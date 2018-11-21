@@ -1,0 +1,45 @@
+{
+    "rankable-mods": {
+        "NOFAIL": true,
+        "EASY": true,
+        "TOUCHSCREEN": true,
+        "HIDDEN": true,
+        "HARDROCK": true,
+        "SUDDENDEATH": true,
+        "DOUBLETIME": true,
+        "RELAX": false,
+        "HALFTIME": true,
+        "NIGHTCORE": true,
+        "FLASHLIGHT": true,
+        "AUTOPLAY": false,
+        "SPUNOUT": true,
+        "RELAX2": false,
+        "PERFECT": true,
+        "KEY4": true,
+        "KEY5": true,
+        "KEY6": true,
+        "KEY7": true,
+        "KEY8": true,
+        "KEYMOD": true,
+        "FADEIN": true,
+        "RANDOM": true,
+        "LASTMOD": true,
+        "KEY9": true,
+        "KEY10": true,
+        "KEY1": true,
+        "KEY3": true,
+        "KEY2": true,
+        "SCOREV2": false
+    },
+    "submit-config": {
+        "max-std-pp": 700,
+        "score-overwrite": "score"
+    },
+    "allowed-beatmap-rankstatus": [ 2, 3, 4 ],
+    "scoreboard": {
+        "ppboard": false
+    },
+    "type": "regular",
+    "webhook": "",
+    "secret-webhook-url": ""
+}
