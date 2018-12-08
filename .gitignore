@@ -9,3 +9,4 @@ common_refractor
 *.c
 *.so
 *.log
+*.iml
