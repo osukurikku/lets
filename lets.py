@@ -67,7 +67,7 @@ def make_app():
 		(r"/p/verify", redirectHandler.handler, dict(destination="https://kotorikku.ru/")),
 		(r"/u/(.*)", redirectHandler.handler, dict(destination="https://kotorikku.ru/u/{}")),
 		(r"/b/(.*)", redirectHandler.handler, dict(destination="https://kotorikku.ru/b/{}")),
-		(r"/", redirectHandler.handler, dict(destination="https://kotorikku.ru/"))
+		(r"/", redirectHandler.handler, dict(destination="https://kotorikku.ru/")),
 
 		(r"/api/v1/status", apiStatusHandler.handler),
 		(r"/api/v1/pp", apiPPHandler.handler),
