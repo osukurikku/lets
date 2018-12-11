@@ -266,14 +266,18 @@ class beatmap:
 	def getData(self, totalScores=0, version=4):
 		"""
 		Return this beatmap's data (header) for getscores
-
 		return -- beatmap header for getscores
 		"""
+		rankedStatusOutput = self.rankedStatus
+
+		# Force approved for A/Q/L beatmaps that give PP, so we don't get the alert in game
+		if self.rankedStatus >= rankedStatuses.APPROVED and self.is_rankable:
+			rankedStatusOutput = rankedStatuses.APPROVED
+
 		# Fix loved maps for old clients
 		if version < 4 and self.rankedStatus == rankedStatuses.LOVED:
 			rankedStatusOutput = rankedStatuses.QUALIFIED
-		else:
-			rankedStatusOutput = self.rankedStatus
+
 		data = "{}|false".format(rankedStatusOutput)
 		if self.rankedStatus != rankedStatuses.NOT_SUBMITTED and self.rankedStatus != rankedStatuses.NEED_UPDATE and self.rankedStatus != rankedStatuses.UNKNOWN:
 			# If the beatmap is updated and exists, the client needs more data

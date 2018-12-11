@@ -9,7 +9,6 @@ class scoreboard:
 	def __init__(self, username, gameMode, beatmap, setScores = True, country = False, friends = False, mods = -1):
 		"""
 		Initialize a leaderboard object
-
 		username -- username of who's requesting the scoreboard. None if not known
 		gameMode -- requested gameMode
 		beatmap -- beatmap objecy relative to this leaderboard
@@ -41,7 +40,7 @@ class scoreboard:
 		self.scores.append(-1)
 
 		# Make sure the beatmap is ranked
-		if self.beatmap.rankedStatus not in glob.conf.extra["allowed-beatmap-rankstatus"]:
+		if self.beatmap.rankedStatus < rankedStatuses.RANKED:
 			return
 
 		# Query parts
@@ -67,10 +66,7 @@ class scoreboard:
 				friends = "AND (scores.userid IN (SELECT user2 FROM users_relationships WHERE user1 = %(userid)s) OR scores.userid = %(userid)s)"
 
 			# Sort and limit at the end
-			if (self.mods & 128 > 0):
-				order = "ORDER BY pp DESC"
-			else:
-				order = "ORDER BY score DESC"	
+			order = "ORDER BY score DESC"
 			limit = "LIMIT 1"
 
 			# Build query, get params and run query
@@ -111,16 +107,13 @@ class scoreboard:
 			friends = ""
 
 		# Sort and limit at the end
-		if not glob.conf.extra["scoreboard"]["ppboard"] and self.mods <= -1 or self.mods & modsEnum.AUTOPLAY == 0:
+		if self.mods <= -1 or self.mods & modsEnum.AUTOPLAY == 0:
 			# Order by score if we aren't filtering by mods or autoplay mod is disabled
 			order = "ORDER BY score DESC"
-		elif self.mods & modsEnum.AUTOPLAY > 0 or glob.conf.extra["scoreboard"]["ppboard"]:
+		elif self.mods & modsEnum.AUTOPLAY > 0:
 			# Otherwise, filter by pp
 			order = "ORDER BY pp DESC"
-		if (self.mods & 128 > 0):
-			limit = "LIMIT 100"
-		else:
-			limit = "LIMIT 50"
+		limit = "LIMIT 50"
 
 		# Build query, get params and run query
 		query = buildQuery(locals())
@@ -152,7 +145,6 @@ class scoreboard:
 			# Count all scores on this map
 			select = "SELECT COUNT(*) AS count"
 			limit = "LIMIT 1"
-
 			# Build query, get params and run query
 			query = buildQuery(locals())
 			count = glob.db.fetch(query, params)
@@ -195,13 +187,11 @@ class scoreboard:
 		if hasScore is None:
 			return
 
-		overwrite = glob.conf.extra["scoreboard"]["ppboard"] and "pp" or "score"
-		
 		# We have a score, run the huge query
 		# Base query
-		query = """SELECT COUNT(*) AS rank FROM scores STRAIGHT_JOIN users ON scores.userid = users.id STRAIGHT_JOIN users_stats ON users.id = users_stats.id WHERE scores.{0} >= (
-		SELECT {0} FROM scores WHERE beatmap_md5 = %(md5)s AND play_mode = %(mode)s AND completed = 3 AND userid = %(userid)s LIMIT 1
-		) AND scores.beatmap_md5 = %(md5)s AND scores.play_mode = %(mode)s AND scores.completed = 3 AND users.privileges & 1 > 0""".format(overwrite)
+		query = """SELECT COUNT(*) AS rank FROM scores STRAIGHT_JOIN users ON scores.userid = users.id STRAIGHT_JOIN users_stats ON users.id = users_stats.id WHERE scores.score >= (
+		SELECT score FROM scores WHERE beatmap_md5 = %(md5)s AND play_mode = %(mode)s AND completed = 3 AND userid = %(userid)s LIMIT 1
+		) AND scores.beatmap_md5 = %(md5)s AND scores.play_mode = %(mode)s AND scores.completed = 3 AND users.privileges & 1 > 0"""
 		# Country
 		if self.country:
 			query += " AND users_stats.country = (SELECT country FROM users_stats WHERE id = %(userid)s LIMIT 1)"
@@ -212,7 +202,7 @@ class scoreboard:
 		if self.friends:
 			query += " AND (scores.userid IN (SELECT user2 FROM users_relationships WHERE user1 = %(userid)s) OR scores.userid = %(userid)s)"
 		# Sort and limit at the end
-		query += " ORDER BY {} DESC LIMIT 1".format(overwrite)
+		query += " ORDER BY score DESC LIMIT 1"
 		result = glob.db.fetch(query, {"md5": self.beatmap.fileMD5, "userid": self.userID, "mode": self.gameMode, "mods": self.mods})
 		if result is not None:
 			self.personalBestRank = result["rank"]
@@ -220,7 +210,6 @@ class scoreboard:
 	def getScoresData(self):
 		"""
 		Return scores data for getscores
-
 		return -- score data in getscores format
 		"""
 		data = ""
@@ -233,9 +222,10 @@ class scoreboard:
 			# Set personal best score rank
 			self.setPersonalBest()	# sets self.personalBestRank with the huge query
 			self.scores[0].setRank(self.personalBestRank)
-			data += self.scores[0].getData(pp=glob.conf.extra["scoreboard"]["ppboard"])
+			data += self.scores[0].getData()
 
 		# Output top 50 scores
 		for i in self.scores[1:]:
-			data += i.getData(pp=glob.conf.extra["scoreboard"]["ppboard"] or (self.mods > -1 and self.mods & modsEnum.AUTOPLAY > 0))
+			data += i.getData(pp=self.mods > -1 and self.mods & modsEnum.AUTOPLAY > 0)
+
 		return data
