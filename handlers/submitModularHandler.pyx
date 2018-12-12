@@ -138,6 +138,9 @@ class handler(requestsManager.asyncRequestHandler):
 				s.pp = 0
 				ppCalcException = e
 
+			if beatmapInfo.rankedStatus >= rankedStatuses.LOVED and s.passed:
+				s.pp = 0
+
 			# Restrict obvious cheaters
 			if (s.pp >= 700 and s.gameMode == gameModes.STD) and restricted == False:
 				userUtils.restrict(userID)
@@ -221,10 +224,12 @@ class handler(requestsManager.asyncRequestHandler):
 				log.warning("**{}** ({}) has been restricted due to missing process list".format(username, userID), "cm")
 			"""
 
+			
+
 			# Bake a cake
 
-			if s.passed == True:
-				butterCake.bake(self, s)
+			#if s.passed == True:
+			#		butterCake.bake(self, s)
 
 			# Save replay
 			if s.passed == True and s.completed == 3:

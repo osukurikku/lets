@@ -7,6 +7,7 @@ from common.log import logUtils as log
 from common.ripple import userUtils
 from common.ripple import scoreUtils
 from objects import glob
+from constants import rankedStatuses
 
 
 class score:
