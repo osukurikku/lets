@@ -29,7 +29,7 @@
         "KEY1": true,
         "KEY3": true,
         "KEY2": true,
-        "SCOREV2": false
+        "SCOREV2": true
     },
     "submit-config": {
         "max-std-pp": 700,
