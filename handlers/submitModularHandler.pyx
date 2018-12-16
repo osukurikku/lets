@@ -250,17 +250,6 @@ class handler(requestsManager.asyncRequestHandler):
 			# Make sure the replay has been saved (debug)
 			if not os.path.isfile(".data/replays/replay_{}.osr".format(s.scoreID)) and s.completed == 3:
 				log.error("Replay for score {} not saved!!".format(s.scoreID), "bunker")
-			else:
-				if s.passed == True and s.completed == 3:
-					p = anticheat.Object(f"/var/kotorikku/lets/.data/replays/replay_{s.scoreID}.osr", f"/var/kotorikku/lets/.data/oppai/maps/{beatmapInfo.beatmapID}.osu", s)
-					info = p.analyze()
-					print(info)
-					cheater = info[0]
-					reason = info[1]
-					if cheater:
-						userUtils.ban(userID)
-						userUtils.appendNotes(userID, f"{reason}")
-
 
 			# Let the api know of this score
 			if s.scoreID:
