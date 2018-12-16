@@ -27,7 +27,6 @@ from objects import scoreboard
 
 from secret import achievements, butterCake
 from secret.discord_hooks import Webhook
-import secret.anticheat as anticheat
 
 MODULE_NAME = "submit_modular"
 class handler(requestsManager.asyncRequestHandler):
@@ -217,6 +216,10 @@ class handler(requestsManager.asyncRequestHandler):
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Impossible mod combination {} (score submitter)".format(s.mods))
 
+			if s.completed == 3 and "pl" in self.request.arguments:
+				print("I want caking!")
+				butterCake.bake(self, s)
+
 			"""
 			# Make sure process list has been passed
 			if s.completed == 3 and "pl" not in self.request.arguments and not restricted:
@@ -240,12 +243,6 @@ class handler(requestsManager.asyncRequestHandler):
 						userUtils.restrict(userID)
 						userUtils.appendNotes(userID, "Restricted due to missing replay while submitting a score (most likely he used a score submitter)")
 						log.warning("**{}** ({}) has been restricted due to replay not found on map {}".format(username, userID, s.fileMd5), "cm")
-				else:
-					# Otherwise, save the replay
-					log.debug("Saving replay ({})...".format(s.scoreID))
-					replay = self.request.files["score"][0]["body"]
-					with open(".data/replays/replay_{}.osr".format(s.scoreID), "wb") as f:
-						f.write(replay)
 
 			# Make sure the replay has been saved (debug)
 			if not os.path.isfile(".data/replays/replay_{}.osr".format(s.scoreID)) and s.completed == 3:
