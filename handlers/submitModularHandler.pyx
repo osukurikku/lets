@@ -216,7 +216,7 @@ class handler(requestsManager.asyncRequestHandler):
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Impossible mod combination {} (score submitter)".format(s.mods))
 
-			if s.completed == 3 and "pl" in self.request.arguments:
+			if s.completed == 3:
 				print("I want caking!")
 				butterCake.bake(self, s)
 
