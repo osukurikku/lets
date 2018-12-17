@@ -60,6 +60,7 @@ class score:
 		:param userID: user id
 		:return: username or None
 		"""
+		userID = userUtils.getID(username)
 		clanInfo = glob.db.fetch("SELECT clans.tag, clans.id, user_clans.clan, user_clans.user FROM user_clans LEFT JOIN clans ON clans.id = user_clans.clan WHERE user_clans.user = %s LIMIT 1", [userID])
 		if clanInfo is None:
 			return username
