@@ -54,6 +54,18 @@ class score:
 		if scoreID is not None and setData:
 			self.setDataFromDB(scoreID, rank)
 
+	def getClan(self, userID):
+		"""
+		Get userID's clan
+		:param userID: user id
+		:return: username or None
+		"""
+		clanInfo = glob.db.fetch("SELECT clans.tag, clans.id, user_clans.clan, user_clans.user FROM user_clans LEFT JOIN clans ON clans.id = user_clans.clan WHERE user_clans.user = %s LIMIT 1", [userID])
+		username = userUtils.getUsername(userID)
+		if clanInfo is None:
+			return username
+		return "[" + clanInfo["tag"] + "] " + username
+
 	def calculateAccuracy(self):
 		"""
 		Calculate and set accuracy for that score
@@ -119,7 +131,7 @@ class score:
 		#print(str(data))
 		self.scoreID = data["id"]
 		if "username" in data:
-			self.playerName = data["username"]
+			self.getClan(data["userid"])
 		else:
 			self.playerName = userUtils.getUsername(data["userid"])
 		self.playerUserID = data["userid"]
