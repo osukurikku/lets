@@ -216,9 +216,9 @@ class handler(requestsManager.asyncRequestHandler):
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Impossible mod combination {} (score submitter)".format(s.mods))
 
-			if s.completed == 3:
-				print("I want caking!")
-				butterCake.bake(self, s)
+#			if s.completed == 3:
+#				print("I want caking!")
+#				butterCake.bake(self, s)
 
 			"""
 			# Make sure process list has been passed
