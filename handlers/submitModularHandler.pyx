@@ -236,13 +236,21 @@ class handler(requestsManager.asyncRequestHandler):
 			#		butterCake.bake(self, s)
 
 			# Save replay
-			if s.passed == True and s.completed == 3:
-				if "score" not in self.request.files:
+			if s.passed and s.scoreID > 0 and s.completed == 3:
+				if "score" in self.request.files:
+					# Save the replay if it was provided
+					log.debug("Saving replay ({})...".format(s.scoreID))
+					replay = self.request.files["score"][0]["body"]
+					with open(".data/replays/replay_{}.osr".format(s.scoreID), "wb") as f:
+						f.write(replay)
+				else:
+					# Restrict if no replay was provided
 					if not restricted:
-						# Ban if no replay passed
 						userUtils.restrict(userID)
-						userUtils.appendNotes(userID, "Restricted due to missing replay while submitting a score (most likely he used a score submitter)")
-						log.warning("**{}** ({}) has been restricted due to replay not found on map {}".format(username, userID, s.fileMd5), "cm")
+						userUtils.appendNotes(userID, "Restricted due to missing replay while submitting a score.")
+						log.warning("**{}** ({}) has been restricted due to not submitting a replay on map {}.".format(
+							username, userID, s.fileMd5
+						), "cm")
 
 			# Make sure the replay has been saved (debug)
 			if not os.path.isfile(".data/replays/replay_{}.osr".format(s.scoreID)) and s.completed == 3:
