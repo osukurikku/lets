@@ -459,8 +459,6 @@ class handler(requestsManager.asyncRequestHandler):
 					"newUsername": newUsername.decode("utf-8")
 				}))
 
-			# Redis stats
-			glob.redis.incr("ripple:submitted_scores")
 			# Datadog stats
 			glob.dog.increment(glob.DATADOG_PREFIX+".submitted_scores")
 		except exceptions.invalidArgumentsException:
