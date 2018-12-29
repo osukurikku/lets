@@ -65,10 +65,10 @@ def make_app():
 		(r"/s/(.*)", downloadMapHandler.handler),
 		(r"/web/replays/(.*)", getFullReplayHandler.handler),
 
-		(r"/p/verify", redirectHandler.handler, dict(destination="https://kotorikku.ru/")),
-		(r"/u/(.*)", redirectHandler.handler, dict(destination="https://kotorikku.ru/u/{}")),
-		(r"/b/(.*)", redirectHandler.handler, dict(destination="https://kotorikku.ru/b/{}")),
-		(r"/", redirectHandler.handler, dict(destination="https://kotorikku.ru/")),
+		(r"/p/verify", redirectHandler.handler, dict(destination="https://katori.fun/")),
+		(r"/u/(.*)", redirectHandler.handler, dict(destination="https://katori.fun/u/{}")),
+		(r"/b/(.*)", redirectHandler.handler, dict(destination="https://katori.fun/b/{}")),
+		(r"/", redirectHandler.handler, dict(destination="https://katori.fun/")),
 
 		(r"/api/v1/status", apiStatusHandler.handler),
 		(r"/api/v1/pp", apiPPHandler.handler),

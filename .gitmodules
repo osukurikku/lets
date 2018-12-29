@@ -3,7 +3,7 @@
 	url = https://zxq.co/ripple/ripple-python-common.git
 [submodule "secret"]
 	path = secret
-	url = http://128.0.131.49/osukotorikku/secret.git
+	url = http://github.com/osukatori/secret.git
 [submodule "pp/oppai-ng"]
 	path = pp/oppai-ng
 	url = https://github.com/Francesco149/oppai-ng.git

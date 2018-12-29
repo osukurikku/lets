@@ -388,7 +388,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 				# send message to #announce if we're rank #1
 				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
-					annmsg = "[https://kotorikku.ru/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
+					annmsg = "[https://katori.fun/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
 						userID,
 						username.encode().decode("ASCII", "ignore"),
 						beatmapInfo.beatmapID,
@@ -439,7 +439,7 @@ class handler(requestsManager.asyncRequestHandler):
 					embed.set_author(name=username.encode().decode("ASCII", "ignore"), icon='https://i.imgur.com/rdm3W9t.png')
 					embed.set_desc("Achieved #1 on mode **{}**, {} +{}!".format(gameModes.getGamemodeFull(s.gameMode), beatmapInfo.songName.encode().decode("ASCII", "ignore"), ScoreMods))
 					embed.add_field(name='Total: {}pp'.format(float("{0:.2f}".format(s.pp))), value='Gained: +{}pp'.format(float("{0:.2f}".format(ppGained))))
-					embed.add_field(name='Actual rank: {}'.format(rankInfo["currentRank"]), value='[Download Link](http://storage.kotorikku.ru/d/{})'.format(beatmapInfo.beatmapSetID))
+					embed.add_field(name='Actual rank: {}'.format(rankInfo["currentRank"]), value='[Download Link](http://storage.katori.fun/d/{})'.format(beatmapInfo.beatmapSetID))
 					embed.set_image('https://assets.ppy.sh/beatmaps/{}/covers/cover.jpg'.format(beatmapInfo.beatmapSetID))
 					embed.post()
 
