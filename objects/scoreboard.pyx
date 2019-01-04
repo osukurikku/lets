@@ -138,12 +138,16 @@ class scoreboard:
 				# Set data and rank from topScores's row
 				if self.clan:
 					if clan_pos>0:
-						if topScore['clan'] == self.scores[clan_pos-1].clan:
-							oldScore = self.scores[clan_pos-1]
-							oldScore.reSetClanDataFromScoreObject(topScore)
+						try:
+							s2 = self.scores[clan_pos-1]
+							if topScore['clan'] == s2.clan:
+								oldScore = self.scores[clan_pos-1]
+								oldScore.reSetClanDataFromScoreObject(topScore)
+								continue
+							else:
+								s.setClanDataFromDict(topScore)
+						except:
 							continue
-						else:
-							s.setClanDataFromDict(topScore)
 					else:
 						s.setClanDataFromDict(topScore)
 				else:
