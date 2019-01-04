@@ -199,7 +199,7 @@ class score:
 		self.fullCombo = True if new_data["full_combo"] == 1 else False
 		self.mods = 0
 		self.rank = self.rank if self.rank is not None else ""
-		self.date = new_data["time"]
+		self.date = new_data["time"] if self.date<new_data['time'] else self.date
 		#if "pp" in data:
 		self.pp = int((self.pp+new_data['pp'])/2)
 		self.calculateAccuracy()

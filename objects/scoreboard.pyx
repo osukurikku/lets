@@ -130,6 +130,7 @@ class scoreboard:
 		cdef int c = 1
 		cdef int clan_pos = 0
 		cdef dict topScore
+		cdef dict clanscores
 		if topScores is not None:
 			for topScore in topScores:
 				# Create score object
@@ -137,19 +138,12 @@ class scoreboard:
 
 				# Set data and rank from topScores's row
 				if self.clan:
-					if clan_pos>0:
-						try:
-							s2 = self.scores[clan_pos-1]
-							if topScore['clan'] == s2.clan:
-								oldScore = self.scores[clan_pos-1]
-								oldScore.reSetClanDataFromScoreObject(topScore)
-								continue
-							else:
-								s.setClanDataFromDict(topScore)
-						except:
-							continue
+					sc = clanscores.get(topScore['clan_name'], None)
+					if sc:
+						sc.reSetClanDataFromScoreObject(topScore)
 					else:
 						s.setClanDataFromDict(topScore)
+						clanscores[topScore['clan_name']] = s
 				else:
 					s.setDataFromDict(topScore)
 				s.setRank(c)
@@ -160,8 +154,15 @@ class scoreboard:
 
 				# Add this score to scores list and increment rank
 				self.scores.append(s)
-				clan_pos+=1
 				c+=1
+
+		if self.clan:
+			cdef int sorted_c = 1
+			self.scores.clear()
+			for x in (sorted(clanscores.values(), key=operator.attrgetter('score'))):
+				x.setRank(sorted_c)
+				self.scores.append(x)
+				sorted_c+=1
 
 		'''# If we have more than 50 scores, run query to get scores count
 		if c >= 50:
