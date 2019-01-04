@@ -6,7 +6,7 @@ from objects import glob
 
 
 class scoreboard:
-	def __init__(self, username, gameMode, beatmap, setScores = True, country = False, friends = False, mods = -1):
+	def __init__(self, username, gameMode, beatmap, setScores = True, country = False, friends = False, clan = False, mods = -1):
 		"""
 		Initialize a leaderboard object
 		username -- username of who's requesting the scoreboard. None if not known
@@ -23,6 +23,7 @@ class scoreboard:
 		self.beatmap = beatmap			# beatmap objecy relative to this leaderboard
 		self.country = country
 		self.friends = friends
+		self.clan = clan
 		self.mods = mods
 		if setScores:
 			self.setScores()
@@ -88,11 +89,16 @@ class scoreboard:
 		select = "SELECT *"
 		joins = "FROM scores STRAIGHT_JOIN users ON scores.userid = users.id STRAIGHT_JOIN users_stats ON users.id = users_stats.id WHERE scores.beatmap_md5 = %(beatmap_md5)s AND scores.play_mode = %(play_mode)s AND scores.completed = 3 AND (users.privileges & 1 > 0 OR users.id = %(userid)s)"
 
-		# Country ranking
-		if self.country:
-			country = "AND users_stats.country = (SELECT country FROM users_stats WHERE id = %(userid)s LIMIT 1)"
-		else:
+		# Country and Clan ranking
+		if self.clan:
+			select = "SELECT *, user_clans.clan, clans.name AS clan_name, clans.tag AS clan_tag, clans.icon AS clan_icon"
+			joins = "FROM scores STRAIGHT_JOIN users ON scores.userid = users.id STRAIGHT_JOIN users_stats ON users.id = users_stats.id STRAIGHT_JOIN user_clans ON user_clans.user = users.id STRAIGHT_JOIN clans ON clans.id = user_clans.clan WHERE scores.beatmap_md5 = %(beatmap_md5)s AND scores.play_mode = %(play_mode)s AND scores.completed = 3 AND(users.privileges & 1 > 0 OR users.id = %(userid)s)"
 			country = ""
+		else:
+			if self.country:
+				country = "AND users_stats.country = (SELECT country FROM users_stats WHERE id = %(userid)s LIMIT 1)"
+			else:
+				country = ""
 
 		# Mods ranking (ignore auto, since we use it for pp sorting)
 		if self.mods > -1 and self.mods & modsEnum.AUTOPLAY == 0:
@@ -122,6 +128,7 @@ class scoreboard:
 
 		# Set data for all scores
 		cdef int c = 1
+		cdef int clan_pos = 0
 		cdef dict topScore
 		if topScores is not None:
 			for topScore in topScores:
@@ -129,7 +136,22 @@ class scoreboard:
 				s = score.score(topScore["id"], setData=False)
 
 				# Set data and rank from topScores's row
-				s.setDataFromDict(topScore)
+				if self.clan:
+					if clan_pos>0:
+						try:
+							s2 = self.scores[clan_pos-1]
+							if topScore['clan'] == s2.clan:
+								oldScore = self.scores[clan_pos-1]
+								oldScore.reSetClanDataFromScoreObject(topScore)
+								continue
+							else:
+								s.setClanDataFromDict(topScore)
+						except:
+							continue
+					else:
+						s.setClanDataFromDict(topScore)
+				else:
+					s.setDataFromDict(topScore)
 				s.setRank(c)
 
 				# Check if this top 50 score is our personal best
@@ -138,6 +160,7 @@ class scoreboard:
 
 				# Add this score to scores list and increment rank
 				self.scores.append(s)
+				clan_pos+=1
 				c+=1
 
 		'''# If we have more than 50 scores, run query to get scores count

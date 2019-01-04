@@ -13,7 +13,7 @@ from constants import rankedStatuses
 class score:
 	__slots__ = ["scoreID", "playerName", "score", "maxCombo", "c50", "c100", "c300", "cMiss", "cKatu", "cGeki",
 	             "fullCombo", "mods", "playerUserID","rank","date", "hasReplay", "fileMd5", "passed", "playDateTime",
-	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease"]
+	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan"]
 	def __init__(self, scoreID = None, rank = None, setData = True):
 		"""
 		Initialize a (empty) score object.
@@ -45,6 +45,7 @@ class score:
 		self.completed = 0
 
 		self.accuracy = 0.00
+		self.clan = 0
 
 		self.pp = 0.00
 
@@ -152,6 +153,55 @@ class score:
 		self.completed = data["completed"]
 		#if "pp" in data:
 		self.pp = data["pp"]
+		self.calculateAccuracy()
+
+	# I don't want some break, because i create this method ;d
+	def setClanDataFromDict(self, data, rank = None):
+		"""
+		Set this object's score data from dictionary
+		Doesn't set playerUserID
+		data -- score dictionarty
+		rank -- rank in scoreboard. Optional.
+		"""
+		#print(str(data))
+		self.scoreID = 0
+		self.playerName = f"[{data['clan_tag']}] {data['clan_name']}"
+		self.playerUserID = 1
+		self.score = data["score"]
+		self.maxCombo = data["max_combo"]
+		self.gameMode = data["play_mode"]
+		self.c50 = data["50_count"]
+		self.c100 = data["100_count"]
+		self.c300 = data["300_count"]
+		self.cMiss = data["misses_count"]
+		self.cKatu = data["katus_count"]
+		self.cGeki = data["gekis_count"]
+		self.fullCombo = True if data["full_combo"] == 1 else False
+		self.mods = 0
+		self.rank = rank if rank is not None else ""
+		self.date = data["time"]
+		self.fileMd5 = data["beatmap_md5"]
+		self.completed = data["completed"]
+		#if "pp" in data:
+		self.pp = int(data["pp"]/2)
+		self.clan = data['clan']
+		self.calculateAccuracy()
+
+	def reSetClanDataFromScoreObject(self, new_data):
+		self.score = self.score+new_data['score']
+		self.maxCombo = self.maxCombo if new_data['max_combo'] <= self.maxCombo else new_data['max_combo']
+		self.c50 = self.c50+new_data['50_count']
+		self.c100 = self.c100+new_data['100_count']
+		self.c300 = self.c300+new_data['300_count']
+		self.cMiss = self.cMiss+new_data['misses_count']
+		self.cKatu = self.cKatu+new_data['katus_count']
+		self.cGeki = self.cGeki+new_data['gekis_count']
+		self.fullCombo = True if new_data["full_combo"] == 1 else False
+		self.mods = 0
+		self.rank = self.rank if self.rank is not None else ""
+		self.date = new_data["time"]
+		#if "pp" in data:
+		self.pp = int((self.pp+new_data['pp'])/2)
 		self.calculateAccuracy()
 
 	def setDataFromScoreData(self, scoreData):

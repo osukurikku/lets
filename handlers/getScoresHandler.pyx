@@ -64,14 +64,22 @@ class handler(requestsManager.asyncRequestHandler):
 					log.warning("Found AQN folder on user {} ({})".format(username, userID), "cm")
 					userUtils.setAqn(userID)
 
+			userSettings = glob.redis.get("kr:user_settings:{}".format(userID))
+			if userSettings:
+				userSettings = json.loads(userSettings)
+
 			# Scoreboard type
 			isDonor = userUtils.getPrivileges(userID) & privileges.USER_DONOR > 0
 			country = False
 			friends = False
+			clan = False
 			modsFilter = -1
 			if scoreboardType == 4:
 				# Country leaderboard
 				country = True
+				if userSettings and userSettings.get("clan_top_enabled", False):
+					clan = True
+					country = False
 			elif scoreboardType == 2:
 				# Mods leaderboard, replace mods (-1, every mod) with "mods" GET parameters
 				modsFilter = int(self.get_argument("mods"))
@@ -91,7 +99,7 @@ class handler(requestsManager.asyncRequestHandler):
 			bmap = beatmap.beatmap(md5, beatmapSetID, gameMode)
 
 			# Create leaderboard object, link it to bmap and get all scores
-			sboard = scoreboard.scoreboard(username, gameMode, bmap, setScores=True, country=country, mods=modsFilter, friends=friends)
+			sboard = scoreboard.scoreboard(username, gameMode, bmap, setScores=True, country=country, mods=modsFilter, friends=friends, clan=clan)
 
 			# Data to return
 			data = ""
