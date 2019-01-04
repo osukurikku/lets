@@ -99,7 +99,7 @@ class handler(requestsManager.asyncRequestHandler):
 			bmap = beatmap.beatmap(md5, beatmapSetID, gameMode)
 
 			# Create leaderboard object, link it to bmap and get all scores
-			sboard = scoreboard.scoreboard(username, gameMode, bmap, setScores=True, country=country, mods=modsFilter, friends=friends, clan=True)
+			sboard = scoreboard.scoreboard(username, gameMode, bmap, setScores=True, country=country, mods=modsFilter, friends=friends, clan=clan)
 
 			# Data to return
 			data = ""
