@@ -6,7 +6,7 @@
 	url = https://github.com/osukatori/secret.git
 [submodule "pp/oppai-ng"]
 	path = pp/oppai-ng
-	url = https://github.com/osukatori/oppai-ng.git
+	url = https://github.com/Francesco149/oppai-ng.git
 [submodule "pp/catch_the_pp"]
 	path = pp/catch_the_pp
 	url = https://github.com/osuripple/catch-the-pp.git
@@ -15,4 +15,4 @@
 	url = git@zxq.co:ripple/maniapp-osu-tools.git
 	branch = calc-no-replay
 [submodule "oppai-ng"]
-	url = https://github.com/osukatori/oppai-ng.git
+	url = https://github.com/Francesco149/oppai-ng.git
