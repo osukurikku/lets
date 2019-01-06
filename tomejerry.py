@@ -132,6 +132,7 @@ if __name__ == "__main__":
 		"""
 		# Get total scores number
 		totalScores = len(scores)
+		print(totalScores)
 
 		# Calculate number of workers if needed
 		if workersNum == 0:
@@ -182,7 +183,7 @@ if __name__ == "__main__":
 						workersDone += 1
 
 				# Output global information
-				#consoleHelper.printColored("> Progress {perc:.2f}% ({done}/{total}) [{donew}/{workers}]".format(perc=totalPerc/workersNum, done=scoresDone, total=totalScores, donew=workersDone, workers=workersNum), bcolors.YELLOW)
+				consoleHelper.printColored("> Progress {perc:.2f}% ({done}/{total}) [{donew}/{workers}]".format(perc=totalPerc/workersNum, done=scoresDone, total=totalScores, donew=workersDone, workers=workersNum), bcolors.YELLOW)
 				bar.update(scoresDone)
 
 				# Exit from the loop if every worker has finished its work
