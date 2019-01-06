@@ -1,3 +1,4 @@
+import operator
 from common.constants import mods as modsEnum
 from common.ripple import userUtils
 from constants import rankedStatuses
@@ -132,7 +133,7 @@ class scoreboard:
         cdef int c = 1
         cdef int clan_pos = 0
         cdef dict topScore
-        cdef dict clanscores
+        clanscores = {}
         cdef int sorted_c = 1
         if topScores is not None:
             for topScore in topScores:
