@@ -322,7 +322,7 @@ class score:
 			calculator = pp.PP_RELAX_CALCULATORS[self.gameMode](b, self)
 			self.pp = calculator.pp
 		else:
-			if b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed and self.gameMode in pp.PP_CALCULATORS:
+			if b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed and not self.mods&PlayMods.RELAX>0 and self.gameMode in pp.PP_CALCULATORS:
 				calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
 				self.pp = calculator.pp
 			else:
