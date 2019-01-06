@@ -7,7 +7,7 @@
         "HARDROCK": true,
         "SUDDENDEATH": true,
         "DOUBLETIME": true,
-        "RELAX": true,
+        "RELAX": false,
         "HALFTIME": true,
         "NIGHTCORE": true,
         "FLASHLIGHT": true,
