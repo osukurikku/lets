@@ -34,6 +34,7 @@ class oppai:
 	"""
 	Oppai cacalculator
 	"""
+	OPPAI_FOLDER = ".data/oppai"
 	# __slots__ = ["pp", "score", "acc", "mods", "combo", "misses", "stars", "beatmap", "map"]
 
 	def __init__(self, __beatmap, __score = None, acc = 0, mods = 0, tillerino = False):
@@ -111,7 +112,7 @@ class oppai:
 		self.pp = None
 		try:
 			# Build .osu map file path
-			mapFile = mapsHelper.cachedMapPath(self.beatmap.beatmapID)
+			mapFile = "{path}/maps/{map}".format(path=self.OPPAI_FOLDER, map=self.map)
 			log.debug("oppai-relax ~> Map file: {}".format(mapFile))
 			mapsHelper.cacheMap(mapFile, self.beatmap)
 
