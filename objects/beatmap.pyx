@@ -270,8 +270,6 @@ class beatmap:
 		"""
 		rankedStatusOutput = self.rankedStatus
 
-		print(self.rankedStatus)
-
 		# Fix loved maps for old clients
 		if version < 4 and self.rankedStatus == rankedStatuses.LOVED:
 			rankedStatusOutput = rankedStatuses.QUALIFIED

@@ -162,6 +162,7 @@ class scoreboard:
 
         if self.clan:
             self.scores.clear()
+            self.scores.append(-1)
             for x in (sorted(clanscores.values(), key=operator.attrgetter('score'))):
                 x.setRank(sorted_c)
                 self.scores.append(x)
