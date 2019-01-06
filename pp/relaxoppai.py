@@ -58,6 +58,7 @@ class oppai:
 
 		# Beatmap object
 		self.beatmap = __beatmap
+		self.map = "{}.osu".format(self.beatmap.beatmapID)
 
 		# If passed, set everything from score object
 		if __score is not None:
