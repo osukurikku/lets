@@ -167,7 +167,7 @@ class score:
 		#print(str(data))
 		self.scoreID = 0
 		self.playerName = f"[{data['clan_tag']}] {data['clan_name']}"
-		self.playerUserID = 1000000000000000000+data['clan']
+		self.playerUserID = 2000000000+data['clan']
 		self.score = data["score"]
 		self.maxCombo = data["max_combo"]
 		self.gameMode = data["play_mode"]
