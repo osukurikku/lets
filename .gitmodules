@@ -16,3 +16,6 @@
 	branch = calc-no-replay
 [submodule "oppai-ng"]
 	url = https://github.com/Francesco149/oppai-ng.git
+[submodule "pp/oppai-relax"]
+	path = pp/oppai-relax
+	url = https://github.com/osuwaving/oppai-relax

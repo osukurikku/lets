@@ -2,6 +2,7 @@ import time
 
 import pp
 from common.constants import gameModes
+from common.constants import mods as PlayMods
 from objects import beatmap
 from common.log import logUtils as log
 from common.ripple import userUtils
@@ -317,11 +318,15 @@ class score:
 			b = beatmap.beatmap(self.fileMd5, 0)
 
 		# Calculate pp
-		if b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed and self.gameMode in pp.PP_CALCULATORS:
-			calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
+		if self.mods&PlayMods.RELAX>0 and b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed and self.gameMode in pp.PP_RELAX_CALCULATORS:
+			calculator = pp.PP_RELAX_CALCULATORS[self.gameMode](b, self)
 			self.pp = calculator.pp
 		else:
-			self.pp = 0
+			if b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed and self.gameMode in pp.PP_CALCULATORS:
+				calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
+				self.pp = calculator.pp
+			else:
+				self.pp = 0
 
 class PerfectScoreFactory:
 	@staticmethod
