@@ -52,6 +52,7 @@ class score:
 
 		self.oldPersonalBest = 0
 		self.rankedScoreIncrease = 0
+		self.personalOldBestScore = None
 
 		if scoreID is not None and setData:
 			self.setDataFromDB(scoreID, rank)
@@ -280,7 +281,9 @@ class score:
 				self.completed = 3
 				self.rankedScoreIncrease = self.score
 				self.oldPersonalBest = 0
+				self.personalOldBestScore = None
 			else:
+				self.personalOldBestScore = personalBest["id"]
 				# Compare personal best's score with current score
 				if self.score > personalBest["score"]:
 					# New best score

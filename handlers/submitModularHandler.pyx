@@ -111,9 +111,11 @@ class handler(requestsManager.asyncRequestHandler):
 			s.setDataFromScoreData(scoreData)
 			
 			oldBestScore = None
-			if s.oldPersonalBest > 0:
+			if s.personalOldBestScore:
 				oldBestScore = score.score()
-				oldBestScore.setDataFromDB(s.oldPersonalBest)
+				oldBestScore.setDataFromDB(s.personalOldBestScore)
+
+
 
 			# Set score stuff missing in score data
 			s.playerUserID = userID
@@ -401,8 +403,8 @@ class handler(requestsManager.asyncRequestHandler):
 					outputBeatmap["accuracyAfter"] = s.accuracy
 					outputBeatmap["ppBefore"] = ""
 					outputBeatmap["ppAfter"] = s.pp
-				output["achievements-new"] = ""
-				output["onlineScoreId"] = s.scoreID
+				outputBeatmap["achievements-new"] = ""
+				outputBeatmap["onlineScoreId"] = s.scoreID
 
 				# Build final string
 				msg = ""
@@ -413,8 +415,6 @@ class handler(requestsManager.asyncRequestHandler):
 							msg += "|"
 						else:
 							msg += "\n"
-
-				msg+="\n"
 				for line, val in outputBeatmap.items():
 					msg += "{}:{}".format(line, val)
 					if val != "\n":
