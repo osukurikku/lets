@@ -110,6 +110,10 @@ class handler(requestsManager.asyncRequestHandler):
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 			s.setDataFromScoreData(scoreData)
 			
+			oldBestScore = None
+			if s.oldPersonalBest > 0:
+				oldBestScore = score.score()
+				oldBestScore.setDataFromDB(s.oldPersonalBest)
 
 			# Set score stuff missing in score data
 			s.playerUserID = userID
@@ -173,6 +177,11 @@ class handler(requestsManager.asyncRequestHandler):
 				userHelper.appendNotes(userID, "-- Restricted due to clientside anti cheat flag ({}) (cheated score id: {})".format(haxFlags, s.scoreID))
 				log.warning("**{}** ({}) has been restricted due clientside anti cheat flag **({})**".format(username, userID, haxFlags), "cm")'''
 
+			# OH? Italian peperoni?
+			# Ya-Ya, 100% peperoni
+			# What are they made of?
+			# From Howl and Nyo
+			# MMMMMMMMMMMMMMMMMMMM >_< I likes!
 			# Mi stavo preparando per scendere
 			# Mi stavo preparando per comprare i dolci
 			# Oggi e' il compleanno di mio nipote
@@ -346,21 +355,53 @@ class handler(requestsManager.asyncRequestHandler):
 				output["chartId"] = "overall"
 				output["chartName"] = "Overall Ranking"
 				output["chartEndDate"] = ""
-				output["beatmapRankingBefore"] = oldPersonalBestRank
-				output["beatmapRankingAfter"] = newScoreboard.personalBestRank
 				output["rankedScoreBefore"] = oldUserData["rankedScore"]
 				output["rankedScoreAfter"] = newUserData["rankedScore"]
 				output["totalScoreBefore"] = oldUserData["totalScore"]
 				output["totalScoreAfter"] = newUserData["totalScore"]
-				output["playCountBefore"] = newUserData["playcount"]
-				output["accuracyBefore"] = float(oldUserData["accuracy"])/100
-				output["accuracyAfter"] = float(newUserData["accuracy"])/100
+				if oldPersonalBestRank > 0:
+					if oldBestScore and oldBestScore.maxCombo > s.maxCombo:
+						output["maxComboBefore"] = oldBestScore.maxCombo
+						output["maxComboAfter"] = oldBestScore.maxCombo
+					else:
+						output["maxComboBefore"] = 0
+						output["maxComboAfter"] = s.maxCombo
+				else:
+					output["maxComboBefore"] = 0
+					output["maxComboAfter"] = s.maxCombo
+				output["accuracyBefore"] = float(oldUserData["accuracy"])
+				output["accuracyAfter"] = float(newUserData["accuracy"])
+				output["ppBefore"] = oldStats["pp"]
+				output["ppAfter"] = newUserData["pp"]
 				output["rankBefore"] = oldRank
 				output["rankAfter"] = rankInfo["currentRank"]
 				output["toNextRank"] = rankInfo["difference"]
 				output["toNextRankUser"] = rankInfo["nextUsername"]
 				output["achievements"] = ""
-				output["achievements-new"] = secret.achievements.utils.achievements_response(new_achievements)
+				output["achievements-new"] = ""
+				output["onlineScoreId"] = s.scoreID
+
+				outputBeatmap = collections.OrderedDict()
+				outputBeatmap["chartId"] = "beatmap"
+				outputBeatmap["chartUrl"] = f"https://katori.fun/b/{beatmapInfo.beatmapID}"
+				outputBeatmap["chartName"] = "Beatmap Ranking"
+				outputBeatmap["rankBefore"] = oldPersonalBestRank
+				outputBeatmap["rankAfter"] = newScoreboard.personalBestRank
+				if oldBestScore:
+					outputBeatmap["maxComboBefore"] = oldBestScore.maxCombo
+					outputBeatmap["maxComboAfter"] = s.maxCombo
+					outputBeatmap["accuracyBefore"] = oldBestScore.accuracy
+					outputBeatmap["accuracyAfter"] = s.accuracy
+					outputBeatmap["ppBefore"] = oldBestScore.pp
+					outputBeatmap["ppAfter"] = s.pp
+				else:
+					output["maxComboBefore"] = ""
+					output["maxComboAfter"] = s.maxCombo
+					outputBeatmap["accuracyBefore"] = ""
+					outputBeatmap["accuracyAfter"] = s.accuracy
+					outputBeatmap["ppBefore"] = ""
+					outputBeatmap["ppAfter"] = s.pp
+				output["achievements-new"] = ""
 				output["onlineScoreId"] = s.scoreID
 
 				# Build final string
@@ -369,6 +410,15 @@ class handler(requestsManager.asyncRequestHandler):
 					msg += "{}:{}".format(line, val)
 					if val != "\n":
 						if (len(output) - 1) != list(output.keys()).index(line):
+							msg += "|"
+						else:
+							msg += "\n"
+
+				msg+="\n"
+				for line, val in outputBeatmap.items():
+					msg += "{}:{}".format(line, val)
+					if val != "\n":
+						if (len(outputBeatmap) - 1) != list(outputBeatmap.keys()).index(line):
 							msg += "|"
 						else:
 							msg += "\n"

@@ -197,9 +197,6 @@ class scoreboard:
         if self.personalBestRank >= 1:
             glob.personalBestCache.set(self.userID, self.personalBestRank, self.beatmap.fileMD5)
 
-        if self.clan:
-            self.personalBestRank = None
-
     def setPersonalBest(self):
         """
         Set personal best rank ONLY
