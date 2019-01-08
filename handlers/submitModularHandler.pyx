@@ -371,8 +371,8 @@ class handler(requestsManager.asyncRequestHandler):
 				else:
 					output["maxComboBefore"] = 0
 					output["maxComboAfter"] = s.maxCombo
-				output["accuracyBefore"] = float(oldUserData["accuracy"])
-				output["accuracyAfter"] = float(newUserData["accuracy"])
+				output["accuracyBefore"] = round(float(oldUserData["accuracy"]), 2)
+				output["accuracyAfter"] = round(float(newUserData["accuracy"]), 2)
 				output["ppBefore"] = oldStats["pp"]
 				output["ppAfter"] = newUserData["pp"]
 				output["rankBefore"] = oldRank
@@ -392,15 +392,15 @@ class handler(requestsManager.asyncRequestHandler):
 				if oldBestScore:
 					outputBeatmap["maxComboBefore"] = oldBestScore.maxCombo
 					outputBeatmap["maxComboAfter"] = s.maxCombo
-					outputBeatmap["accuracyBefore"] = oldBestScore.accuracy
-					outputBeatmap["accuracyAfter"] = s.accuracy
+					outputBeatmap["accuracyBefore"] = round(oldBestScore.accuracy*100, 2)
+					outputBeatmap["accuracyAfter"] = round(s.accuracy*100, 2)
 					outputBeatmap["ppBefore"] = oldBestScore.pp
 					outputBeatmap["ppAfter"] = s.pp
 				else:
 					output["maxComboBefore"] = ""
 					output["maxComboAfter"] = s.maxCombo
 					outputBeatmap["accuracyBefore"] = ""
-					outputBeatmap["accuracyAfter"] = s.accuracy
+					outputBeatmap["accuracyAfter"] = round(s.accuracy*100, 2)
 					outputBeatmap["ppBefore"] = ""
 					outputBeatmap["ppAfter"] = s.pp
 				outputBeatmap["achievements-new"] = ""
