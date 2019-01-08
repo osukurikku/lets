@@ -392,6 +392,8 @@ class handler(requestsManager.asyncRequestHandler):
 				if oldBestScore:
 					outputBeatmap["maxComboBefore"] = oldBestScore.maxCombo
 					outputBeatmap["maxComboAfter"] = s.maxCombo
+					outputBeatmap["rankedScoreBefore"] = oldBestScore.score
+					outputBeatmap["rankedScoreAfter"] = s.score
 					outputBeatmap["accuracyBefore"] = round(oldBestScore.accuracy*100, 2)
 					outputBeatmap["accuracyAfter"] = round(s.accuracy*100, 2)
 					outputBeatmap["ppBefore"] = oldBestScore.pp
@@ -399,6 +401,8 @@ class handler(requestsManager.asyncRequestHandler):
 				else:
 					output["maxComboBefore"] = ""
 					output["maxComboAfter"] = s.maxCombo
+					outputBeatmap["rankedScoreBefore"] = ""
+					outputBeatmap["rankedScoreAfter"] = s.score
 					outputBeatmap["accuracyBefore"] = ""
 					outputBeatmap["accuracyAfter"] = round(s.accuracy*100, 2)
 					outputBeatmap["ppBefore"] = ""
