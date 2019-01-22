@@ -433,7 +433,7 @@ class handler(requestsManager.asyncRequestHandler):
 				
 				userStats = userUtils.getUserStats(userID, s.gameMode)
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
-					if newScoreboard.personalBestRank > 1 or not oldScoreboard.personalBestRank == newScoreboard.personalBestRank or not newScoreboard.personalBestRank <= oldScoreboard.personalBestRank:
+					if newScoreboard.personalBestRank > 1 and not newScoreboard.personalBestRank <= oldPersonalBestRank:
 						print("I want submit some users log")
 						userLogMsg = f" Achieved #{newScoreboard.personalBestRank} rank on "
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
