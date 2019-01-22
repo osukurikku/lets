@@ -432,8 +432,9 @@ class handler(requestsManager.asyncRequestHandler):
 				log.debug(msg)
 				
 				userStats = userUtils.getUserStats(userID, s.gameMode)
-				if newScoreboard.personalBestRank < 101 and s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.PENDING:
-					if newScoreboard.personalBestRank > 1 and not oldScoreboard.personalBestRank == newScoreboard.personalBestRank or not newScoreboard.personalBestRank <= oldScoreboard.personalBestRank:
+				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
+					if newScoreboard.personalBestRank > 1 or not oldScoreboard.personalBestRank == newScoreboard.personalBestRank or not newScoreboard.personalBestRank <= oldScoreboard.personalBestRank:
+						print("I want submit some users log")
 						userLogMsg = f" Achieved #{newScoreboard.personalBestRank} rank on "
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
@@ -447,10 +448,9 @@ class handler(requestsManager.asyncRequestHandler):
 
 				# send message to #announce if we're rank #1
 				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
-					if not oldScoreboard.personalBestRank == newScoreboard.personalBestRank:
-						userUtils.logUserLog(" Achieved #1 rank on ", s.fileMd5, userID, s.gameMode, s.scoreID)
-						if len(newScoreboard.scores)>1:
-							userUtils.logUserLog(" Has lost #1 rank on ", s.fileMd5, newScoreboard.scores[1].playerUserID, s.gameMode, newScoreboard.scores[1].scoreID)
+					userUtils.logUserLog(" Achieved #1 rank on ", s.fileMd5, userID, s.gameMode, s.scoreID)
+					if len(newScoreboard.scores)>1:
+						userUtils.logUserLog(" Has lost #1 rank on ", s.fileMd5, newScoreboard.scores[1].playerUserID, s.gameMode, newScoreboard.scores[1].scoreID)
 
 					annmsg = "[https://katori.fun/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
 						userID,
