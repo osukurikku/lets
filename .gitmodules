@@ -19,3 +19,6 @@
 [submodule "pp/oppai-relax"]
 	path = pp/oppai-relax
 	url = https://github.com/osuwaving/oppai-relax
+[submodule "pp/osu-tools"]
+	path = pp/osu-tools
+	url = https://git.dou-mou-about.me/osukatori/osu-tools
