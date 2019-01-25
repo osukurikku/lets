@@ -12,7 +12,9 @@ class PianoError(Exception):
 
 
 class WiFiPiano:
-	__slots__ = ["beatmap", "score", "pp"]
+	#__slots__ = ["beatmap", "score", "pp"]
+
+	PERFOMANCE_PATH = ".data/mania"
 
 	def __init__(self, beatmap_, score_):
 		self.beatmap = beatmap_
@@ -74,4 +76,4 @@ class WiFiPiano:
 
 	@property
 	def mapPath(self):
-		return mapsHelper.cachedMapPath(self.beatmap.beatmapID)
+		return f"{self.PERFOMANCE_PATH}/maps/{self.beatmap.beatmapID}.osu"
