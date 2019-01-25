@@ -23,7 +23,7 @@ class WiFiPiano:
 	def _runProcess(self):
 		# Run with dotnet
 		command = \
-			"dotnet pp/osu-tools/build/PerformanceCalculator.dll " \
+			"dotnet pp/osu-tools/PerformanceCalculator/bin/Debug/netcoreapp2.0/PerformanceCalculator.dll " \
 			"performance {map} " \
 			"-mode 3 " \
 			"-score {score_.score} " \
