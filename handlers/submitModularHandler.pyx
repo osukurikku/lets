@@ -332,13 +332,13 @@ class handler(requestsManager.asyncRequestHandler):
 					('chartName', "Beatmap Ranking"),
 					('rankBefore', oldPersonalBestRank),
 					('rankAfter', newScoreboard.personalBestRank),
-					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else "")
+					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else ""),
 					('maxComboAfter', s.maxCombo),
-					('rankedScoreBefore', oldBestScore.score if oldBestScore else "")
+					('rankedScoreBefore', oldBestScore.score if oldBestScore else ""),
 					('rankedScoreAfter', s.score),
-					('accuracyBefore', round(oldBestScore.accuracy*100, 2) if oldBestScore else "")
+					('accuracyBefore', round(oldBestScore.accuracy*100, 2) if oldBestScore else ""),
 					('accuracyAfter', round(s.accuracy*100, 2)),
-					('ppBefore', oldBestScore.pp if oldBestScore else "")
+					('ppBefore', oldBestScore.pp if oldBestScore else ""),
 					('ppAfter', s.pp),
 					('achievements-new', ""),
 					('onlineScoreId', s.scoreID)
@@ -395,7 +395,7 @@ class handler(requestsManager.asyncRequestHandler):
 					embed.set_author(name=username.encode().decode("ASCII", "ignore"),
 									 icon='https://i.imgur.com/rdm3W9t.png')
 					
-					embed.set_desc(f"Achieved #1 on mode **{gameModes.getGamemodeFull(s.gameMode)}**, {beatmapInfo.songName.encode().decode("ASCII", "ignore")} +{ScoreMods}!")
+					embed.set_desc(f"Achieved #1 on mode **{gameModes.getGamemodeFull(s.gameMode)}**, {beatmapInfo.songName.encode().decode('ASCII', 'ignore')} +{ScoreMods}!")
 					embed.add_field(name='Total: {}pp'.format(float("{0:.2f}".format(s.pp))),
 									value='Gained: +{}pp'.format(float("{0:.2f}".format(ppGained))))
 					
