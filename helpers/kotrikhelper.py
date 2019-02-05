@@ -9,9 +9,8 @@ def zingonify(d):
 
 def parse_mods(mods):
     ScoreMods = ""
-					
-    if mods == 0:
-        ScoreMods += "nomod"
+	if not mods or mods == 0:
+        return "nomod"
     if mods & mods.NOFAIL > 0:
         ScoreMods += "NF"
     if mods & mods.EASY > 0:
