@@ -20,6 +20,7 @@ from constants import exceptions
 from constants import rankedStatuses
 from helpers import aeshelper
 from helpers import leaderboardHelper
+from helpers.kotrikhelper import zingonify, parse_mods
 from objects import beatmap
 from objects import glob
 from objects import score
@@ -115,8 +116,6 @@ class handler(requestsManager.asyncRequestHandler):
 				oldBestScore = score.score()
 				oldBestScore.setDataFromDB(s.personalOldBestScore)
 
-
-
 			# Set score stuff missing in score data
 			s.playerUserID = userID
 
@@ -148,13 +147,13 @@ class handler(requestsManager.asyncRequestHandler):
 				s.pp = 0
 
 			# Restrict obvious cheaters
-			if (s.pp >= 1000 and s.gameMode == gameModes.STD) and restricted == False:
+			if (s.pp >= 700 and s.gameMode == gameModes.STD) and restricted == False:
 				userUtils.restrict(userID)
 				userUtils.appendNotes(userID, "Restricted due to too high pp gain ({}pp)".format(s.pp))
 				log.warning("**{}** ({}) has been restricted due to too high pp gain **({}pp)**".format(username, userID, s.pp), "cm")
 
 			# Check notepad hack
-			if bmk is None and bml is None:
+			if not bmk and not bml:
 				# No bmk and bml params passed, edited or super old client
 				#log.warning("{} ({}) most likely submitted a score from an edited client or a super old client".format(username, userID), "cm")
 				pass
@@ -181,36 +180,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# OH? Italian peperoni?
 			# Ya-Ya, 100% peperoni
-			# What are they made of?
-			# From Howl and Nyo
-			# MMMMMMMMMMMMMMMMMMMM >_< I likes!
-			# Mi stavo preparando per scendere
-			# Mi stavo preparando per comprare i dolci
-			# Oggi e' il compleanno di mio nipote
-			# Dovevamo festeggiare staseraaaa
-			# ----
-			# Da un momento all'altro ho sentito una signora
-			# Correte, correte se ne e' sceso un muro
-			# Da un momento all'altro ho sentito una signora
-			# Correte, correte se ne e' sceso un muro
-			# --- (io sto angora in ganottier ecche qua) ---
-			# Sono scesa e ho visto ilpalazzochesenee'caduto
-			# Ho preso a mio cognato, che stava svenuto
-			# Mia figlia e' scesa, mia figlia ha urlato
-			# "C'e' qualcuno sotto, C'e' qualcuno sotto"
-			# "C'e' qualcuno sotto, C'e' qualcuno sottoooooooooo"
-			# --- (scusatm che sto angor emozzionat non parlo ancora moltobbene) ---
-			# Da un momento all'altro ho sentito una signora
-			# Correte, correte se ne e' sceso un muro
-			# Da un momento all'altro ho sentito una signora
-			# Correte, correte se ne e' sceso un muro
-			# -- THIS IS THE PART WITH THE GOOD SOLO (cit <3) --
-			# Vedete quel palazzo la' vicino
-			# Se ne sta scendendo un po' alla volta
-			# Piano piano, devono prendere provvedimenti
-			# Al centro qua hanno fatto una bella ristrututuitriazione
-			# Hanno mess le panghina le fondane iffiori
-			# LALALALALALALALALA
+			# Ripple, i just clean code and comments
 			if s.score < 0 or s.score > (2 ** 63) - 1:
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Banned due to negative score (score submitter)")
@@ -220,31 +190,12 @@ class handler(requestsManager.asyncRequestHandler):
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Banned due to mania score > 1000000 (score submitter)")
 
-			# Ci metto la faccia, ci metto la testa e ci metto il mio cuore
+			# Check for impossible mod combination
 			if ((s.mods & mods.DOUBLETIME) > 0 and (s.mods & mods.HALFTIME) > 0) \
 					or ((s.mods & mods.HARDROCK) > 0 and (s.mods & mods.EASY) > 0)\
 					or ((s.mods & mods.SUDDENDEATH) > 0 and (s.mods & mods.NOFAIL) > 0):
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Impossible mod combination {} (score submitter)".format(s.mods))
-
-#			if s.completed == 3:
-#				print("I want caking!")
-#				butterCake.bake(self, s)
-
-			"""
-			# Make sure process list has been passed
-			if s.completed == 3 and "pl" not in self.request.arguments and not restricted:
-				userUtils.restrict(userID)
-				userUtils.appendNotes(userID, "Restricted due to missing process list while submitting a score (most likely he used a score submitter)")
-				log.warning("**{}** ({}) has been restricted due to missing process list".format(username, userID), "cm")
-			"""
-
-			
-
-			# Bake a cake
-
-			#if s.passed == True:
-			#		butterCake.bake(self, s)
 
 			# Save replay
 			if s.passed and s.scoreID > 0 and s.completed == 3:
@@ -273,7 +224,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Re-raise pp calc exception after saving score, cake, replay etc
 			# so Sentry can track it without breaking score submission
-			if ppCalcException is not None:
+			if ppCalcException:
 				raise ppCalcException
 
 			# If there was no exception, update stats and build score submitted panel
@@ -333,7 +284,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Output ranking panel only if we passed the song
 			# and we got valid beatmap info from db
-			if beatmapInfo is not None and beatmapInfo != False and s.passed:
+			if beatmapInfo and beatmapInfo != False and s.passed:
 				log.debug("Started building ranking panel")
 
 				# Trigger bancho stats cache update
@@ -347,85 +298,54 @@ class handler(requestsManager.asyncRequestHandler):
 				rankInfo = leaderboardHelper.getRankInfo(userID, s.gameMode)
 
 				# Output dictionary
-				output = collections.OrderedDict()
-				output["beatmapId"] = beatmapInfo.beatmapID
-				output["beatmapSetId"] = beatmapInfo.beatmapSetID
-				output["beatmapPlaycount"] = beatmapInfo.playcount
-				output["beatmapPasscount"] = beatmapInfo.passcount
-				#output["approvedDate"] = "2015-07-09 23:20:14\n"
-				output["approvedDate"] = "\n"
-				output["chartId"] = "overall"
-				output["chartName"] = "Overall Ranking"
-				output["chartEndDate"] = ""
-				output["rankedScoreBefore"] = oldUserData["rankedScore"]
-				output["rankedScoreAfter"] = newUserData["rankedScore"]
-				output["totalScoreBefore"] = oldUserData["totalScore"]
-				output["totalScoreAfter"] = newUserData["totalScore"]
-				if oldPersonalBestRank > 0:
-					if oldBestScore and oldBestScore.maxCombo > s.maxCombo:
-						output["maxComboBefore"] = oldBestScore.maxCombo
-						output["maxComboAfter"] = oldBestScore.maxCombo
-					else:
-						output["maxComboBefore"] = 0
-						output["maxComboAfter"] = s.maxCombo
-				else:
-					output["maxComboBefore"] = 0
-					output["maxComboAfter"] = s.maxCombo
-				output["accuracyBefore"] = round(float(oldUserData["accuracy"]), 2)
-				output["accuracyAfter"] = round(float(newUserData["accuracy"]), 2)
-				output["ppBefore"] = oldStats["pp"]
-				output["ppAfter"] = newUserData["pp"]
-				output["rankBefore"] = oldRank
-				output["rankAfter"] = rankInfo["currentRank"]
-				output["toNextRank"] = rankInfo["difference"]
-				output["toNextRankUser"] = rankInfo["nextUsername"]
-				output["achievements"] = ""
-				output["achievements-new"] = ""
-				output["onlineScoreId"] = s.scoreID
-
-				outputBeatmap = collections.OrderedDict()
-				outputBeatmap["chartId"] = "beatmap"
-				outputBeatmap["chartUrl"] = f"https://katori.fun/b/{beatmapInfo.beatmapID}"
-				outputBeatmap["chartName"] = "Beatmap Ranking"
-				outputBeatmap["rankBefore"] = oldPersonalBestRank
-				outputBeatmap["rankAfter"] = newScoreboard.personalBestRank
-				if oldBestScore:
-					outputBeatmap["maxComboBefore"] = oldBestScore.maxCombo
-					outputBeatmap["maxComboAfter"] = s.maxCombo
-					outputBeatmap["rankedScoreBefore"] = oldBestScore.score
-					outputBeatmap["rankedScoreAfter"] = s.score
-					outputBeatmap["accuracyBefore"] = round(oldBestScore.accuracy*100, 2)
-					outputBeatmap["accuracyAfter"] = round(s.accuracy*100, 2)
-					outputBeatmap["ppBefore"] = oldBestScore.pp
-					outputBeatmap["ppAfter"] = s.pp
-				else:
-					output["maxComboBefore"] = ""
-					output["maxComboAfter"] = s.maxCombo
-					outputBeatmap["rankedScoreBefore"] = ""
-					outputBeatmap["rankedScoreAfter"] = s.score
-					outputBeatmap["accuracyBefore"] = ""
-					outputBeatmap["accuracyAfter"] = round(s.accuracy*100, 2)
-					outputBeatmap["ppBefore"] = ""
-					outputBeatmap["ppAfter"] = s.pp
-				outputBeatmap["achievements-new"] = ""
-				outputBeatmap["onlineScoreId"] = s.scoreID
+				output = collections.OrderedDict([
+					('beatmapId', beatmapInfo.beatmapID),
+					('beatmapSetId', beatmapInfo.beatmapSetID),
+					('beatmapPlaycount', beatmapInfo.playcount),
+					('beatmapPasscount', beatmapInfo.passcount),
+					('approvedDate', "\n"),
+					('chartId', 'overall'),
+					('chartName', 'Overall Ranking'),
+					('chartEndDate', ""),
+					('rankedScoreBefore', oldUserData["rankedScore"]),
+					('rankedScoreAfter', newUserData["rankedScore"]),
+					('totalScoreBefore', oldUserData["totalScore"]),
+					('totalScoreAfter', newUserData["totalScore"]),
+					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else ""),
+					('maxComboAfter', s.maxCombo),
+					('accuracyBefore', round(float(oldUserData["accuracy"]), 2)),
+					('accuracyAfter', round(float(newUserData["accuracy"]), 2)),
+					('ppBefore', oldStats["pp"]),
+					('ppAfter', newUserData["pp"]),
+					('rankBefore', oldRank),
+					('rankAfter', rankInfo["currentRank"]),
+					('toNextRank', rankInfo["difference"]),
+					('toNextRankUser', rankInfo["nextUsername"]),
+					('achievements', ""),
+					('achievements-new', ""),
+					('onlineScoreId', s.scoreID)
+				])
+				
+				outputBeatmap = collections.OrderedDict([
+					('chartId', "beatmap"),
+					('chartUrl', f"https://katori.fun/b/{beatmapInfo.beatmapID}"),
+					('chartName', "Beatmap Ranking"),
+					('rankBefore', oldPersonalBestRank),
+					('rankAfter', newScoreboard.personalBestRank),
+					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else "")
+					('maxComboAfter', s.maxCombo),
+					('rankedScoreBefore', oldBestScore.score if oldBestScore else "")
+					('rankedScoreAfter', s.score),
+					('accuracyBefore', round(oldBestScore.accuracy*100, 2) if oldBestScore else "")
+					('accuracyAfter', round(s.accuracy*100, 2)),
+					('ppBefore', oldBestScore.pp if oldBestScore else "")
+					('ppAfter', s.pp),
+					('achievements-new', ""),
+					('onlineScoreId', s.scoreID)
+				])
 
 				# Build final string
-				msg = ""
-				for line, val in output.items():
-					msg += "{}:{}".format(line, val)
-					if val != "\n":
-						if (len(output) - 1) != list(output.keys()).index(line):
-							msg += "|"
-						else:
-							msg += "\n"
-				for line, val in outputBeatmap.items():
-					msg += "{}:{}".format(line, val)
-					if val != "\n":
-						if (len(outputBeatmap) - 1) != list(outputBeatmap.keys()).index(line):
-							msg += "|"
-						else:
-							msg += "\n"
+				msg = "\n".join(zingonify(x) for x in [output, outputBeatmap])
 
 				# Some debug messages
 				log.debug("Generated output for online ranking screen!")
@@ -434,7 +354,6 @@ class handler(requestsManager.asyncRequestHandler):
 				userStats = userUtils.getUserStats(userID, s.gameMode)
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
 					if newScoreboard.personalBestRank > 1 and newScoreboard.personalBestRank <= oldPersonalBestRank:
-						print("I want submit some users log")
 						userLogMsg = f" Achieved #{newScoreboard.personalBestRank} rank on "
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
@@ -469,42 +388,21 @@ class handler(requestsManager.asyncRequestHandler):
 					# webhook to discord
 
 					#TEMPORARY mods handle
-					ScoreMods = ""
-					
-					if s.mods == 0:
-						ScoreMods += "nomod"
-					if s.mods & mods.NOFAIL > 0:
-						ScoreMods += "NF"
-					if s.mods & mods.EASY > 0:
-						ScoreMods += "EZ"
-					if s.mods & mods.HIDDEN > 0:
-						ScoreMods += "HD"
-					if s.mods & mods.HARDROCK > 0:
-						ScoreMods += "HR"
-					if s.mods & mods.DOUBLETIME > 0:
-						ScoreMods += "DT"
-					if s.mods & mods.HALFTIME > 0:
-						ScoreMods += "HT"
-					if s.mods & mods.FLASHLIGHT > 0:
-						ScoreMods += "FL"
-					if s.mods & mods.SPUNOUT > 0:
-						ScoreMods += "SO"
-					if s.mods & mods.TOUCHSCREEN > 0:
-						ScoreMods += "TD"
-					if s.mods & mods.RELAX > 0:
-						ScoreMods += "RX"
-					if s.mods & mods.RELAX2 > 0:
-						ScoreMods += "AP"
-
-
+					ScoreMods = parse_mods(s.mods)
 					url = glob.conf.config["discord"]["webhook"]
 				
 					embed = Webhook(url, color=0x35b75c)
-					embed.set_author(name=username.encode().decode("ASCII", "ignore"), icon='https://i.imgur.com/rdm3W9t.png')
-					embed.set_desc("Achieved #1 on mode **{}**, {} +{}!".format(gameModes.getGamemodeFull(s.gameMode), beatmapInfo.songName.encode().decode("ASCII", "ignore"), ScoreMods))
-					embed.add_field(name='Total: {}pp'.format(float("{0:.2f}".format(s.pp))), value='Gained: +{}pp'.format(float("{0:.2f}".format(ppGained))))
-					embed.add_field(name='Actual rank: {}'.format(rankInfo["currentRank"]), value='[Download Link](http://storage.katori.fun/d/{})'.format(beatmapInfo.beatmapSetID))
-					embed.set_image('https://assets.ppy.sh/beatmaps/{}/covers/cover.jpg'.format(beatmapInfo.beatmapSetID))
+					embed.set_author(name=username.encode().decode("ASCII", "ignore"),
+									 icon='https://i.imgur.com/rdm3W9t.png')
+					
+					embed.set_desc(f"Achieved #1 on mode **{gameModes.getGamemodeFull(s.gameMode)}**, {beatmapInfo.songName.encode().decode("ASCII", "ignore")} +{ScoreMods}!")
+					embed.add_field(name='Total: {}pp'.format(float("{0:.2f}".format(s.pp))),
+									value='Gained: +{}pp'.format(float("{0:.2f}".format(ppGained))))
+					
+					embed.add_field(name=f'Actual rank: {rankInfo["currentRank"]}',
+									value=f'[Download Link](http://storage.katori.fun/d/{beatmapInfo.beatmapSetID})')
+					
+					embed.set_image(f'https://assets.ppy.sh/beatmaps/{beatmapInfo.beatmapSetID}/covers/cover.jpg')
 					embed.post()
 
 				# Write message to client
@@ -515,9 +413,9 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Send username change request to bancho if needed
 			# (key is deleted bancho-side)
-			newUsername = glob.redis.get("ripple:change_username_pending:{}".format(userID))
-			if newUsername is not None:
-				log.debug("Sending username change request for user {} to Bancho".format(userID))
+			newUsername = glob.redis.get(f"ripple:change_username_pending:{userID}")
+			if newUsername:
+				log.debug(f"Sending username change request for user {userID} to Bancho")
 				glob.redis.publish("peppy:change_username", json.dumps({
 					"userID": userID,
 					"newUsername": newUsername.decode("utf-8")
