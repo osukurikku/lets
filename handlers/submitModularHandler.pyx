@@ -312,7 +312,7 @@ class handler(requestsManager.asyncRequestHandler):
 					('totalScoreBefore', oldUserData["totalScore"]),
 					('totalScoreAfter', newUserData["totalScore"]),
 					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else ""),
-					('maxComboAfter', s.maxCombo),
+					('maxComboAfter', s.maxCombo if not oldBestScore else (s.maxCombo if oldBestScore and oldBestScore.maxCombo<s.maxCombo else oldBestScore.maxCombo)),
 					('accuracyBefore', round(float(oldUserData["accuracy"]), 2)),
 					('accuracyAfter', round(float(newUserData["accuracy"]), 2)),
 					('ppBefore', oldStats["pp"]),
