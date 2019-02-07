@@ -16,3 +16,6 @@
 [submodule "pp/oppai-relax"]
 	path = pp/oppai-relax
 	url = https://github.com/osuwaving/oppai-relax
+[submodule "common"]
+	path = common
+	url = https://github.com/osukatori/python-common
