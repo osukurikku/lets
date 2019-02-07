@@ -1,12 +1,9 @@
-[submodule "common"]
-	path = common
-	url = https://github.com/osukatori/python-common.git
 [submodule "secret"]
 	path = secret
 	url = https://github.com/osukatori/secret.git
 [submodule "pp/oppai-ng"]
 	path = pp/oppai-ng
-	url = https://github.com/Francesco149/oppai-ng.git
+	url = https://github.com/osukatori/oppai-ng.git
 [submodule "pp/catch_the_pp"]
 	path = pp/catch_the_pp
 	url = https://github.com/osuripple/catch-the-pp.git
