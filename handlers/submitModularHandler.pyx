@@ -328,7 +328,7 @@ class handler(requestsManager.asyncRequestHandler):
 				
 				outputBeatmap = collections.OrderedDict([
 					('chartId', "beatmap"),
-					('chartUrl', f"https://katori.fun/b/{beatmapInfo.beatmapID}"),
+					('chartUrl', f"https://kurikku.pw/b/{beatmapInfo.beatmapID}"),
 					('chartName', "Beatmap Ranking"),
 					('rankBefore', oldPersonalBestRank),
 					('rankAfter', newScoreboard.personalBestRank),
@@ -371,7 +371,7 @@ class handler(requestsManager.asyncRequestHandler):
 					if len(newScoreboard.scores)>1:
 						userUtils.logUserLog(" Has lost #1 rank on ", s.fileMd5, newScoreboard.scores[1].playerUserID, s.gameMode, newScoreboard.scores[1].scoreID)
 
-					annmsg = "[https://katori.fun/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
+					annmsg = "[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
 						userID,
 						username.encode().decode("ASCII", "ignore"),
 						beatmapInfo.beatmapID,
@@ -400,7 +400,7 @@ class handler(requestsManager.asyncRequestHandler):
 									value='Gained: +{}pp'.format(float("{0:.2f}".format(ppGained))))
 					
 					embed.add_field(name=f'Actual rank: {rankInfo["currentRank"]}',
-									value=f'[Download Link](http://storage.katori.fun/d/{beatmapInfo.beatmapSetID})')
+									value=f'[Download Link](http://storage.kurikku.pw/d/{beatmapInfo.beatmapSetID})')
 					
 					embed.set_image(f'https://assets.ppy.sh/beatmaps/{beatmapInfo.beatmapSetID}/covers/cover.jpg')
 					embed.post()

@@ -12,7 +12,7 @@ class handler(requestsManager.asyncRequestHandler):
 		self.write("""
 				<html>
 					<head>
-						<meta http-equiv="refresh" content="1;URL=https://katori.fun" />
+						<meta http-equiv="refresh" content="1;URL=https://kurikku.pw" />
 					</head>
 				</html>
 				""")
