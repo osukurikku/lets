@@ -359,7 +359,7 @@ class handler(requestsManager.asyncRequestHandler):
 						userLogMsg = f" Achieved #{newScoreboard.personalBestRank} rank on "
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
-				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and s.pp > 0:
+				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and s.pp > 10:
 					glob.redis.publish("scores:new_score", json.dumps({
 					"gm":s.gameMode,
 					"user":{"username":username, "userID": userID, "rank":newUserData["gameRank"],"oldaccuracy":oldStats["accuracy"],"accuracy":newUserData["accuracy"], "oldpp":oldStats["pp"],"pp":newUserData["pp"]},
