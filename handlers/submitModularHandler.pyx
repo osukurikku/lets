@@ -110,6 +110,8 @@ class handler(requestsManager.asyncRequestHandler):
 			s = score.score()
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 			s.setDataFromScoreData(scoreData)
+
+			s.calcRank()
 			
 			oldBestScore = None
 			if s.personalOldBestScore:

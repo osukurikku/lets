@@ -9,6 +9,7 @@ from common.ripple import userUtils
 from common.ripple import scoreUtils
 from objects import glob
 from constants import rankedStatuses
+from common import generalUtils
 
 
 class score:
@@ -112,6 +113,17 @@ class score:
 		rank -- new score rank
 		"""
 		self.rank = rank
+
+	def calcRank(self, rank):
+		self.rank = generalUtils.getRank(
+			self.gameMode,
+			self.mods, 
+			int(self.accuracy), 
+			self.c300, 
+			self.c100,
+			self.c50,
+			self.cMiss
+		)
 
 	def setDataFromDB(self, scoreID, rank = None):
 		"""
