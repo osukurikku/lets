@@ -20,7 +20,7 @@ from constants import exceptions
 from constants import rankedStatuses
 from helpers import aeshelper
 from helpers import leaderboardHelper
-from helpers.kotrikhelper import zingonify, parse_mods
+from helpers.kotrikhelper import zingonify
 from objects import beatmap
 from objects import glob
 from objects import score
@@ -364,46 +364,6 @@ class handler(requestsManager.asyncRequestHandler):
 					"score":{"scoreID": s.scoreID, "mods":s.mods, "accuracy":s.accuracy, "missess":s.cMiss, "combo":s.maxCombo, "pp":s.pp, "rank":newScoreboard.personalBestRank, "ranking":s.rank},
 					"beatmap":{"beatmapID": beatmapInfo.beatmapID, "beatmapSetID": beatmapInfo.beatmapSetID, "max_combo":beatmapInfo.maxCombo, "song_name":beatmapInfo.songName}
 					}))
-
-				# send message to #announce if we're rank #1
-				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
-					userUtils.logUserLog(" Achieved #1 rank on ", s.fileMd5, userID, s.gameMode, s.scoreID)
-					if len(newScoreboard.scores)>1:
-						userUtils.logUserLog(" Has lost #1 rank on ", s.fileMd5, newScoreboard.scores[1].playerUserID, s.gameMode, newScoreboard.scores[1].scoreID)
-
-					annmsg = "[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
-						userID,
-						username.encode().decode("ASCII", "ignore"),
-						beatmapInfo.beatmapID,
-						beatmapInfo.songName.encode().decode("ASCII", "ignore"),
-						gameModes.getGamemodeFull(s.gameMode)
-					)
-					params = urlencode({"k": glob.conf.config["server"]["apikey"], "to": "#announce", "msg": annmsg})
-					requests.get("{}/api/v1/fokabotMessage?{}".format(glob.conf.config["server"]["banchourl"], params))
-
-					# upon new #1 = send the score to the discord bot
-					# s=0 = regular && s=1 = relax
-					ppGained = newUserData["pp"] - oldUserData["pp"]
-					gainedRanks = oldRank - rankInfo["currentRank"]
-					# webhook to discord
-
-					#TEMPORARY mods handle
-					ScoreMods = parse_mods(s.mods)
-					url = glob.conf.config["discord"]["webhook"]
-				
-					embed = Webhook(url, color=0x35b75c)
-					embed.set_author(name=username.encode().decode("ASCII", "ignore"),
-									 icon='https://i.imgur.com/rdm3W9t.png')
-					
-					embed.set_desc(f"Achieved #1 on mode **{gameModes.getGamemodeFull(s.gameMode)}**, {beatmapInfo.songName.encode().decode('ASCII', 'ignore')} +{ScoreMods}!")
-					embed.add_field(name='Total: {}pp'.format(float("{0:.2f}".format(s.pp))),
-									value='Gained: +{}pp'.format(float("{0:.2f}".format(ppGained))))
-					
-					embed.add_field(name=f'Actual rank: {rankInfo["currentRank"]}',
-									value=f'[Download Link](http://storage.kurikku.pw/d/{beatmapInfo.beatmapSetID})')
-					
-					embed.set_image(f'https://assets.ppy.sh/beatmaps/{beatmapInfo.beatmapSetID}/covers/cover.jpg')
-					embed.post()
 
 				# Write message to client
 				self.write(msg)
