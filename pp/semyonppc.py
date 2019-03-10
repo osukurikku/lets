@@ -21,7 +21,6 @@ class Omppc:
         self.beatmap = beatmap_
         self.score = score_
         self.pp = 0
-        self.mapPath = None
         self.getPP()
 
     def _runProcess(self):
@@ -61,7 +60,9 @@ class Omppc:
 
             # Calculate pp
             self.pp = self._runProcess()
-        except OmppcError:
+        except Exception as e1:
+            print(e1)
+        except OmppcError as e:
             log.warning("Invalid beatmap {}".format(
                 self.beatmap.beatmapID))
             self.pp = 0
