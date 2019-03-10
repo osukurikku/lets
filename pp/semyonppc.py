@@ -8,62 +8,66 @@ import subprocess
 from common.log import logUtils as log
 from helpers import mapsHelper
 
+
 class OmppcError(Exception):
-	pass
+    pass
 
 
 class Omppc:
 
     OMPPC_FOLDER = ".data/omppc"
 
-	def __init__(self, beatmap_, score_):
-		self.beatmap = beatmap_
-		self.score = score_
-		self.pp = 0
+    def __init__(self, beatmap_, score_):
+        self.beatmap = beatmap_
+        self.score = score_
+        self.pp = 0
         self.mapPath = None
-		self.getPP()
+        self.getPP()
 
-	def _runProcess(self):
-		# Run with dotnet
-		command = \
-			"luajit ./pp/omppc/omppc.lua " \
-			"-b {map} " \
-			"-s {score_.score} " \
-			"-m {score_.mods}".format(
-				map=self.mapPath,
-				score_=self.score
-			)
-		log.debug("omppc ~> running {}".format(command))
-		process = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
+    def _runProcess(self):
+        # Run with dotnet
+        command = \
+            "luajit ./pp/omppc/omppc.lua " \
+            "-b {map} " \
+            "-s {score_.score} " \
+            "-m {score_.mods}".format(
+                map=self.mapPath,
+                score_=self.score
+            )
+        log.debug("omppc ~> running {}".format(command))
+        process = subprocess.run(
+            command, shell=True, stdout=subprocess.PIPE)
 
-		# Get pp from output
-		output = process.stdout.decode("utf-8", errors="ignore")
-		log.debug("omppc ~> output: {}".format(output))
-		pp = 0
-		try:
-			pp = float(output)
-		except ValueError:
-			raise OmppcError("Invalid 'pp' value (got '{}', expected a float)".format(output))
-		
-		log.debug("omppc ~> returned pp: {}".format(pp))
-		return pp
+        # Get pp from output
+        output = process.stdout.decode("utf-8", errors="ignore")
+        log.debug("omppc ~> output: {}".format(output))
+        pp = 0
+        try:
+            pp = float(output)
+        except ValueError:
+            raise OmppcError(
+                "Invalid 'pp' value (got '{}', expected a float)".format(output))
 
-	def getPP(self):
-		try:
-			# Reset pp
-			self.pp = 0
+        log.debug("omppc ~> returned pp: {}".format(pp))
+        return pp
 
-			# Cache map
-			mapsHelper.cacheMap(self.mapPath, self.beatmap)
+    def getPP(self):
+        try:
+            # Reset pp
+            self.pp = 0
 
-			# Calculate pp
-			self.pp = self._runProcess()
-		except OmppcError:
-			log.warning("Invalid beatmap {}".format(self.beatmap.beatmapID))
-			self.pp = 0
-		finally:
-			return self.pp
+            # Cache map
+            mapsHelper.cacheMap(self.mapPath, self.beatmap)
 
-	@property
-	def mapPath(self):
+            # Calculate pp
+            self.pp = self._runProcess()
+        except OmppcError:
+            log.warning("Invalid beatmap {}".format(
+                self.beatmap.beatmapID))
+            self.pp = 0
+        finally:
+            return self.pp
+
+    @property
+    def mapPath(self):
         return f"{self.OMPPC_FOLDER}/maps/{self.beatmap.beatmapID}.osu"
