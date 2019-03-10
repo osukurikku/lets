@@ -120,7 +120,8 @@ if __name__ == "__main__":
 		consoleHelper.printNoNl("> Checking folders... ")
 		paths = [".data", ".data/replays", ".data/screenshots",
 				 ".data/oppai", ".data/oppai/maps",
-				 ".data/catch_the_pp", ".data/catch_the_pp/maps"]
+				 ".data/catch_the_pp", ".data/catch_the_pp/maps",
+				 ".data/omppc", ".data/omppc/maps"]
 		for i in paths:
 			if not os.path.exists(i):
 				os.makedirs(i, 0o770)

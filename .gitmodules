@@ -19,3 +19,6 @@
 [submodule "common"]
 	path = common
 	url = https://github.com/osukurikku/python-common
+[submodule "pp/omppc"]
+	path = pp/omppc
+	url = https://github.com/osukurikku/omppc.git

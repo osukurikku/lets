@@ -114,7 +114,7 @@ class score:
 		"""
 		self.rank = rank
 
-	def calcRank(self, rank):
+	def calcRank(self):
 		self.rank = generalUtils.getRank(
 			self.gameMode,
 			self.mods, 
