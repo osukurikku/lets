@@ -371,7 +371,7 @@ class handler(requestsManager.asyncRequestHandler):
 						gameModes.getGamemodeFull(s.gameMode)
 					)
 
-					requests.get(f"{glob.conf.config["server"]["banchourl"]}/api/v1/fokabotMessage?", params={
+					requests.get("{}/api/v1/fokabotMessage".format(glob.conf.config["server"]["banchourl"]), params={
 						"k": glob.conf.config["server"]["apikey"],
 						"to": "#announce",
 						"msg": annmsg
