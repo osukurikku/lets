@@ -353,11 +353,29 @@ class handler(requestsManager.asyncRequestHandler):
 				log.debug("Generated output for online ranking screen!")
 				log.debug(msg)
 				
-				userStats = userUtils.getUserStats(userID, s.gameMode)
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
 					if newScoreboard.personalBestRank > 1 and newScoreboard.personalBestRank <= oldPersonalBestRank:
 						userLogMsg = f" Achieved #{newScoreboard.personalBestRank} rank on "
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
+
+				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
+					userUtils.logUserLog(" Achieved #1 rank on ", s.fileMd5, userID, s.gameMode, s.scoreID)
+					if len(newScoreboard.scores)>1:
+						userUtils.logUserLog(" Has lost #1 rank on ", s.fileMd5, newScoreboard.scores[1].playerUserID, s.gameMode, newScoreboard.scores[1].scoreID)
+
+					annmsg = "[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
+						userID,
+						username.encode().decode("ASCII", "ignore"),
+						beatmapInfo.beatmapID,
+						beatmapInfo.songName.encode().decode("ASCII", "ignore"),
+						gameModes.getGamemodeFull(s.gameMode)
+					)
+
+					requests.get(f"{glob.conf.config["server"]["banchourl"]}/api/v1/fokabotMessage?", params={
+						"k": glob.conf.config["server"]["apikey"],
+						"to": "#announce",
+						"msg": annmsg
+					})
 
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and s.pp > 10:
 					glob.redis.publish("scores:new_score", json.dumps({
