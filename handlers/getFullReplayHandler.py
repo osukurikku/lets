@@ -10,7 +10,7 @@ from common.log import logUtils as log
 from common.web import requestsManager
 from constants import dataTypes
 from constants import exceptions
-from helpers import binaryHelper
+from helpers import binaryHelper, kotrikhelper
 from common import generalUtils
 from objects import glob
 from common.sentry import sentry
@@ -60,7 +60,7 @@ class handler(requestsManager.asyncRequestHandler):
 				[scoreData["full_combo"], dataTypes.byte],
 				[scoreData["mods"], dataTypes.uInt32],
 				[0, dataTypes.byte],
-				[0, dataTypes.uInt64],
+				[kotrikhelper.toDotTicks(int(scoreData["time"])), dataTypes.uInt64],
 				[rawReplay, dataTypes.rawReplay],
 				[0, dataTypes.uInt32],
 				[0, dataTypes.uInt32],
