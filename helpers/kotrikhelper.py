@@ -14,4 +14,4 @@ def toDotTicks(unixTime):
     :param unixTime: UnixTimeStamp
     """
     dotTicksBase = 621355968000000000
-    return (10000000*1542296830)+dotTicksBase
+    return (10000000*unixTime)+dotTicksBase
