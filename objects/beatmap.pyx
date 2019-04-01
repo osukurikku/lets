@@ -4,12 +4,12 @@ from common.log import logUtils as log
 from constants import rankedStatuses
 from helpers import osuapiHelper
 from objects import glob
-
+from web import cheesegull
 
 class beatmap:
 	__slots__ = ["songName", "fileMD5", "rankedStatus", "rankedStatusFrozen", "beatmapID", "beatmapSetID", "offset",
 	             "rating", "starsStd", "starsTaiko", "starsCtb", "starsMania", "AR", "OD", "maxCombo", "hitLength",
-	             "bpm", "playcount" ,"passcount", "refresh"]
+	             "bpm", "playcount" ,"passcount", "refresh", "approvedDate"]
 
 	def __init__(self, md5 = None, beatmapSetID = None, gameMode = 0, refresh=False):
 		"""
@@ -36,6 +36,7 @@ class beatmap:
 		self.maxCombo = 0
 		self.hitLength = 0
 		self.bpm = 0
+		self.approvedDate = None
 
 		# Statistics for ranking panel
 		self.playcount = 0
@@ -120,6 +121,14 @@ class beatmap:
 		# Data in DB, set beatmap data
 		log.debug("Got beatmap data from db")
 		self.setDataFromDict(data)
+
+		#And finally we need approvedDate, cheesegull plz help
+		cg_request = cheesegull.getBeatmapSet(self.beatmapSetID)
+		if cg_request and 'ApprovedDate' in cg_request:
+			# I consider it quite possible
+			# I'll be safe just in case
+			self.approvedDate = cg_request['ApprovedDate']
+			
 		return True
 
 	def setDataFromDict(self, data):

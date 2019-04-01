@@ -305,7 +305,7 @@ class handler(requestsManager.asyncRequestHandler):
 					('beatmapSetId', beatmapInfo.beatmapSetID),
 					('beatmapPlaycount', beatmapInfo.playcount),
 					('beatmapPasscount', beatmapInfo.passcount),
-					('approvedDate', "\n"),
+					('approvedDate', f"{beatmapInfo.approvedDate}\n" if beatmapInfo.approvedDate else "\n"),
 					('chartId', 'overall'),
 					('chartName', 'Overall Ranking'),
 					('chartEndDate', ""),

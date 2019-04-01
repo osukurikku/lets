@@ -1,3 +1,5 @@
+import datetime
+
 def zingonify(d):
     """
     Zingonifies a string
@@ -8,10 +10,13 @@ def zingonify(d):
     return "|".join(f"{k}:{v}" for k, v in d.items())
 
 def toDotTicks(unixTime):
-    """
-    I fucking blows, peppy and ripple thx
+    '''
+    New version of my fix.
 
-    :param unixTime: UnixTimeStamp
-    """
-    dotTicksBase = 621355968000000000
-    return (10000000*unixTime)+dotTicksBase
+    :param unixTime: unixTimeStamp
+    '''
+
+    unixStamp = datetime.datetime.fromtimestamp(unixTime)
+    base = datetime.datetime(1, 1, 1, 0, 0, 0)
+    delt = unixStamp-base
+    return int(delt.total_seconds())*10000000
