@@ -4,7 +4,7 @@ from common.log import logUtils as log
 from constants import rankedStatuses
 from helpers import osuapiHelper
 from objects import glob
-from web import cheesegull
+from common.web import cheesegull
 
 class beatmap:
 	__slots__ = ["songName", "fileMD5", "rankedStatus", "rankedStatusFrozen", "beatmapID", "beatmapSetID", "offset",
