@@ -232,8 +232,8 @@ class beatmap:
 		if dataTaiko and dataTaiko.get("difficultyrating", False):
 			self.starsTaiko = dataTaiko["difficultyrating"]
 
-		if dataCtb and dataCtb.get("difficultyrating", False):
-			self.starsCtb = dataCtb["difficultyrating"]
+		if dataCtb and dataCtb.get("diff_aim", False):
+			self.starsCtb = dataCtb["diff_aim"]
 
 		if dataMania and dataMania.get("difficultyrating", False):
 			self.starsMania = dataMania["difficultyrating"]
