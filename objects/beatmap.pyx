@@ -4,7 +4,7 @@ from common.log import logUtils as log
 from constants import rankedStatuses
 from helpers import osuapiHelper
 from objects import glob
-from web import cheesegull
+from common.web import cheesegull
 
 class beatmap:
 	__slots__ = ["songName", "fileMD5", "rankedStatus", "rankedStatusFrozen", "beatmapID", "beatmapSetID", "offset",
@@ -224,13 +224,18 @@ class beatmap:
 		self.starsTaiko = 0
 		self.starsCtb = 0
 		self.starsMania = 0
-		if dataStd is not None:
+
+		# Some strange about peppy!Api and CTB
+		if dataStd and dataStd.get("difficultyrating", False):
 			self.starsStd = dataStd["difficultyrating"]
-		if dataTaiko is not None:
+
+		if dataTaiko and dataTaiko.get("difficultyrating", False):
 			self.starsTaiko = dataTaiko["difficultyrating"]
-		if dataCtb is not None:
+
+		if dataCtb and dataCtb.get("difficultyrating", False):
 			self.starsCtb = dataCtb["difficultyrating"]
-		if dataMania is not None:
+
+		if dataMania and dataMania.get("difficultyrating", False):
 			self.starsMania = dataMania["difficultyrating"]
 
 		self.maxCombo = int(mainData["max_combo"]) if mainData["max_combo"] is not None else 0
