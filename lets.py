@@ -38,6 +38,7 @@ from handlers import osuSearchSetHandler
 from handlers import redirectHandler
 from handlers import submitModularHandler
 from handlers import uploadScreenshotHandler
+from handlers import lastFMHandler
 from helpers import config
 from helpers import consoleHelper
 from common import generalUtils
@@ -77,9 +78,9 @@ def make_app():
 		(r"/letsapi/v1/status", apiStatusHandler.handler),
 		(r"/letsapi/v1/pp", apiPPHandler.handler),
 		(r"/letsapi/v1/cacheBeatmap", apiCacheBeatmapHandler.handler),
-
+		(r"/web/lastfm.php", lastFMHandler.handler),
+		
 		# Not done yet
-		(r"/web/lastfm.php", emptyHandler.handler),
 		(r"/web/osu-rate.php", emptyHandler.handler),
 		(r"/web/osu-comment.php", emptyHandler.handler),
 		(r"/web/osu-checktweets.php", emptyHandler.handler),
