@@ -17,10 +17,6 @@ cheat_ids = {
     128: 'AqnLibeay32Loaded (lib for SSL)'
 }
 
-webhook = Webhook(glob.conf.config["discord"]["ahook"],
-                  color=0xc32c74,
-                  footer="stupid anticheat")
-
 
 MODULE_NAME = "lastFMHandler"
 class handler(requestsManager.asyncRequestHandler):
@@ -32,8 +28,11 @@ class handler(requestsManager.asyncRequestHandler):
     """
     @tornado.web.asynchronous
     @tornado.gen.engine
-    @sentry.captureTornado
     def asyncGet(self):
+        webhook = Webhook(glob.conf.config["discord"]["ahook"],
+                  color=0xc32c74,
+                  footer="stupid anticheat")
+
         ip = self.getRequestIP()
         if not requestsManager.checkArguments(self.request.arguments, ["b", "ha", "us"]):
             return self.write("error: gimme more arguments")
