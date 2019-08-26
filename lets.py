@@ -70,6 +70,8 @@ def make_app():
 		(r"/u/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/u/{}")),
 		(r"/b/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/b/{}")),
 		(r"/", redirectHandler.handler, dict(destination="https://kurikku.pw/")),
+		(r"/s/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/s/{}")),
+		(r"/beatmapsets/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/beatmapsets/{}")),
 
 		(r"/api/v1/status", apiStatusHandler.handler),
 		(r"/api/v1/pp", apiPPHandler.handler),

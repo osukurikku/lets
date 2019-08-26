@@ -1,4 +1,5 @@
 import datetime
+from objects import glob
 
 def zingonify(d):
     """
@@ -20,3 +21,16 @@ def toDotTicks(unixTime):
     base = datetime.datetime(1, 1, 1, 0, 0, 0)
     delt = unixStamp-base
     return int(delt.total_seconds())*10000000
+
+def getUserBadges(userID):
+    '''
+    This shit just returning all badges by UserID
+    #22
+
+    :param userID: user in-game ID
+    '''
+
+    response = glob.db.fetchAll(f"SELECT * FROM user_badges WHERE user = {userID}")
+
+    badges = [item['id'] for item in response]
+    return badges
