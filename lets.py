@@ -60,17 +60,20 @@ def make_app():
 		(r"/web/osu-search-set.php", osuSearchSetHandler.handler),
 		(r"/web/check-updates.php", checkUpdatesHandler.handler),
 		(r"/web/osu-error.php", osuErrorHandler.handler),
-		(r"/ss/(.*)", getScreenshotHandler.handler),
+		(r"/web/lastfm.php", lastFMHandler.handler),
 		(r"/web/maps/(.*)", mapsHandler.handler),
-		(r"/d/(.*)", downloadMapHandler.handler),
-		(r"/s/(.*)", downloadMapHandler.handler),
 		(r"/web/replays/(.*)", getFullReplayHandler.handler),
 
+		(r"/ss/(.*)", getScreenshotHandler.handler),
+		
+		(r"/d/(.*)", downloadMapHandler.handler),
+		(r"/s/(.*)", downloadMapHandler.handler),
+		(r"/beatmapsets/(.*)", downloadMapHandler.handlerSets),
+		
 		(r"/p/verify", redirectHandler.handler, dict(destination="https://kurikku.pw/")),
 		(r"/u/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/u/{}")),
 		(r"/b/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/b/{}")),
 		(r"/", redirectHandler.handler, dict(destination="https://kurikku.pw/")),
-		(r"/s/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/s/{}")),
 		(r"/beatmapsets/(.*)", redirectHandler.handler, dict(destination="https://kurikku.pw/beatmapsets/{}")),
 
 		(r"/api/v1/status", apiStatusHandler.handler),
@@ -80,7 +83,6 @@ def make_app():
 		(r"/letsapi/v1/status", apiStatusHandler.handler),
 		(r"/letsapi/v1/pp", apiPPHandler.handler),
 		(r"/letsapi/v1/cacheBeatmap", apiCacheBeatmapHandler.handler),
-		(r"/web/lastfm.php", lastFMHandler.handler),
 		
 		# Not done yet
 		(r"/web/osu-rate.php", emptyHandler.handler),
