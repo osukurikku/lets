@@ -108,11 +108,11 @@ class handler(requestsManager.asyncRequestHandler):
 			# Create score object and set its data
 			log.info("{} has submitted a score on {}...".format(username, scoreData[0]))
 			s = score.score()
-			oldStats = userUtils.getUserStats(userID, s.gameMode)
 			s.setDataFromScoreData(scoreData)
-
-			s.calcRank()
 			
+			s.calcRank()
+			oldStats = userUtils.getUserStats(userID, s.gameMode)
+
 			oldBestScore = None
 			if s.personalOldBestScore:
 				oldBestScore = score.score()

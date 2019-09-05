@@ -272,6 +272,8 @@ class score:
 		"""
 		Set this score completed status and rankedScoreIncrease
 		"""
+		b = beatmap.beatmap(self.fileMd5, 0)
+
 		self.completed = 0
 		if self.passed and scoreUtils.isRankable(self.mods):
 			# Get userID
@@ -297,12 +299,26 @@ class score:
 			else:
 				self.personalOldBestScore = personalBest["id"]
 				# Compare personal best's score with current score
-				if self.score > personalBest["score"] or self.pp > personalBest["pp"]:
-					# New best score
-					self.completed = 3
-					self.rankedScoreIncrease = self.score-personalBest["score"]
-					self.oldPersonalBest = personalBest["id"]
-				else:
+
+				if b.rankedStatus == rankedStatuses.RANKED or b.rankedStatus == rankedStatuses.APPROVED:
+					if self.pp > personalBest["pp"]:
+						# New best score
+						self.completed = 3
+						self.rankedScoreIncrease = self.score-personalBest["score"]
+						self.oldPersonalBest = personalBest["id"]
+						return
+
+					self.completed = 2
+					self.rankedScoreIncrease = 0
+					self.oldPersonalBest = 0
+				elif b.rankedStatus == rankedStatuses.LOVED:
+					if self.score > personalBest["score"]:
+						# New best score
+						self.completed = 3
+						self.rankedScoreIncrease = self.score-personalBest["score"]
+						self.oldPersonalBest = personalBest["id"]
+						return
+
 					self.completed = 2
 					self.rankedScoreIncrease = 0
 					self.oldPersonalBest = 0
