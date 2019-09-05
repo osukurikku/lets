@@ -307,10 +307,6 @@ class score:
 						self.rankedScoreIncrease = self.score-personalBest["score"]
 						self.oldPersonalBest = personalBest["id"]
 						return
-
-					self.completed = 2
-					self.rankedScoreIncrease = 0
-					self.oldPersonalBest = 0
 				elif b.rankedStatus == rankedStatuses.LOVED:
 					if self.score > personalBest["score"]:
 						# New best score
@@ -319,9 +315,9 @@ class score:
 						self.oldPersonalBest = personalBest["id"]
 						return
 
-					self.completed = 2
-					self.rankedScoreIncrease = 0
-					self.oldPersonalBest = 0
+				self.completed = 2
+				self.rankedScoreIncrease = 0
+				self.oldPersonalBest = 0
 
 		log.debug("Completed status: {}".format(self.completed))
 
