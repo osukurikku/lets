@@ -299,6 +299,8 @@ class score:
 			else:
 				self.personalOldBestScore = personalBest["id"]
 				# Compare personal best's score with current score
+				# idk but my version is not work or something goes wrong ;d
+				# let's try akatsuki version ;d
 
 				if b.rankedStatus == rankedStatuses.RANKED or b.rankedStatus == rankedStatuses.APPROVED:
 					if self.pp > personalBest["pp"]:
@@ -306,22 +308,20 @@ class score:
 						self.completed = 3
 						self.rankedScoreIncrease = self.score-personalBest["score"]
 						self.oldPersonalBest = personalBest["id"]
-						return
-
-					self.completed = 2
-					self.rankedScoreIncrease = 0
-					self.oldPersonalBest = 0
+					else:
+						self.completed = 2
+						self.rankedScoreIncrease = 0
+						self.oldPersonalBest = 0
 				elif b.rankedStatus == rankedStatuses.LOVED:
 					if self.score > personalBest["score"]:
 						# New best score
 						self.completed = 3
 						self.rankedScoreIncrease = self.score-personalBest["score"]
 						self.oldPersonalBest = personalBest["id"]
-						return
-
-					self.completed = 2
-					self.rankedScoreIncrease = 0
-					self.oldPersonalBest = 0
+					else:
+						self.completed = 2
+						self.rankedScoreIncrease = 0
+						self.oldPersonalBest = 0
 
 		log.debug("Completed status: {}".format(self.completed))
 
