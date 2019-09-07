@@ -145,6 +145,8 @@ class handler(requestsManager.asyncRequestHandler):
 				s.pp = 0
 				ppCalcException = e
 
+			s.setCompletedStatus()
+
 			if beatmapInfo.rankedStatus >= rankedStatuses.LOVED and s.passed:
 				s.pp = 0
 
