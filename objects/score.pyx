@@ -246,7 +246,7 @@ class score:
 			#osuVersion = scoreData[17]
 
 			# Set completed status
-			self.setCompletedStatus()
+			#self.setCompletedStatus()
 
 
 	def getData(self, pp=False):
@@ -301,14 +301,18 @@ class score:
 				# Compare personal best's score with current score
 				# idk but my version is not work or something goes wrong ;d
 				# let's try akatsuki version ;d
-
+				print(self.pp)
+				print(personalBest.get("pp", None))
+				print(b.rankedStatus)
 				if b.rankedStatus == rankedStatuses.RANKED or b.rankedStatus == rankedStatuses.APPROVED:
 					if self.pp > personalBest["pp"]:
+						print("New best pp score")
 						# New best score
 						self.completed = 3
 						self.rankedScoreIncrease = self.score-personalBest["score"]
 						self.oldPersonalBest = personalBest["id"]
 					else:
+						print("Not best pp score")
 						self.completed = 2
 						self.rankedScoreIncrease = 0
 						self.oldPersonalBest = 0
