@@ -39,6 +39,8 @@ from handlers import redirectHandler
 from handlers import submitModularHandler
 from handlers import uploadScreenshotHandler
 from handlers import lastFMHandler
+from handlers import rateHandler
+from handlers import commentHandler
 from helpers import config
 from helpers import consoleHelper
 from common import generalUtils
@@ -60,6 +62,8 @@ def make_app():
 		(r"/web/osu-search-set.php", osuSearchSetHandler.handler),
 		(r"/web/check-updates.php", checkUpdatesHandler.handler),
 		(r"/web/osu-error.php", osuErrorHandler.handler),
+		(r"/web/osu-comment.php", commentHandler.handler),
+		(r"/web/osu-rate.php", rateHandler.handler),
 		(r"/web/lastfm.php", lastFMHandler.handler),
 		(r"/web/maps/(.*)", mapsHandler.handler),
 		(r"/web/replays/(.*)", getFullReplayHandler.handler),
@@ -85,9 +89,8 @@ def make_app():
 		(r"/letsapi/v1/cacheBeatmap", apiCacheBeatmapHandler.handler),
 		
 		# Not done yet
-		(r"/web/osu-rate.php", emptyHandler.handler),
-		(r"/web/osu-comment.php", emptyHandler.handler),
 		(r"/web/osu-checktweets.php", emptyHandler.handler),
+		(r"/web/osu-addfavourite.php", emptyHandler.handler),
 
 		(r"/loadTest", loadTestHandler.handler),
 	], default_handler_class=defaultHandler.handler)
