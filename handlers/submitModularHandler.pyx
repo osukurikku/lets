@@ -113,11 +113,6 @@ class handler(requestsManager.asyncRequestHandler):
 			s.calcRank()
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 
-			oldBestScore = None
-			if s.personalOldBestScore:
-				oldBestScore = score.score()
-				oldBestScore.setDataFromDB(s.personalOldBestScore)
-
 			# Set score stuff missing in score data
 			s.playerUserID = userID
 
@@ -146,6 +141,11 @@ class handler(requestsManager.asyncRequestHandler):
 				ppCalcException = e
 
 			s.setCompletedStatus()
+
+			oldBestScore = None
+			if s.personalOldBestScore:
+				oldBestScore = score.score()
+				oldBestScore.setDataFromDB(s.personalOldBestScore)
 
 			if beatmapInfo.rankedStatus >= rankedStatuses.LOVED and s.passed:
 				s.pp = 0
