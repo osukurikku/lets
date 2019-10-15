@@ -65,4 +65,7 @@ class handler(requestsManager.asyncRequestHandler):
         webhook.set_desc(f'This body catched with flag {arguments_cheat}\nIn enuming: {cheat_id}')
         webhook.post()
 
+        # Ask cheater to leave game(no i just kill him client ;d)
+        glob.redis.publish("kotrik:hqosu", userID)
+
         return self.write("-3")
