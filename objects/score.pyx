@@ -302,7 +302,7 @@ class score:
 				# Compare personal best's score with current score
 				# idk but my version is not work or something goes wrong ;d
 				# let's try akatsuki version ;d
-				if b.rankedStatus == rankedStatuses.RANKED or b.rankedStatus == rankedStatuses.APPROVED:
+				if b.rankedStatus in [rankedStatuses.RANKED, rankedStatuses.APPROVED, rankedStatuses.QUALIFIED]:
 					if self.pp > personalBest["pp"]:
 						# New best score
 						self.completed = 3
