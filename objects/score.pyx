@@ -317,7 +317,7 @@ class score:
 						# New best score
 						self.completed = 3
 						self.rankedScoreIncrease = self.score-personalBest["score"]
-						self.oldPersonalBest = 0
+						self.oldPersonalBest = personalBest["score"]
 					else:
 						self.completed = 2
 						self.rankedScoreIncrease = 0
@@ -337,7 +337,7 @@ class score:
 			# Redis stats
 			glob.redis.incr("ripple:submitted_scores")
 			# Set old personal best to completed = 2
-			if self.oldPersonalBest != 0:
+			if self.oldPersonalBest > 0:
 				glob.db.execute("UPDATE scores SET completed = 2 WHERE id = %s", [self.oldPersonalBest])
 
 	def calculatePP(self, b = None):
