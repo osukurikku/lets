@@ -298,6 +298,7 @@ class score:
 				self.oldPersonalBest = 0
 				self.personalOldBestScore = None
 			else:
+				self.calculatePP()
 				self.personalOldBestScore = personalBest["id"]
 				# Compare personal best's score with current score
 				# idk but my version is not work or something goes wrong ;d
