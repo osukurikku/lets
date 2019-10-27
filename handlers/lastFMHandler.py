@@ -53,6 +53,7 @@ class handler(requestsManager.asyncRequestHandler):
         else:
             webhook.set_desc(f'This body catched with undefined flag {arguments_cheat}')
 
+        webhook.set_footer(text="sended by lastFMHandler")
         webhook.post()
         # Ask cheater to leave game(no i just kill him client ;d)
         glob.redis.publish("kotrik:hqosu", userID)

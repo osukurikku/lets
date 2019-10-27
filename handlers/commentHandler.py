@@ -76,10 +76,8 @@ class handler(requestsManager.asyncRequestHandler):
         # Merge beatmap, beatmapset and score comments
         for x in (
             {"db_type": "beatmap_id", "client_type": "map", "value": beatmapID},
-                        {"db_type": "beatmapset_id",
-                            "client_type": "song", "value": beatmapSetID},
-                        {"db_type": "score_id",
-                            "client_type": "replay", "value": scoreID},
+            {"db_type": "beatmapset_id", "client_type": "song", "value": beatmapSetID},
+            {"db_type": "score_id", "client_type": "replay", "value": scoreID},
         ):
             # Add this set of comments only if the client has set the value
             if x["value"] <= 0:

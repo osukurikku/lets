@@ -20,7 +20,7 @@ from constants import exceptions
 from constants import rankedStatuses
 from helpers import aeshelper
 from helpers import leaderboardHelper
-from helpers.kotrikhelper import zingonify, getHackByFlag
+from helpers.kotrikhelper import zingonify, getHackByHexFlags
 from objects import beatmap
 from objects import glob
 from objects import score
@@ -171,12 +171,12 @@ class handler(requestsManager.asyncRequestHandler):
 			# Save score in db
 			s.saveScoreInDB()
 
-			if not restricted:
+			if restricted == False:
 				# Checking for client ac flags
 				haxFlags = scoreData[17].count(' ') # 4 is normal, 0 is irregular but inconsistent.
 				if haxFlags != 4 and haxFlags != 0 and s.completed > 1 and s.pp > 100:
-					hack = getHackByFlag(int(haxFlags))
-					if type(hack) == str:
+					hack = getHackByHexFlags(int(haxFlags))
+					if len(hack) > 1:
 						# okay we found some cheater
 						webhook = Webhook(glob.conf.config["discord"]["ahook"],
 										  color=0xc32c74,
@@ -184,6 +184,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 						webhook.set_title(title=f"Catched some cheater {username} ({userID})")
 						webhook.set_desc(f'This body catched with flag {haxFlags}\nIn enuming: {hack}')
+						webhook.set_footer(text="sended by submitModularHandler")
 						webhook.post()
 
 			# Client anti-cheat flags
