@@ -34,3 +34,20 @@ def getUserBadges(userID):
 
     badges = [item['id'] for item in response]
     return badges
+
+cheat_ids = {
+    1: 'ReLife|HqOsu is running',
+    2: 'Console in BG is found',
+    4: 'Unknown but strange',
+    8: 'Invalid name?',
+    16: 'Invalid file?',
+    32: 'ReLife|HqOsu has loaded',
+    64: 'AqnSdl2Loaded (lib for overlay)',
+    128: 'AqnLibeay32Loaded (lib for SSL)'
+}
+
+def getHackByFlag(flag):
+    if cheat_ids.get(flag, False):
+        return cheat_ids[flag]
+    else:
+        return flag
