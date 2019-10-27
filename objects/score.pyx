@@ -307,7 +307,7 @@ class score:
 						# New best score
 						self.completed = 3
 						self.rankedScoreIncrease = self.score-personalBest["score"]
-						self.oldPersonalBest = personalBest["score"]
+						self.oldPersonalBest = personalBest["id"]
 					else:
 						self.completed = 2
 						self.rankedScoreIncrease = 0
@@ -317,7 +317,7 @@ class score:
 						# New best score
 						self.completed = 3
 						self.rankedScoreIncrease = self.score-personalBest["score"]
-						self.oldPersonalBest = personalBest["score"]
+						self.oldPersonalBest = personalBest["id"]
 					else:
 						self.completed = 2
 						self.rankedScoreIncrease = 0
