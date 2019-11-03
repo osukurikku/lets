@@ -85,8 +85,8 @@ class handler(requestsManager.asyncRequestHandler):
 				modsFilter = int(self.get_argument("mods"))
 
 				# Disable automod (pp sort) if we are not donors
-				if not isDonor:
-					modsFilter = modsFilter & ~mods.AUTOPLAY
+				# if not isDonor:
+				# 	modsFilter = modsFilter & ~mods.AUTOPLAY
 			elif scoreboardType == 3 and isDonor:
 				# Friends leaderboard
 				friends = True
