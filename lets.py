@@ -30,7 +30,6 @@ from handlers import getFullReplayHandler
 from handlers import getReplayHandler
 from handlers import getScoresHandler
 from handlers import getScreenshotHandler
-from handlers import loadTestHandler
 from handlers import mapsHandler
 from handlers import osuErrorHandler
 from handlers import osuSearchHandler
@@ -90,9 +89,7 @@ def make_app():
 		
 		# Not done yet
 		(r"/web/osu-checktweets.php", emptyHandler.handler),
-		(r"/web/osu-addfavourite.php", emptyHandler.handler),
-
-		(r"/loadTest", loadTestHandler.handler),
+		(r"/web/osu-addfavourite.php", emptyHandler.handler)
 	], default_handler_class=defaultHandler.handler)
 
 if __name__ == "__main__":
