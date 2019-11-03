@@ -38,12 +38,16 @@ def getUserBadges(userID):
 cheat_ids = {
     1: 'ReLife|HqOsu is running',
     2: 'Console in BG is found',
-    4: 'Unknown but strange',
+    4: 'Wrong mod combination',
     8: 'Invalid name?',
     16: 'Invalid file?',
     32: 'ReLife|HqOsu has loaded',
     64: 'AqnSdl2Loaded (lib for overlay)',
-    128: 'AqnLibeay32Loaded (lib for SSL)'
+    128: 'AqnLibeay32Loaded (lib for SSL)',
+    256: 'FL check',
+    512: 'Unknown, but cheat',
+    1024: 'IsFormOpacityHacked',
+    4096: 'Cursore dance hack(50%)'
 }
 
 # Thanks for this flags cmyui#0425
