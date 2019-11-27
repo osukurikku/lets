@@ -20,7 +20,7 @@ from constants import exceptions
 from constants import rankedStatuses
 from helpers import aeshelper
 from helpers import leaderboardHelper
-from helpers.kotrikhelper import zingonify, getHackByHexFlags
+from helpers.kotrikhelper import zingonify
 from objects import beatmap
 from objects import glob
 from objects import score
@@ -171,32 +171,8 @@ class handler(requestsManager.asyncRequestHandler):
 			# Save score in db
 			s.saveScoreInDB()
 
-			if restricted == False:
-				# Checking for client ac flags
-				haxFlags = scoreData[17].count(' ') # 4 is normal, 0 is irregular but inconsistent.
-				if haxFlags != 4 and haxFlags != 0 and s.completed > 1 and s.pp > 100:
-					hack = getHackByHexFlags(int(haxFlags))
-					if len(hack) > 1:
-						# okay we found some cheater
-						webhook = Webhook(glob.conf.config["discord"]["ahook"],
-										  color=0xc32c74,
-										  footer="stupid anticheat")
-
-						webhook.set_title(title=f"Catched some cheater {username} ({userID})")
-						webhook.set_desc(f'This body catched with flag {haxFlags}\nIn enuming: {hack}')
-						webhook.set_footer(text="sended by submitModularHandler")
-						webhook.post()
-
-			# Client anti-cheat flags
-			'''ignoreFlags = 4
-			if glob.debug == True:
-				# ignore multiple client flags if we are in debug mode
-				ignoreFlags |= 8
-			haxFlags = (len(scoreData[17])-len(scoreData[17].strip())) & ~ignoreFlags
-			if haxFlags != 0 and restricted == False:
-				userHelper.restrict(userID)
-				userHelper.appendNotes(userID, "-- Restricted due to clientside anti cheat flag ({}) (cheated score id: {})".format(haxFlags, s.scoreID))
-				log.warning("**{}** ({}) has been restricted due clientside anti cheat flag **({})**".format(username, userID, haxFlags), "cm")'''
+			# esli zaxotite eto ispolzovat', znajte eto tolko dlya klientov < 2017 goda
+			# i tolko dlya std moda = 0
 
 			# OH? Italian peperoni?
 			# Ya-Ya, 100% peperoni
