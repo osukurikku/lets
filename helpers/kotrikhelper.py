@@ -43,11 +43,7 @@ cheat_ids = {
     16: 'Invalid file?',
     32: 'ReLife|HqOsu has loaded',
     64: 'AqnSdl2Loaded (lib for overlay)',
-    128: 'AqnLibeay32Loaded (lib for SSL)',
-    256: 'FL check',
-    512: 'Unknown, but cheat',
-    1024: 'IsFormOpacityHacked',
-    4096: 'Cursore dance hack(50%)'
+    128: 'AqnLibeay32Loaded (lib for SSL)'
 }
 
 def getHackByFlag(flag):
