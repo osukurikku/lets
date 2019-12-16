@@ -19,3 +19,6 @@
 [submodule "pp/omppc"]
 	path = pp/omppc
 	url = https://github.com/osukurikku/omppc.git
+[submodule "pp/oppai-relax"]
+	path = pp/oppai-relax
+	url = https://git.kotworks.wtf/osukurikku/oppai-relax/
