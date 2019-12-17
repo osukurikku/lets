@@ -349,9 +349,18 @@ class score:
 			b = beatmap.beatmap(self.fileMd5, 0)
 
 		# Calculate pp
-		if b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed and self.gameMode in pp.PP_CALCULATORS:
-			calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
-			self.pp = calculator.pp
+		if b.is_rankable and scoreUtils.isRankable(self.mods) and self.passed:
+			# RX, AP only 0(std)
+			if (self.mods&PlayMods.RELAX) > 0 or (self.mods&PlayMods.RELAX2) and self.gameMode in pp.PP_RELAX_CALCULATORS:
+				calculator = pp.PP_RELAX_CALCULATORS[self.gameMode](b, self)
+				self.pp = calculator.pp
+				return
+
+			# Normal mods
+			if self.gameMode in pp.PP_CALCULATORS:
+				calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
+				self.pp = calculator.pp
+				return
 		else:
 			self.pp = 0
 

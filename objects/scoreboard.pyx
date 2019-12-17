@@ -257,6 +257,14 @@ class scoreboard:
 
         # Output top 50 scores
         for i in self.scores[1:]:
-            data += i.getData(pp=self.mods > -1 and self.mods & modsEnum.AUTOPLAY > 0)
+            if self.mods > -1:
+                if (self.mods&modsEnum.RELAX) > 0 or (self.mods&modsEnum.RELAX2) > 0:
+                    data += i.getData(pp=True)
+                    return
+                
+                if (self.mods&modsEnum.AUTOPLAY) > 0:
+                    data += i.getData(pp=True)
+            else:
+                data += i.getData(pp=False)
 
         return data
