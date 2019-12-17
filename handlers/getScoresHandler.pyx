@@ -95,7 +95,6 @@ class handler(requestsManager.asyncRequestHandler):
 				if not (modsFilter&mods.RELAX) and not (modsFilter&mods.RELAX2):
 					modsFilter = -1
 
-			print(modsFilter)
 			# Console output
 			fileNameShort = fileName[:32]+"..." if len(fileName) > 32 else fileName[:-4]
 			log.info("Requested beatmap {} ({})".format(fileNameShort, md5))
