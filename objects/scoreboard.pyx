@@ -55,6 +55,7 @@ class scoreboard:
         cdef str order = ""
         cdef str limit = ""
 
+       
         # Find personal best score
         if self.userID != 0:
             # Query parts
@@ -62,7 +63,16 @@ class scoreboard:
 
             # Mods
             if self.mods > -1:
-                mods = "AND mods = %(mods)s"
+                if self.mods&modsEnum.RELAX:
+                    mods = "AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
+                elif self.mods&modsEnum.RELAX2:
+                    mods = "AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s)"
+                elif self.mods & modsEnum.AUTOPLAY == 0:
+                    mods = "AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
+                else:
+                    mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
+            else:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
 
             # Friends ranking
             if self.friends:
@@ -118,7 +128,7 @@ class scoreboard:
         if self.mods <= -1 or self.mods & modsEnum.AUTOPLAY == 0:
             # Order by score if we aren't filtering by mods or autoplay mod is disabled
             order = "ORDER BY score DESC"
-        elif self.mods & modsEnum.AUTOPLAY > 0:
+        elif self.mods & modsEnum.AUTOPLAY > 0 or self.mods & modsEnum.RELAX > 0 or self.mods & modsEnum.RELAX2 > 0:
             # Otherwise, filter by pp
             order = "ORDER BY pp DESC"
         limit = "LIMIT 50"
@@ -260,10 +270,13 @@ class scoreboard:
             if self.mods > -1:
                 if (self.mods&modsEnum.RELAX) > 0 or (self.mods&modsEnum.RELAX2) > 0:
                     data += i.getData(pp=True)
-                    return
-                
+                    continue
+
                 if (self.mods&modsEnum.AUTOPLAY) > 0:
                     data += i.getData(pp=True)
+                    continue
+        
+                data += i.getData(pp=False)
             else:
                 data += i.getData(pp=False)
 

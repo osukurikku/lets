@@ -73,7 +73,7 @@ class handler(requestsManager.asyncRequestHandler):
 			country = False
 			friends = False
 			clan = False
-			modsFilter = -1
+			modsFilter = int(self.get_argument("mods"))
 			if scoreboardType == 4:
 				# Country leaderboard
 				country = True
@@ -91,6 +91,11 @@ class handler(requestsManager.asyncRequestHandler):
 				# Friends leaderboard
 				friends = True
 
+			if modsFilter > -1 and scoreboardType != 2:
+				if not (modsFilter&mods.RELAX) and not (modsFilter&mods.RELAX2):
+					modsFilter = -1
+
+			print(modsFilter)
 			# Console output
 			fileNameShort = fileName[:32]+"..." if len(fileName) > 32 else fileName[:-4]
 			log.info("Requested beatmap {} ({})".format(fileNameShort, md5))
