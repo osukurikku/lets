@@ -271,7 +271,7 @@ class scoreboard:
         scores = glob.db.fetchAll(query, {"md5": self.beatmap.fileMD5, "userid": self.userID, "mode": self.gameMode,
                                           "mods": self.mods})
         for entry in scores:
-            dummy_list.append([entry['id'], entry['userid']])
+            dummy_list.append([entry['userid'], entry['id']])
 
         # returns user id who on pos arg
         if len(dummy_list) < pos:
