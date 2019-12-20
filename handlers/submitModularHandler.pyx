@@ -234,11 +234,8 @@ class handler(requestsManager.asyncRequestHandler):
 
 				# Try to get oldPersonalBestRank from cache
 				oldPersonalBestRank = glob.personalBestCache.get(userID, s.fileMd5)
-				if oldPersonalBestRank == 0:
-					# oldPersonalBestRank not found in cache, get it from db
-					oldScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods if not (s.mods&mods.RELAX or s.mods&mods.RELAX2) else -1)
-					oldScoreboard.setPersonalBest()
-					oldPersonalBestRank = oldScoreboard.personalBestRank if oldScoreboard.personalBestRank > 0 else 0
+				if not oldPersonalBestRank:
+					oldPersonalBestRank = -1
 
 			# Always update users stats (total/ranked score, playcount, level, acc and pp)
 			# even if not passed
@@ -285,7 +282,7 @@ class handler(requestsManager.asyncRequestHandler):
 				glob.redis.publish("peppy:update_cached_stats", userID)
 
 				# Get personal best after submitting the score
-				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods if not (s.mods&mods.RELAX or s.mods&mods.RELAX2) else -1)
+				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods if (s.mods&mods.RELAX or s.mods&mods.RELAX2) else -1)
 				newScoreboard.setPersonalBest()
 
 				# Get rank info (current rank, pp/score to next rank, user who is 1 rank above us)
@@ -324,7 +321,7 @@ class handler(requestsManager.asyncRequestHandler):
 					('chartId', "beatmap"),
 					('chartUrl', f"https://kurikku.pw/b/{beatmapInfo.beatmapID}"),
 					('chartName', "Beatmap Ranking"),
-					('rankBefore', oldPersonalBestRank),
+					('rankBefore', oldPersonalBestRank if oldPersonalBestRank > 0 else ""),
 					('rankAfter', newScoreboard.personalBestRank),
 					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else ""),
 					('maxComboAfter', s.maxCombo),
@@ -350,38 +347,26 @@ class handler(requestsManager.asyncRequestHandler):
 				if isRelax:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank with RX on ",
-						" Achieved #1 rank with RX on ",
-						" Has lost #1 rank with RX on ",
 						"[https://kurikku.pw/?u={} {}] achieved rank #1 with RX on [https://osu.ppy.sh/b/{} {}] ({})"
 					]
 				elif isAutopilot:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank with AP on ",
-						" Achieved #1 rank with AP on ",
-						" Has lost #1 rank with AP on ",
 						"[https://kurikku.pw/?u={} {}] achieved rank #1 with AP on [https://osu.ppy.sh/b/{} {}] ({})"
 					]
 				else:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank on ",
-						" Achieved #1 rank on ",
-						" Has lost #1 rank on ",
 						"[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})"
 					]
 
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
-					if newScoreboard.personalBestRank > 1 and newScoreboard.personalBestRank <= oldPersonalBestRank:
+					if newScoreboard.personalBestRank > 1 and newScoreboard.personalBestRank > oldPersonalBestRank:
 						userLogMsg = messages[0]
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
 				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
-					userUtils.logUserLog(messages[1], s.fileMd5, userID, s.gameMode, s.scoreID)
-
-					oldUserTopOne = newScoreboard.getNPos(2)
-					if oldUserTopOne != -1:
-						userUtils.logUserLog(messages[2], s.fileMd5, oldUserTopOne[0], s.gameMode, oldUserTopOne[1])
-
-					annmsg = messages[3].format(
+					annmsg = messages[1].format(
 						userID,
 						username.encode().decode("ASCII", "ignore"),
 						beatmapInfo.beatmapID,
