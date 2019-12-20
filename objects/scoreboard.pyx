@@ -7,8 +7,8 @@ from objects import score
 
 
 class scoreboard:
-    def __init__(self, username, gameMode, beatmap, setScores = True, country = False, friends = False, clan = False,
-                 mods = -1):
+    def __init__(self, username, gameMode, beatmap, setScores=True, country=False, friends=False, clan=False,
+                 mods=-1):
         """
         Initialize a leaderboard object
         username -- username of who's requesting the scoreboard. None if not known
@@ -19,7 +19,8 @@ class scoreboard:
         self.scores = []  # list containing all top 50 scores objects. First object is personal best
         self.totalScores = 0
         self.personalBestRank = -1  # our personal best rank, -1 if not found yet
-        self.username = username  # username of who's requesting the scoreboard. None if not known
+        # username of who's requesting the scoreboard. None if not known
+        self.username = username
         self.userID = userUtils.getID(self.username)  # username's userID
         self.gameMode = gameMode  # requested gameMode
         self.beatmap = beatmap  # beatmap objecy relative to this leaderboard
@@ -55,7 +56,6 @@ class scoreboard:
         cdef str order = ""
         cdef str limit = ""
 
-       
         # Find personal best score
         if self.userID != 0:
             # Query parts
@@ -63,9 +63,9 @@ class scoreboard:
 
             # Mods
             if self.mods > -1:
-                if self.mods&modsEnum.RELAX:
+                if self.mods & modsEnum.RELAX:
                     mods = "AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
-                elif self.mods&modsEnum.RELAX2:
+                elif self.mods & modsEnum.RELAX2:
                     mods = "AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s)"
                 elif self.mods & modsEnum.AUTOPLAY == 0:
                     mods = "AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
@@ -84,7 +84,8 @@ class scoreboard:
 
             # Build query, get params and run query
             query = buildQuery(locals())
-            params = {"userid": self.userID, "md5": self.beatmap.fileMD5, "mode": self.gameMode, "mods": self.mods}
+            params = {"userid": self.userID, "md5": self.beatmap.fileMD5,
+                      "mode": self.gameMode, "mods": self.mods}
             personalBestScore = glob.db.fetch(query, params)
         else:
             personalBestScore = None
@@ -205,7 +206,8 @@ class scoreboard:
         # Cache our personal best rank so we can eventually use it later as
         # before personal best rank" in submit modular when building ranking panel
         if self.personalBestRank >= 1:
-            glob.personalBestCache.set(self.userID, self.personalBestRank, self.beatmap.fileMD5)
+            glob.personalBestCache.set(
+                self.userID, self.personalBestRank, self.beatmap.fileMD5)
 
     def setPersonalBest(self):
         """
@@ -265,16 +267,16 @@ class scoreboard:
             return
 
         # get all scores on that map
-        dummy_list = [] 
+        dummy_list = []
         scores = glob.db.fetchAll(query, {"md5": self.beatmap.fileMD5, "userid": self.userID, "mode": self.gameMode,
-                                        "mods": self.mods})
+                                          "mods": self.mods})
         for entry in scores:
-		    dummy_list.append([entry['id'], entry['userid']])
-        
+            dummy_list.append([entry['id'], entry['userid']])
+
         # returns user id who on pos arg
         if len(dummy_list) < pos:
             return -1
-        
+
         return dummy_list[pos-1]
 
     def getScoresData(self):
@@ -297,14 +299,14 @@ class scoreboard:
         # Output top 50 scores
         for i in self.scores[1:]:
             if self.mods > -1:
-                if (self.mods&modsEnum.RELAX) > 0 or (self.mods&modsEnum.RELAX2) > 0:
+                if (self.mods & modsEnum.RELAX) > 0 or (self.mods & modsEnum.RELAX2) > 0:
                     data += i.getData(pp=True)
                     continue
 
-                if (self.mods&modsEnum.AUTOPLAY) > 0:
+                if (self.mods & modsEnum.AUTOPLAY) > 0:
                     data += i.getData(pp=True)
                     continue
-        
+
                 data += i.getData(pp=False)
             else:
                 data += i.getData(pp=False)
