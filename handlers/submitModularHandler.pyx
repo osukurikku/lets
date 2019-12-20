@@ -236,7 +236,7 @@ class handler(requestsManager.asyncRequestHandler):
 				oldPersonalBestRank = glob.personalBestCache.get(userID, s.fileMd5)
 				if oldPersonalBestRank == 0:
 					# oldPersonalBestRank not found in cache, get it from db
-					oldScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False)
+					oldScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods)
 					oldScoreboard.setPersonalBest()
 					oldPersonalBestRank = oldScoreboard.personalBestRank if oldScoreboard.personalBestRank > 0 else 0
 
@@ -285,7 +285,7 @@ class handler(requestsManager.asyncRequestHandler):
 				glob.redis.publish("peppy:update_cached_stats", userID)
 
 				# Get personal best after submitting the score
-				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False)
+				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods)
 				newScoreboard.setPersonalBest()
 
 				# Get rank info (current rank, pp/score to next rank, user who is 1 rank above us)
@@ -345,17 +345,43 @@ class handler(requestsManager.asyncRequestHandler):
 				log.debug("Generated output for online ranking screen!")
 				log.debug(msg)
 				
+				isRelax = s.mods&mods.RELAX
+				isAutopilot = s.mods&mods.RELAX2
+				if isRelax:
+					messages = [
+						f" Achieved #{newScoreboard.personalBestRank} rank with RX on ",
+						" Achieved #1 rank with RX on ",
+						" Has lost #1 rank with RX on ",
+						"[https://kurikku.pw/?u={} {}] achieved rank #1 with RX on [https://osu.ppy.sh/b/{} {}] ({})"
+					]
+				elif isAutopilot:
+					messages = [
+						f" Achieved #{newScoreboard.personalBestRank} rank with AP on ",
+						" Achieved #1 rank with AP on ",
+						" Has lost #1 rank with AP on ",
+						"[https://kurikku.pw/?u={} {}] achieved rank #1 with AP on [https://osu.ppy.sh/b/{} {}] ({})"
+					]
+				else:
+					messages = [
+						f" Achieved #{newScoreboard.personalBestRank} rank on ",
+						" Achieved #1 rank on ",
+						" Has lost #1 rank on ",
+						"[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})"
+					]
+
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
 					if newScoreboard.personalBestRank > 1 and newScoreboard.personalBestRank <= oldPersonalBestRank:
-						userLogMsg = f" Achieved #{newScoreboard.personalBestRank} rank on "
+						userLogMsg = messages[0]
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
 				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
-					userUtils.logUserLog(" Achieved #1 rank on ", s.fileMd5, userID, s.gameMode, s.scoreID)
-					if len(newScoreboard.scores)>1:
-						userUtils.logUserLog(" Has lost #1 rank on ", s.fileMd5, newScoreboard.scores[1].playerUserID, s.gameMode, newScoreboard.scores[1].scoreID)
+					userUtils.logUserLog(messages[1], s.fileMd5, userID, s.gameMode, s.scoreID)
 
-					annmsg = "[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})".format(
+					oldUserTopOne = newScoreboard.getNPos(2)
+					if oldUserTopOne != -1:
+						userUtils.logUserLog(messages[2], s.fileMd5, oldUserTopOne[0], s.gameMode, oldUserTopOne[1])
+
+					annmsg = messages[3].format(
 						userID,
 						username.encode().decode("ASCII", "ignore"),
 						beatmapInfo.beatmapID,
@@ -371,10 +397,10 @@ class handler(requestsManager.asyncRequestHandler):
 
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and s.pp > 10:
 					glob.redis.publish("scores:new_score", json.dumps({
-					"gm":s.gameMode,
-					"user":{"username":username, "userID": userID, "rank":newUserData["gameRank"],"oldaccuracy":oldStats["accuracy"],"accuracy":newUserData["accuracy"], "oldpp":oldStats["pp"],"pp":newUserData["pp"]},
-					"score":{"scoreID": s.scoreID, "mods":s.mods, "accuracy":s.accuracy, "missess":s.cMiss, "combo":s.maxCombo, "pp":s.pp, "rank":newScoreboard.personalBestRank, "ranking":s.rank},
-					"beatmap":{"beatmapID": beatmapInfo.beatmapID, "beatmapSetID": beatmapInfo.beatmapSetID, "max_combo":beatmapInfo.maxCombo, "song_name":beatmapInfo.songName}
+						"gm":s.gameMode,
+						"user":{"username":username, "userID": userID, "rank":newUserData["gameRank"],"oldaccuracy":oldStats["accuracy"],"accuracy":newUserData["accuracy"], "oldpp":oldStats["pp"],"pp":newUserData["pp"]},
+						"score":{"scoreID": s.scoreID, "mods":s.mods, "accuracy":s.accuracy, "missess":s.cMiss, "combo":s.maxCombo, "pp":s.pp, "rank":newScoreboard.personalBestRank, "ranking":s.rank},
+						"beatmap":{"beatmapID": beatmapInfo.beatmapID, "beatmapSetID": beatmapInfo.beatmapSetID, "max_combo":beatmapInfo.maxCombo, "song_name":beatmapInfo.songName}
 					}))
 
 				# Write message to client

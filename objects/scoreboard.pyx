@@ -248,6 +248,35 @@ class scoreboard:
         if result is not None:
             self.personalBestRank = result["rank"]
 
+    def getNPos(self, pos: int):
+        # Before running the HUGE query, make sure we have a score on that map
+        cdef str query = "SELECT id, userid FROM scores WHERE beatmap_md5 = %(md5)s AND userid = %(userid)s AND play_mode = %(mode)s AND completed = 3"
+        # Mods
+        if self.mods > -1:
+            query += " AND scores.mods = %(mods)s"
+        # Friends ranking
+        if self.friends:
+            query += " AND (scores.userid IN (SELECT user2 FROM users_relationships WHERE user1 = %(userid)s) OR scores.userid = %(userid)s)"
+        # Sort and limit at the end
+        query += f" LIMIT {pos+5}"
+        hasScore = glob.db.fetch(query, {"md5": self.beatmap.fileMD5, "userid": self.userID, "mode": self.gameMode,
+                                         "mods": self.mods})
+        if hasScore is None:
+            return
+
+        # get all scores on that map
+        dummy_list = [] 
+        scores = glob.db.fetchAll(query, {"md5": self.beatmap.fileMD5, "userid": self.userID, "mode": self.gameMode,
+                                        "mods": self.mods})
+        for entry in scores:
+		    dummy_list.append([entry['id'], entry['userid']])
+        
+        # returns user id who on pos arg
+        if len(dummy_list) < pos:
+            return -1
+        
+        return dummy_list[pos-1]
+
     def getScoresData(self):
         """
         Return scores data for getscores
