@@ -360,8 +360,7 @@ class handler(requestsManager.asyncRequestHandler):
 						"[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})"
 					]
 
-				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
-					if newScoreboard.personalBestRank > 1 and newScoreboard.personalBestRank > oldPersonalBestRank:
+				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and newScoreboard.personalBestRank > oldPersonalBestRank:
 						userLogMsg = messages[0]
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
