@@ -374,7 +374,7 @@ class handler(requestsManager.asyncRequestHandler):
 						userLogMsg = messages[0]
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
-				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
+				if oldPersonalBestRank != newScoreboard.personalBestRank and newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
 					userUtils.logUserLog(messages[1], s.fileMd5, userID, s.gameMode, s.scoreID)
 
 					oldUserTopOne = newScoreboard.getNPos(2)
