@@ -260,7 +260,7 @@ class scoreboard:
         if self.friends:
             query += " AND (scores.userid IN (SELECT user2 FROM users_relationships WHERE user1 = %(userid)s) OR scores.userid = %(userid)s)"
         # Sort and limit at the end
-        query += " ORDER BY score DESC LIMIT {}".format(pos+5) # cython can't in f-string(9999
+        query += " ORDER BY {} DESC LIMIT {}".format(pos+5, "pp" if (self.mods&modsEnum.RELAX or self.mods&modsEnum.RELAX2) else "score") # cython can't in f-string(9999
         hasScore = glob.db.fetch(query, {"md5": self.beatmap.fileMD5, "userid": self.userID, "mode": self.gameMode,
                                          "mods": self.mods})
         if hasScore is None:
