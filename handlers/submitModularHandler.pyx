@@ -171,9 +171,6 @@ class handler(requestsManager.asyncRequestHandler):
 			# Save score in db
 			s.saveScoreInDB()
 
-			# esli zaxotite eto ispolzovat', znajte eto tolko dlya klientov < 2017 goda
-			# i tolko dlya std moda = 0
-
 			# OH? Italian peperoni?
 			# Ya-Ya, 100% peperoni
 			# Ripple, i just clean code and comments
@@ -188,8 +185,9 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Check for impossible mod combination
 			if ((s.mods & mods.DOUBLETIME) > 0 and (s.mods & mods.HALFTIME) > 0) \
-					or ((s.mods & mods.HARDROCK) > 0 and (s.mods & mods.EASY) > 0)\
-					or ((s.mods & mods.SUDDENDEATH) > 0 and (s.mods & mods.NOFAIL) > 0):
+			or ((s.mods & mods.HARDROCK) > 0 and (s.mods & mods.EASY) > 0) \
+			or ((s.mods & mods.RELAX) > 0 and (s.mods & mods.RELAX2) > 0) \
+			or ((s.mods & mods.SUDDENDEATH) > 0 and (s.mods & mods.NOFAIL) > 0):
 				userUtils.ban(userID)
 				userUtils.appendNotes(userID, "Impossible mod combination {} (score submitter)".format(s.mods))
 
@@ -276,7 +274,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# At the end, check achievements
 			if s.passed:
-				new_achievements = secret.achievements.utils.unlock_achievements(s, beatmapInfo, newUserData)
+				secret.achievements.utils.unlock_achievements(s, beatmapInfo, newUserData)
 
 			# Output ranking panel only if we passed the song
 			# and we got valid beatmap info from db
