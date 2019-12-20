@@ -236,7 +236,7 @@ class handler(requestsManager.asyncRequestHandler):
 				oldPersonalBestRank = glob.personalBestCache.get(userID, s.fileMd5)
 				if oldPersonalBestRank == 0:
 					# oldPersonalBestRank not found in cache, get it from db
-					oldScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods)
+					oldScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods if not (s.mods&mods.RELAX or s.mods&mods.RELAX2) else -1)
 					oldScoreboard.setPersonalBest()
 					oldPersonalBestRank = oldScoreboard.personalBestRank if oldScoreboard.personalBestRank > 0 else 0
 
@@ -285,7 +285,7 @@ class handler(requestsManager.asyncRequestHandler):
 				glob.redis.publish("peppy:update_cached_stats", userID)
 
 				# Get personal best after submitting the score
-				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods)
+				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods if not (s.mods&mods.RELAX or s.mods&mods.RELAX2) else -1)
 				newScoreboard.setPersonalBest()
 
 				# Get rank info (current rank, pp/score to next rank, user who is 1 rank above us)
@@ -374,7 +374,7 @@ class handler(requestsManager.asyncRequestHandler):
 						userLogMsg = messages[0]
 						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
-				if oldPersonalBestRank != newScoreboard.personalBestRank and newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
+				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
 					userUtils.logUserLog(messages[1], s.fileMd5, userID, s.gameMode, s.scoreID)
 
 					oldUserTopOne = newScoreboard.getNPos(2)
