@@ -252,7 +252,7 @@ class scoreboard:
 
     def getNPos(self, pos: int):
         # Before running the HUGE query, make sure we have a score on that map
-        cdef str query = "SELECT id, userid FROM scores WHERE beatmap_md5 = %(md5)s AND userid = %(userid)s AND play_mode = %(mode)s AND completed = 3"
+        cdef str query = "SELECT id, userid, score, pp FROM scores WHERE beatmap_md5 = %(md5)s AND userid = %(userid)s AND play_mode = %(mode)s AND completed = 3"
         # Mods
         if self.mods > -1:
             query += " AND scores.mods = %(mods)s"
