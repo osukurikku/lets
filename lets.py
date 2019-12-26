@@ -35,6 +35,7 @@ from handlers import mapsHandler
 from handlers import osuErrorHandler
 from handlers import osuSearchHandler
 from handlers import osuSearchSetHandler
+from handlers import osuSessionHandler
 from handlers import redirectHandler
 from handlers import submitModularHandler
 from handlers import uploadScreenshotHandler
@@ -66,6 +67,7 @@ def make_app():
 		(r"/web/osu-comment.php", commentHandler.handler),
 		(r"/web/osu-rate.php", rateHandler.handler),
 		(r"/web/lastfm.php", lastFMHandler.handler),
+		(r"/web/osu-session.php", osuSessionHandler.handler),
 		(r"/web/maps/(.*)", mapsHandler.handler),
 		(r"/web/replays/(.*)", getFullReplayHandler.handler),
 
