@@ -92,7 +92,8 @@ def make_app():
 		# Not done yet
 		(r"/web/osu-checktweets.php", emptyHandler.handler),
 		(r"/web/osu-addfavourite.php", emptyHandler.handler),
-		(r"/web/osu-markasread.php", emptyHandler.handler)
+		(r"/web/osu-markasread.php", emptyHandler.handler),
+		(r"/web/osu-session.php", emptyHandler.handler)
 	], default_handler_class=defaultHandler.handler)
 
 if __name__ == "__main__":
