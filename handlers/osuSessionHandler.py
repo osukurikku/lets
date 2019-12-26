@@ -28,13 +28,12 @@ class handler(requestsManager.asyncRequestHandler):
                 requestsManager.printArguments(self)
 
             # Check user auth because of sneaky people
-            if not requestsManager.checkArguments(self.request.arguments, ["u", "h", "action", "content"]):
+            if not requestsManager.checkArguments(self.request.arguments, ["u", "h", "action"]):
                 raise exceptions.invalidArgumentsException(MODULE_NAME)
 
             username = self.get_argument("u")
             password = self.get_argument("h")
             action = self.get_argument("action")
-            content = self.get_argument("content")
             ip = self.getRequestIP()
             userID = userUtils.getID(username)
             if not userUtils.checkLogin(userID, password):
@@ -46,6 +45,7 @@ class handler(requestsManager.asyncRequestHandler):
                 self.write("Yield")
                 return
 
+            content = self.get_argument("content")
             try:
                 contentDict = json.loads(content)
                 kotrikhelper.setUserSession(userID, contentDict)
