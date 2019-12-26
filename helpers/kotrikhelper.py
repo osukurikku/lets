@@ -1,5 +1,7 @@
 import datetime
+import json
 from objects import glob
+
 
 def zingonify(d):
     """
@@ -9,6 +11,7 @@ def zingonify(d):
     :return: zingonified dict as str
     """
     return "|".join(f"{k}:{v}" for k, v in d.items())
+
 
 def toDotTicks(unixTime):
     '''
@@ -22,6 +25,7 @@ def toDotTicks(unixTime):
     delt = unixStamp-base
     return int(delt.total_seconds())*10000000
 
+
 def getUserBadges(userID):
     '''
     This shit just returning all badges by UserID
@@ -30,10 +34,21 @@ def getUserBadges(userID):
     :param userID: user in-game ID
     '''
 
-    response = glob.db.fetchAll(f"SELECT * FROM user_badges WHERE user = {userID}")
+    response = glob.db.fetchAll(
+        f"SELECT * FROM user_badges WHERE user = {userID}")
 
     badges = [item['id'] for item in response]
     return badges
+
+
+def setUserSession(userID: int, sessionObj: dict):
+    '''
+        Some shit for update osu-session.php
+    '''
+
+    glob.db.execute("UPDATE users SET last_session = %s WHERE userID = %s", [
+                    json.dumps(sessionObj), userID])
+    return True
 
 cheat_ids = {
     1: 'ReLife|HqOsu is running',
@@ -45,6 +60,7 @@ cheat_ids = {
     64: 'AqnSdl2Loaded (lib for overlay)',
     128: 'AqnLibeay32Loaded (lib for SSL)'
 }
+
 
 def getHackByFlag(flag):
     if cheat_ids.get(flag, False):
