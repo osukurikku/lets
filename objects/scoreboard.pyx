@@ -114,10 +114,18 @@ class scoreboard:
                 country = ""
 
         # Mods ranking (ignore auto, since we use it for pp sorting)
-        if self.mods > -1 and self.mods & modsEnum.AUTOPLAY == 0:
-            mods = "AND scores.mods = %(mods)s"
+        if self.mods > -1:
+            if self.mods & modsEnum.RELAX:
+                mods = "AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
+            elif self.mods & modsEnum.RELAX2:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s)"
+            elif self.mods & modsEnum.AUTOPLAY == 0:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
+            else:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
         else:
-            mods = ""
+            mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
+
 
         # Friends ranking
         if self.friends:
