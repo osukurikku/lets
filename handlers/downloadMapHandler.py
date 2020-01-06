@@ -21,7 +21,7 @@ class handler(requestsManager.asyncRequestHandler):
 			bid = int(bid)
 
 			self.set_status(302, "Moved Temporarily")
-			url = "https://bm6.ppy.sh/d/{}{}".format(bid, "?novideo" if noVideo else "")
+			url = "https://storage.kurikku.pw/d/{}{}".format(bid, "?novideo" if noVideo else "")
 			self.add_header("Location", url)
 			self.add_header("Cache-Control", "no-cache")
 			self.add_header("Pragma", "no-cache")
@@ -48,11 +48,11 @@ class handlerSets(requestsManager.asyncRequestHandler):
 			
 			if len(arguments) < 3:
 				noVideo = arguments[0].endswith("n")
-				url = "https://bm6.ppy.sh/d/{}{}".format(arguments[0], "?novideo" if noVideo else "")
+				url = "https://storage.kurikku.pw/d/{}{}".format(arguments[0], "?novideo" if noVideo else "")
 			
 			if len(arguments) == 3:
 				noVideo = megaepic.endswith("n")
-				url = "https://bm6.ppy.sh/d/{}{}".format(arguments[2], "?novideo" if noVideo else "")
+				url = "https://storage.kurikku.pw/d/{}{}".format(arguments[2], "?novideo" if noVideo else "")
 			
 			self.set_status(302, "Moved Temporarily")
 			self.add_header("Location", url)
