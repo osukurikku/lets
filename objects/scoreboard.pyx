@@ -56,23 +56,23 @@ class scoreboard:
         cdef str order = ""
         cdef str limit = ""
 
+        # Mods
+        if self.mods > -1:
+            if self.mods & modsEnum.RELAX:
+                mods = "AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
+            elif self.mods & modsEnum.RELAX2:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s)"
+            elif self.mods & modsEnum.AUTOPLAY == 0:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s)"
+            else:
+                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
+        else:
+            mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
+
         # Find personal best score
         if self.userID != 0:
             # Query parts
             select = "SELECT id FROM scores WHERE userid = %(userid)s AND beatmap_md5 = %(md5)s AND play_mode = %(mode)s AND completed = 3"
-
-            # Mods
-            if self.mods > -1:
-                if self.mods & modsEnum.RELAX:
-                    mods = "AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
-                elif self.mods & modsEnum.RELAX2:
-                    mods = "AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s)"
-                elif self.mods & modsEnum.AUTOPLAY == 0:
-                    mods = "AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
-                else:
-                    mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
-            else:
-                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
 
             # Friends ranking
             if self.friends:
@@ -112,12 +112,6 @@ class scoreboard:
                 country = "AND users_stats.country = (SELECT country FROM users_stats WHERE id = %(userid)s LIMIT 1)"
             else:
                 country = ""
-
-        # Mods ranking (ignore auto, since we use it for pp sorting)
-        if self.mods > -1 and self.mods & modsEnum.AUTOPLAY == 0:
-            mods = "AND scores.mods = %(mods)s"
-        else:
-            mods = ""
 
         # Friends ranking
         if self.friends:
