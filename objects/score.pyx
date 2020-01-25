@@ -10,6 +10,7 @@ from common.ripple import scoreUtils
 from objects import glob
 from constants import rankedStatuses
 from common import generalUtils
+from helpers import kotrikhelper
 
 
 class score:
@@ -290,7 +291,6 @@ class score:
 			# No duplicates found.
 			# Get right "completed" value
 			personalBest = glob.db.fetch("SELECT id, score, pp FROM scores WHERE userid = %s AND beatmap_md5 = %s AND play_mode = %s AND completed = 3 LIMIT 1", [userID, self.fileMd5, self.gameMode])
-			print(personalBest)
 			if personalBest is None:
 				# This is our first score on this map, so it's our best score
 				self.completed = 3
@@ -301,17 +301,28 @@ class score:
 				self.personalOldBestScore = personalBest["id"]
 				# Compare personal best's score with current score
 				# idk but my version is not work or something goes wrong ;d
-				# let's try akatsuki version ;d
+				is_pp_over_score = kotrikhelper.isPPOverScore(userID)
 				if b.rankedStatus in [rankedStatuses.RANKED, rankedStatuses.APPROVED, rankedStatuses.QUALIFIED]:
-					if self.pp > personalBest["pp"]:
-						# New best score
-						self.completed = 3
-						self.rankedScoreIncrease = self.score-personalBest["score"]
-						self.oldPersonalBest = personalBest["id"]
+					if is_pp_over_score:
+						if self.pp > personalBest["pp"]:
+							# New best score
+							self.completed = 3
+							self.rankedScoreIncrease = self.score-personalBest["score"]
+							self.oldPersonalBest = personalBest["id"]
+						else:
+							self.completed = 2
+							self.rankedScoreIncrease = 0
+							self.oldPersonalBest = 0
 					else:
-						self.completed = 2
-						self.rankedScoreIncrease = 0
-						self.oldPersonalBest = 0
+						if self.score > personalBest["score"]:
+							# New best score
+							self.completed = 3
+							self.rankedScoreIncrease = self.score-personalBest["score"]
+							self.oldPersonalBest = personalBest["id"]
+						else:
+							self.completed = 2
+							self.rankedScoreIncrease = 0
+							self.oldPersonalBest = 0
 				elif b.rankedStatus == rankedStatuses.LOVED:
 					if self.score > personalBest["score"]:
 						# New best score

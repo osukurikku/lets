@@ -41,6 +41,18 @@ def getUserBadges(userID):
     return badges
 
 
+def isPPOverScore(userID):
+    '''
+        it's literally nothing!
+    '''
+
+    response = glob.db.fetch("SELECT pp_over_score FROM users_stats WHERE id = %s LIMIT 1", [userID])
+    if not response:
+        return True
+
+    return bool(response['pp_over_score'])
+
+
 def setUserSession(userID: int, sessionObj: dict):
     '''
         Some shit for update osu-session.php
