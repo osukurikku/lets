@@ -91,9 +91,9 @@ class handler(requestsManager.asyncRequestHandler):
 				# Friends leaderboard
 				friends = True
 
-			if modsFilter > -1 and scoreboardType != 2:
-				if not (modsFilter&mods.RELAX) and not (modsFilter&mods.RELAX2):
-					modsFilter = -1
+			if (modsFilter > -1 and scoreboardType != 2) and \
+			   (not (modsFilter&mods.RELAX) and not (modsFilter&mods.RELAX2)):
+				modsFilter = -1
 
 			# Console output
 			fileNameShort = fileName[:32]+"..." if len(fileName) > 32 else fileName[:-4]

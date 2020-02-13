@@ -62,6 +62,40 @@ def setUserSession(userID: int, sessionObj: dict):
                     json.dumps(sessionObj), userID])
     return True
 
+def getUserIdByIP(ip: str) -> int:
+    '''
+        Getting user by IP, funny yeah?
+    '''
+    users = glob.redis.keys("peppy:sessions:*")
+    all_values = []
+    for user in users:
+        ipMember = glob.redis.smembers(user.decode())
+        all_values.append(list(ipMember)[0])
+
+    user_id = 0
+
+    i = 0
+    for user in users:
+        if all_values[i].decode() == ip:
+            user_id = int(user.decode().replace('peppy:sessions:', ""))
+            break
+        i+=1
+
+    if user_id == 0:
+        return 0
+
+    return user_id
+
+def getUserBGs(uid: int) -> list:
+    '''
+        I'm tired, but this function returns the list with custom bgs!
+    '''
+    bgs = glob.db.fetch("SELECT custom_bgs FROM user_kotrik_settings WHERE uid = %s", [uid])
+    if not bgs:
+        return []
+    
+    return bgs['custom_bgs'].split("|")
+
 cheat_ids = {
     1: 'ReLife|HqOsu is running',
     2: 'Console in BG is found',
@@ -72,7 +106,6 @@ cheat_ids = {
     64: 'AqnSdl2Loaded (lib for overlay)',
     128: 'AqnLibeay32Loaded (lib for SSL)'
 }
-
 
 def getHackByFlag(flag):
     if cheat_ids.get(flag, False):
