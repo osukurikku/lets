@@ -58,7 +58,7 @@ def setUserSession(userID: int, sessionObj: dict):
         Some shit for update osu-session.php
     '''
 
-    glob.db.execute("UPDATE users SET last_session = %s WHERE userID = %s", [
+    glob.db.execute("UPDATE users SET last_session = %s WHERE id = %s", [
                     json.dumps(sessionObj), userID])
     return True
 
