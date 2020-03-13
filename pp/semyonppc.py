@@ -7,7 +7,7 @@ import subprocess
 
 from common.log import logUtils as log
 from helpers import mapsHelper
-
+from common.constants import mods as PlayMods
 
 class OmppcError(Exception):
     pass
@@ -54,6 +54,9 @@ class Omppc:
         try:
             # Reset pp
             self.pp = 0
+            # Disable V2 PPs on Mania due bad calculations in calculator
+            if (self.score.mods&PlayMods.SCOREV2) and (self.score.gameMode == 3):
+                return 0
 
             # Cache map
             mapsHelper.cacheMap(self.mapPath, self.beatmap)

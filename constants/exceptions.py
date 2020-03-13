@@ -45,3 +45,7 @@ class need2FAException(Exception):
 
 class noAPIDataError(Exception):
 	pass
+
+class haxException(Exception):
+	def __init__(self, userID):
+		self.userID = userID

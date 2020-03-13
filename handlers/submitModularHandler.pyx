@@ -102,6 +102,9 @@ class handler(requestsManager.asyncRequestHandler):
 			if len(scoreData) < 16:
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
+			if not "bmk" in self.request.arguments:
+				raise exceptions.haxException(userID) # oldver check
+
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
 
@@ -426,6 +429,12 @@ class handler(requestsManager.asyncRequestHandler):
 			# We only log through schiavo atm (see exceptions.py).
 			self.set_status(408)
 			self.write("error: pass")
+		except exceptions.haxException as e:
+			self.write("error: oldver")
+			glob.redis.publish("peppy:notification", json.dumps({
+				'userID': e.userID,
+				"message": "Sorry, you use outdated/bad osu!version. Please update game to submit scores!"
+			}))
 		except:
 			# Try except block to avoid more errors
 			try:
