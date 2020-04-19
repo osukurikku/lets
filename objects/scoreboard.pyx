@@ -124,8 +124,12 @@ class scoreboard:
             # Order by score if we aren't filtering by mods or autoplay mod is disabled
             order = "ORDER BY score DESC"
         elif self.mods & modsEnum.AUTOPLAY > 0 or self.mods & modsEnum.RELAX > 0 or self.mods & modsEnum.RELAX2 > 0:
-            # Otherwise, filter by pp
-            order = "ORDER BY pp DESC"
+            if self.beatmap.rankedStatus == rankedStatuses.LOVED:
+                order = "ORDER BY score DESC"
+            else:
+                # Otherwise, filter by pp
+                order = "ORDER BY pp DESC"
+
         limit = "LIMIT 50"
 
         # Build query, get params and run query
@@ -265,7 +269,10 @@ class scoreboard:
         for i in self.scores[1:]:
             if self.mods > -1:
                 if (self.mods & modsEnum.RELAX) > 0 or (self.mods & modsEnum.RELAX2) > 0:
-                    data += i.getData(pp=True)
+                    if self.beatmap.rankedStatus == rankedStatuses.LOVED:
+                        data += i.getData(pp=False)
+                    else:
+                        data += i.getData(pp=True)
                     continue
 
                 if (self.mods & modsEnum.AUTOPLAY) > 0:
