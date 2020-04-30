@@ -1,7 +1,7 @@
 import datetime
 import json
+from common.constants import gameModes
 from objects import glob
-
 
 def zingonify(d):
     """
@@ -24,6 +24,22 @@ def toDotTicks(unixTime):
     base = datetime.datetime(1, 1, 1, 0, 0, 0)
     delt = unixStamp-base
     return int(delt.total_seconds())*10000000
+
+
+def updateUserPlayTime(userID, gameMode, playTime):
+    '''
+        Some python guide for ripple-codders on python3.6+
+
+        You can forget about '{}'.format(value) via f'{value}'!
+
+        :param userID int: userID of user which you want update
+        :param gameMode int: gameMode which you want update
+        :param playTime int: how many seconds you want add
+        :return bool: Boolean True
+    '''
+    modeForDB = gameModes.getGameModeForDB(gameMode)
+    glob.db.execute(f"UPDATE users_stats SET playtime_{modeForDB} = playtime_{modeForDB} + %s WHERE id = %s", [playTime, userID])
+    return True
 
 
 def getUserBadges(userID):

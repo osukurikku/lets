@@ -20,7 +20,7 @@ from constants import exceptions
 from constants import rankedStatuses
 from helpers import aeshelper
 from helpers import leaderboardHelper
-from helpers.kotrikhelper import zingonify
+from helpers import kotrikhelper
 from objects import beatmap
 from objects import glob
 from objects import score
@@ -50,7 +50,7 @@ class handler(requestsManager.asyncRequestHandler):
 				requestsManager.printArguments(self)
 
 			# Check arguments
-			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass"]):
+			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x"]):
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
 			# TODO: Maintenance check
@@ -123,10 +123,24 @@ class handler(requestsManager.asyncRequestHandler):
 			beatmapInfo = beatmap.beatmap()
 			beatmapInfo.setDataFromDB(s.fileMd5)
 
+			# Calculating play time data!
+			userQuit = self.get_argument("x") == "1"
+			failTime = None
+			if userQuit:
+				_ft = self.get_argument("ft", "0")
+				if not _ft.isdigit(): # bye abusers
+					raise exceptions.invalidArgumentsException(MODULE_NAME)
+				
+				failTime = int(_ft)
+
+			s.calculatePlayTime(beatmapInfo.hitLength, False if not userQuit else failTime // 1000)
+
 			# Make sure the beatmap is submitted and updated
 			if beatmapInfo.rankedStatus == rankedStatuses.NOT_SUBMITTED or beatmapInfo.rankedStatus == rankedStatuses.NEED_UPDATE or beatmapInfo.rankedStatus == rankedStatuses.UNKNOWN:
 				log.debug("Beatmap is not submitted/outdated/unknown. Score submission aborted.")
 				return
+
+			kotrikhelper.updateUserPlayTime(userID, s.gameMode, s.playTime)
 
 			# Calculate PP
 			# NOTE: PP are std and mania only
@@ -339,7 +353,7 @@ class handler(requestsManager.asyncRequestHandler):
 				])
 
 				# Build final string
-				msg = "\n".join(zingonify(x) for x in [output, outputBeatmap])
+				msg = "\n".join(kotrikhelper.zingonify(x) for x in [output, outputBeatmap])
 
 				# Some debug messages
 				log.debug("Generated output for online ranking screen!")

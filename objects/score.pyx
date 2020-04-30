@@ -16,7 +16,7 @@ from helpers import kotrikhelper
 class score:
 	__slots__ = ["scoreID", "playerName", "score", "maxCombo", "c50", "c100", "c300", "cMiss", "cKatu", "cGeki",
 	             "fullCombo", "mods", "playerUserID","rank","date", "hasReplay", "fileMd5", "passed", "playDateTime",
-	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore"]
+	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime"]
 	def __init__(self, scoreID = None, rank = None, setData = True):
 		"""
 		Initialize a (empty) score object.
@@ -46,6 +46,7 @@ class score:
 		self.playDateTime = 0
 		self.gameMode = 0
 		self.completed = 0
+		self.playTime = 0 # I will make this only for completed scores with completed flag == 3, I really don't want store failed scores, sry buddies, my ssd is not unlimited(
 
 		self.accuracy = 0.00
 		self.clan = 0
@@ -125,6 +126,25 @@ class score:
 			self.c50,
 			self.cMiss
 		)
+
+	def calculatePlayTime(self, normalPlayTime = None, failTime = None):
+		def __adjustSeconds(x):
+			return x // 1.5 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
+
+		normalPlayTime = __adjustSeconds(normalPlayTime)
+		if not failTime:
+			# its a normal using of this
+			self.playTime = normalPlayTime
+			return
+		
+		# if failtime presented
+		failedPlayTime = __adjustSeconds(failTime)
+		if normalPlayTime and failedPlayTime > normalPlayTime * 1.33:
+			self.playTime = 0
+			return
+		
+		self.playTime = failedPlayTime
+		return
 
 	def setDataFromDB(self, scoreID, rank = None):
 		"""
@@ -342,8 +362,8 @@ class score:
 		"""
 		# Add this score
 		if self.completed >= 2:
-			query = "INSERT INTO scores (id, beatmap_md5, userid, score, max_combo, full_combo, mods, 300_count, 100_count, 50_count, katus_count, gekis_count, misses_count, time, play_mode, completed, accuracy, pp) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
-			self.scoreID = int(glob.db.execute(query, [self.fileMd5, userUtils.getID(self.playerName), self.score, self.maxCombo, int(self.fullCombo), self.mods, self.c300, self.c100, self.c50, self.cKatu, self.cGeki, self.cMiss, self.playDateTime, self.gameMode, self.completed, self.accuracy * 100, self.pp]))
+			query = "INSERT INTO scores (id, beatmap_md5, userid, score, max_combo, full_combo, mods, 300_count, 100_count, 50_count, katus_count, gekis_count, misses_count, time, play_mode, completed, accuracy, pp, playtime) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+			self.scoreID = int(glob.db.execute(query, [self.fileMd5, userUtils.getID(self.playerName), self.score, self.maxCombo, int(self.fullCombo), self.mods, self.c300, self.c100, self.c50, self.cKatu, self.cGeki, self.cMiss, self.playDateTime, self.gameMode, self.completed, self.accuracy * 100, self.pp, self.playTime]))
 
 			# Redis stats
 			glob.redis.incr("ripple:submitted_scores")
