@@ -126,14 +126,14 @@ class handler(requestsManager.asyncRequestHandler):
 			# Calculating play time data!
 			userQuit = self.get_argument("x") == "1"
 			failTime = None
-			if userQuit:
-				_ft = self.get_argument("ft", "0")
-				if not _ft.isdigit(): # bye abusers
-					raise exceptions.invalidArgumentsException(MODULE_NAME)
-				
-				failTime = int(_ft)
+			_ft = self.get_argument("ft", "0")
+			if not _ft.isdigit(): # bye abusers
+				raise exceptions.invalidArgumentsException(MODULE_NAME)
+			
+			failTime = int(_ft)
+			failed = not userQuit and failTime
 
-			s.calculatePlayTime(beatmapInfo.hitLength, False if not userQuit else failTime // 1000)
+			s.calculatePlayTime(beatmapInfo.hitLength, failTime // 1000 if failed else False)
 
 			# Make sure the beatmap is submitted and updated
 			if beatmapInfo.rankedStatus == rankedStatuses.NOT_SUBMITTED or beatmapInfo.rankedStatus == rankedStatuses.NEED_UPDATE or beatmapInfo.rankedStatus == rankedStatuses.UNKNOWN:
