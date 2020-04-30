@@ -299,8 +299,8 @@ class handler(requestsManager.asyncRequestHandler):
 				glob.redis.publish("peppy:update_cached_stats", userID)
 
 				# Get personal best after submitting the score
-				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods if (s.mods&mods.RELAX or s.mods&mods.RELAX2) else -1)
-				newScoreboard.setPersonalBest()
+				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods)
+				newScoreboard.setScores(limitQuery=2)
 
 				# Get rank info (current rank, pp/score to next rank, user who is 1 rank above us)
 				rankInfo = leaderboardHelper.getRankInfo(userID, s.gameMode)
@@ -351,7 +351,6 @@ class handler(requestsManager.asyncRequestHandler):
 					('achievements-new', ""),
 					('onlineScoreId', s.scoreID)
 				])
-
 				# Build final string
 				msg = "\n".join(kotrikhelper.zingonify(x) for x in [output, outputBeatmap])
 
@@ -364,22 +363,29 @@ class handler(requestsManager.asyncRequestHandler):
 				if isRelax:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank with RX on ",
-						"[https://kurikku.pw/?u={} {}] achieved rank #1 with RX on [https://osu.ppy.sh/b/{} {}] ({})"
+						"[https://kurikku.pw/?u={} {}] achieved rank #1 with RX on [https://osu.ppy.sh/b/{} {}] ({})",
+						"{} has lost #1 RX on "
 					]
 				elif isAutopilot:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank with AP on ",
-						"[https://kurikku.pw/?u={} {}] achieved rank #1 with AP on [https://osu.ppy.sh/b/{} {}] ({})"
+						"[https://kurikku.pw/?u={} {}] achieved rank #1 with AP on [https://osu.ppy.sh/b/{} {}] ({})",
+						"{} has lost #1 AP on "
 					]
 				else:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank on ",
-						"[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})"
+						"[https://kurikku.pw/?u={} {}] achieved rank #1 on [https://osu.ppy.sh/b/{} {}] ({})",
+						"{} has lost #1 on "
 					]
 
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and newScoreboard.personalBestRank > oldPersonalBestRank:
-						userLogMsg = messages[0]
-						userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
+					if newScoreboard.personalBestRank == 1 and len(newScoreboard.scores) > 2:
+						#woohoo we achieved #1, now we should say to #2 that he sniped!						
+						userUtils.logUserLog(messages[2].format(newScoreboard.scores[2].playerName), s.fileMd5, newScoreboard.scores[2].playerUserID, s.gameMode, s.scoreID)
+
+					userLogMsg = messages[0]
+					userUtils.logUserLog(userLogMsg, s.fileMd5, userID, s.gameMode, s.scoreID)
 
 				if newScoreboard.personalBestRank == 1 and s.completed == 3 and restricted == False:
 					annmsg = messages[1].format(

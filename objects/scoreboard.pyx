@@ -31,7 +31,7 @@ class scoreboard:
         if setScores:
             self.setScores()
 
-    def setScores(self):
+    def setScores(self, limitQuery = 50):
         """
         Set scores list
         """
@@ -130,7 +130,7 @@ class scoreboard:
                 # Otherwise, filter by pp
                 order = "ORDER BY pp DESC"
 
-        limit = "LIMIT 50"
+        limit = "LIMIT {}".format(limitQuery) # костыль
 
         # Build query, get params and run query
         query = buildQuery(locals())
@@ -215,8 +215,19 @@ class scoreboard:
         # Before running the HUGE query, make sure we have a score on that map
         cdef str query = "SELECT id FROM scores WHERE beatmap_md5 = %(md5)s AND userid = %(userid)s AND play_mode = %(mode)s AND completed = 3"
         # Mods
+        cdef str mods = ""
         if self.mods > -1:
-            query += " AND scores.mods = %(mods)s"
+            if self.mods & modsEnum.RELAX:
+                mods = " AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s) "
+            elif self.mods & modsEnum.RELAX2:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s) "
+            elif self.mods & modsEnum.AUTOPLAY == 0:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s) "
+            else:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
+            mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
+        
+        query += mods
         # Friends ranking
         if self.friends:
             query += " AND (scores.userid IN (SELECT user2 FROM users_relationships WHERE user1 = %(userid)s) OR scores.userid = %(userid)s)"
@@ -236,8 +247,7 @@ class scoreboard:
         if self.country:
             query += " AND users_stats.country = (SELECT country FROM users_stats WHERE id = %(userid)s LIMIT 1)"
         # Mods
-        if self.mods > -1:
-            query += " AND scores.mods = %(mods)s"
+        query += mods 
         # Friends
         if self.friends:
             query += " AND (scores.userid IN (SELECT user2 FROM users_relationships WHERE user1 = %(userid)s) OR scores.userid = %(userid)s)"
