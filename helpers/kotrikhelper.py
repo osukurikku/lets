@@ -1,5 +1,8 @@
 import datetime
 import json
+import hashlib
+import string
+import io
 from common.constants import gameModes
 from objects import glob
 
@@ -40,6 +43,34 @@ def updateUserPlayTime(userID, gameMode, playTime):
     modeForDB = gameModes.getGameModeForDB(gameMode)
     glob.db.execute(f"UPDATE users_stats SET playtime_{modeForDB} = playtime_{modeForDB} + %s WHERE id = %s", [playTime, userID])
     return True
+
+
+def verifyScoreData(scoreData, securityHash):
+    nonHashedString = "chickenmcnuggets{}o15{}{}smustard{}{}uu{}{}{}{}{}{}{}Q{}{}{}{}{}".format(
+        int(scoreData[4])+int(scoreData[3]),
+        int(scoreData[5]),
+        int(scoreData[6]),
+        int(scoreData[7]),
+        int(scoreData[8]),
+        scoreData[0],
+        int(scoreData[10]),
+        scoreData[11],
+        scoreData[1].strip(),
+        int(scoreData[9]),
+        scoreData[12],
+        int(scoreData[13]),
+        scoreData[14],
+        int(scoreData[15]),
+        scoreData[17][0:8],
+        int(scoreData[16]),
+        ''.join(filter(lambda x: x in string.printable, securityHash))
+    )
+
+    hashedString = str(hashlib.md5(nonHashedString.encode()).hexdigest())
+    if hashedString == scoreData[2]:
+        return True
+    
+    return False
 
 
 def getUserBadges(userID):

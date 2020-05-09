@@ -49,3 +49,7 @@ class noAPIDataError(Exception):
 class haxException(Exception):
 	def __init__(self, userID):
 		self.userID = userID
+
+class checkSumNotPassed(Exception):
+	def __init__(self, who, map, checksum):
+		log.warning(f"{who} not passed checksum on {map} with checksum {checksum}")

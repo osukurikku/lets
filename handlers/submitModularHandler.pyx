@@ -50,7 +50,7 @@ class handler(requestsManager.asyncRequestHandler):
 				requestsManager.printArguments(self)
 
 			# Check arguments
-			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x"]):
+			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x", "s"]):
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
 			# TODO: Maintenance check
@@ -104,6 +104,12 @@ class handler(requestsManager.asyncRequestHandler):
 
 			if not "bmk" in self.request.arguments:
 				raise exceptions.haxException(userID) # oldver check
+			
+			# checksum check
+			securityHash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True).strip()
+			isScoreVerfied = kotrikhelper.verifyScoreData(scoreData, securityHash)
+			if not isScoreVerfied:
+				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2])
 
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
@@ -455,6 +461,8 @@ class handler(requestsManager.asyncRequestHandler):
 				'userID': e.userID,
 				"message": "Sorry, you use outdated/bad osu!version. Please update game to submit scores!"
 			}))
+		except exceptions.checkSumNotPassed as e:
+			self.write("error: checksum")
 		except:
 			# Try except block to avoid more errors
 			try:
