@@ -2,9 +2,18 @@ import datetime
 import json
 import hashlib
 import string
+import re
 import io
 from common.constants import gameModes
 from objects import glob
+
+
+def writeSomeDebugStuff(log):
+    fileDebug = io.open("/tmp/some-important-kotrik-cry.txt", encoding="utf-8", mode="a+")
+    fileDebug.write(log)
+    fileDebug.close()
+    return True
+
 
 def zingonify(d):
     """
@@ -45,25 +54,25 @@ def updateUserPlayTime(userID, gameMode, playTime):
     return True
 
 
-def verifyScoreData(scoreData, securityHash):
+def verifyScoreData(scoreData, securityHash, bmk=None):
     nonHashedString = "chickenmcnuggets{}o15{}{}smustard{}{}uu{}{}{}{}{}{}{}Q{}{}{}{}{}".format(
         int(scoreData[4])+int(scoreData[3]),
         int(scoreData[5]),
         int(scoreData[6]),
         int(scoreData[7]),
         int(scoreData[8]),
-        scoreData[0],
+        scoreData[0].strip(),
         int(scoreData[10]),
-        scoreData[11],
+        scoreData[11].strip(),
         scoreData[1].strip(),
         int(scoreData[9]),
-        scoreData[12],
+        scoreData[12].strip(),
         int(scoreData[13]),
-        scoreData[14],
+        scoreData[14].strip(),
         int(scoreData[15]),
-        scoreData[17][0:8],
+        int(scoreData[17].strip()[:8]), # first 8 symbols, bcs its yyyymmdd\x14\x14\x14\x14\x14
         int(scoreData[16]),
-        ''.join(filter(lambda x: x in string.printable, securityHash))
+        re.sub('[\x00-\x08\x0B-\x1F]', '', securityHash.strip())
     )
 
     hashedString = str(hashlib.md5(nonHashedString.encode()).hexdigest())
@@ -71,7 +80,6 @@ def verifyScoreData(scoreData, securityHash):
         return True
     
     return False
-
 
 def getUserBadges(userID):
     '''

@@ -50,7 +50,7 @@ class handler(requestsManager.asyncRequestHandler):
 				requestsManager.printArguments(self)
 
 			# Check arguments
-			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x", "s"]):
+			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x", "s", "osuver"]):
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
 			# TODO: Maintenance check
@@ -105,11 +105,20 @@ class handler(requestsManager.asyncRequestHandler):
 			if not "bmk" in self.request.arguments:
 				raise exceptions.haxException(userID) # oldver check
 			
+			if int(scoreData[17][:8]) != int(self.get_argument("osuver")):
+				self.write("error: version mismatch")
+				return
+
 			# checksum check
-			securityHash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True).strip()
-			isScoreVerfied = kotrikhelper.verifyScoreData(scoreData, securityHash)
-			if not isScoreVerfied:
-				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2])
+			#
+			# It's not working, obviously it works for 80% hashes, but 20% of hashes
+			# just don't passing, you can try this, if you can found the solution, please make Pull Request into this repository
+			#
+			# securityHash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True).strip()
+			# isScoreVerfied = kotrikhelper.verifyScoreData(scoreData, securityHash, bmk)
+			# if not isScoreVerfied:
+			# 	print("hash not passed")
+			# 	#raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2])
 
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
@@ -435,7 +444,7 @@ class handler(requestsManager.asyncRequestHandler):
 			# Datadog stats
 			glob.dog.increment(glob.DATADOG_PREFIX+".submitted_scores")
 		except exceptions.invalidArgumentsException:
-			pass
+			self.write("error: dup")
 		except exceptions.loginFailedException:
 			self.write("error: pass")
 		except exceptions.need2FAException:
