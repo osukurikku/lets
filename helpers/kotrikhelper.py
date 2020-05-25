@@ -54,8 +54,8 @@ def updateUserPlayTime(userID, gameMode, playTime):
     return True
 
 
-def verifyScoreData(scoreData, securityHash, bmk=None):
-    nonHashedString = "chickenmcnuggets{}o15{}{}smustard{}{}uu{}{}{}{}{}{}{}Q{}{}{}{}{}".format(
+def verifyScoreData(scoreData, securityHash, sbk=None):
+    nonHashedString = "chickenmcnuggets{}o15{}{}smustard{}{}uu{}{}{}{}{}{}{}Q{}{}{}{}{}{}".format(
         int(scoreData[4])+int(scoreData[3]),
         int(scoreData[5]),
         int(scoreData[6]),
@@ -72,7 +72,8 @@ def verifyScoreData(scoreData, securityHash, bmk=None):
         int(scoreData[15]),
         int(scoreData[17].strip()[:8]), # first 8 symbols, bcs its yyyymmdd\x14\x14\x14\x14\x14
         int(scoreData[16]),
-        re.sub('[\x00-\x08\x0B-\x1F]', '', securityHash.strip())
+        re.sub('[\x00-\x08\x0B-\x1F]', '', securityHash.strip()),
+        sbk
     )
 
     hashedString = str(hashlib.md5(nonHashedString.encode()).hexdigest())

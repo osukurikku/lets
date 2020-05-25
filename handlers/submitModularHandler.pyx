@@ -111,14 +111,12 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# checksum check
 			#
-			# It's not working, obviously it works for 80% hashes, but 20% of hashes
-			# just don't passing, you can try this, if you can found the solution, please make Pull Request into this repository
-			#
-			# securityHash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True).strip()
-			# isScoreVerfied = kotrikhelper.verifyScoreData(scoreData, securityHash, bmk)
-			# if not isScoreVerfied:
-			# 	print("hash not passed")
-			# 	#raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2])
+			# NOT ITS WORKING, ALL FUCKING FLEX!
+			#	
+			securityHash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True).strip()		
+			isScoreVerfied = kotrikhelper.verifyScoreData(scoreData, securityHash, self.get_argument("sbk", ""))
+			if not isScoreVerfied:
+				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2])
 
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
@@ -471,6 +469,14 @@ class handler(requestsManager.asyncRequestHandler):
 				"message": "Sorry, you use outdated/bad osu!version. Please update game to submit scores!"
 			}))
 		except exceptions.checkSumNotPassed as e:
+			webhook = Webhook(glob.conf.config["discord"]["ahook"],
+                  color=0xc32c74,
+                  footer="stupid anticheat")				
+			userID = userUtils.getID(e.who)
+			webhook.set_title(title=f"Catched some cheater {e.who} ({userID})")
+			webhook.set_desc(f'Этот дебил, засабмитил скор каким-то дебильным сабмитером, баним его ребят?')
+			webhook.set_footer(text="sended by submit-moodular-cuckold-checker")
+			webhook.post()
 			self.write("error: checksum")
 		except:
 			# Try except block to avoid more errors
