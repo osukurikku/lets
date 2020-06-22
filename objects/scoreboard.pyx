@@ -57,17 +57,15 @@ class scoreboard:
         cdef str limit = ""
 
         # Mods
-        if self.mods > -1:
-            if self.mods & modsEnum.RELAX:
-                mods = "AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s)"
-            elif self.mods & modsEnum.RELAX2:
-                mods = "AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s)"
-            elif self.mods & modsEnum.AUTOPLAY == 0:
-                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s)"
-            else:
-                mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
+        if self.mods > 0:
+            if (self.mods & modsEnum.RELAX) > 0:
+                mods = " AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s) "
+            elif (self.mods & modsEnum.RELAX2) > 0:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s) "
+            elif (self.mods & modsEnum.AUTOPLAY) >= 0:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s) "
         else:
-            mods = "AND (mods & 128 = 0 AND mods & 8192 = 0)"
+            mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
 
         # Find personal best score
         if self.userID != 0:
@@ -120,7 +118,7 @@ class scoreboard:
             friends = ""
 
         # Sort and limit at the end
-        if self.mods <= -1 or self.mods & modsEnum.AUTOPLAY == 0:
+        if self.mods <= -1 or (self.mods & modsEnum.AUTOPLAY) == 0:
             # Order by score if we aren't filtering by mods or autoplay mod is disabled
             order = "ORDER BY score DESC"
         elif self.mods & modsEnum.AUTOPLAY > 0 or self.mods & modsEnum.RELAX > 0 or self.mods & modsEnum.RELAX2 > 0:
@@ -216,16 +214,6 @@ class scoreboard:
         cdef str query = "SELECT id FROM scores WHERE beatmap_md5 = %(md5)s AND userid = %(userid)s AND play_mode = %(mode)s AND completed = 3"
         # Mods
         cdef str mods = ""
-        if self.mods > -1:
-            if self.mods & modsEnum.RELAX:
-                mods = " AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s) "
-            elif self.mods & modsEnum.RELAX2:
-                mods = " AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s) "
-            elif self.mods & modsEnum.AUTOPLAY == 0:
-                mods = " AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s) "
-            else:
-                mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
-            mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
         
         query += mods
         # Friends ranking
@@ -237,6 +225,16 @@ class scoreboard:
                                          "mods": self.mods})
         if hasScore is None:
             return
+
+        if self.mods > 0:
+            if (self.mods & modsEnum.RELAX) > 0:
+                mods = " AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s) "
+            elif (self.mods & modsEnum.RELAX2) > 0:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s) "
+            elif (self.mods & modsEnum.AUTOPLAY) >= 0:
+                mods = " AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s) "
+        else:
+            mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
 
         # We have a score, run the huge query
         # Base query

@@ -125,8 +125,6 @@ class handler(requestsManager.asyncRequestHandler):
 			log.info("{} has submitted a score on {}...".format(username, scoreData[0]))
 			s = score.score()
 			s.setDataFromScoreData(scoreData)
-			
-			s.calcRank()
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 
 			# Set score stuff missing in score data

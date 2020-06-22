@@ -116,17 +116,6 @@ class score:
 		"""
 		self.rank = rank
 
-	def calcRank(self):
-		self.rank = generalUtils.getRank(
-			self.gameMode,
-			self.mods, 
-			int(self.accuracy), 
-			self.c300, 
-			self.c100,
-			self.c50,
-			self.cMiss
-		)
-
 	def calculatePlayTime(self, normalPlayTime = None, failTime = None):
 		def __adjustSeconds(x):
 			return x // 1.5 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
@@ -190,7 +179,7 @@ class score:
 		self.pp = data["pp"]
 		self.calculateAccuracy()
 
-	# I don't want some break, because i create this method ;d
+	# I don't want some break, that's why I made this method ;d
 	def setClanDataFromDict(self, data, rank = None):
 		"""
 		Set this object's score data from dictionary
@@ -257,7 +246,7 @@ class score:
 			self.score = int(scoreData[9])
 			self.maxCombo = int(scoreData[10])
 			self.fullCombo = scoreData[11] == 'True'
-			#self.rank = scoreData[12]
+			self.rank = scoreData[12]
 			self.mods = int(scoreData[13])
 			self.passed = scoreData[14] == 'True'
 			self.gameMode = int(scoreData[15])

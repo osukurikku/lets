@@ -38,7 +38,7 @@ class handler(requestsManager.asyncRequestHandler):
 			password = self.get_argument("p")
 			ip = self.getRequestIP()
 			userID = userUtils.getID(username)
-			if not userUtils.checkLogin(userID, password):
+			if not userUtils.checkLogin(userID, password, ip):
 				raise exceptions.loginFailedException(MODULE_NAME, username)
 			if userUtils.check2FA(userID, ip):
 				raise exceptions.need2FAException(MODULE_NAME, username, ip)
