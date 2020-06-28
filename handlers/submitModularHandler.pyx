@@ -244,6 +244,15 @@ class handler(requestsManager.asyncRequestHandler):
 			if s.scoreID:
 				glob.redis.publish("api:score_submission", s.scoreID)
 
+				if s.gameMode == 0 and s.completed == 3:
+					beat = beatmap.beatmap(s.fileMd5, 0)
+					glob.redis.publish("kr:calc1", json.dumps({
+						"score_id": s.scoreID,
+						"map_id": beat.beatmapID,
+						"user_id": s.playerUserID,
+						"mods": s.mods
+					}))
+
 			# Re-raise pp calc exception after saving score, cake, replay etc
 			# so Sentry can track it without breaking score submission
 			if ppCalcException:
@@ -309,8 +318,12 @@ class handler(requestsManager.asyncRequestHandler):
 				# Trigger bancho stats cache update
 				glob.redis.publish("peppy:update_cached_stats", userID)
 
+				# checking mods for next code part
+				isRelax = s.mods&mods.RELAX
+				isAutopilot = s.mods&mods.RELAX2
+
 				# Get personal best after submitting the score
-				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=s.mods)
+				newScoreboard = scoreboard.scoreboard(username, s.gameMode, beatmapInfo, False, mods=(s.mods if isRelax or isAutopilot else 0))
 				newScoreboard.setScores(limitQuery=2)
 
 				# Get rank info (current rank, pp/score to next rank, user who is 1 rank above us)
@@ -369,8 +382,6 @@ class handler(requestsManager.asyncRequestHandler):
 				log.debug("Generated output for online ranking screen!")
 				log.debug(msg)
 				
-				isRelax = s.mods&mods.RELAX
-				isAutopilot = s.mods&mods.RELAX2
 				if isRelax:
 					messages = [
 						f" Achieved #{newScoreboard.personalBestRank} rank with RX on ",
