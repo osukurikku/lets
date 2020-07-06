@@ -52,4 +52,7 @@ class haxException(Exception):
 
 class checkSumNotPassed(Exception):
 	def __init__(self, who, map, checksum):
+		self.who = who
+		self.map = map
+		self.checksum = checksum
 		log.warning(f"{who} not passed checksum on {map} with checksum {checksum}")

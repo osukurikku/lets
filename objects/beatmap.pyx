@@ -81,7 +81,7 @@ class beatmap:
 			self.maxCombo,
 			self.hitLength,
 			self.bpm,
-			self.rankedStatus if frozen == 0 else 2,
+			self.rankedStatus,
 			int(time.time()),
 			frozen
 		])
@@ -183,6 +183,9 @@ class beatmap:
 		# If the beatmap is frozen and still valid from osu!api, return True so we don't overwrite anything
 		if mainData is not None and self.rankedStatusFrozen == 1:
 			return True
+
+		if type(mainData) is not dict:
+			return False
 
 		# Can't fint beatmap by MD5. The beatmap has been updated. Check with beatmap set ID
 		if mainData is None:
