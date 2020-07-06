@@ -7,10 +7,6 @@
 [submodule "pp/catch_the_pp"]
 	path = pp/catch_the_pp
 	url = https://github.com/osuripple/catch-the-pp.git
-[submodule "pp/maniapp-osu-tools"]
-	path = pp/maniapp-osu-tools
-	url = git@zxq.co:ripple/maniapp-osu-tools.git
-	branch = calc-no-replay
 [submodule "oppai-ng"]
 	url = https://github.com/Francesco149/oppai-ng.git
 [submodule "common"]
@@ -21,4 +17,4 @@
 	url = https://github.com/osukurikku/omppc.git
 [submodule "pp/oppai-relax"]
 	path = pp/oppai-relax
-	url = https://git.kotworks.wtf/kotrik/oppai-relax
+	url = https://git.kotworks.wtf/KotRik/oppai-relax.git
