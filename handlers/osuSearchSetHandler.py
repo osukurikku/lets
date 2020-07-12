@@ -28,12 +28,11 @@ class handler(requestsManager.asyncRequestHandler):
 				data = cheesegull.getBeatmapSet(_id)
 			elif "c" in self.request.arguments:
 				md5 = self.get_argument("c")
-				response = glob.db.fetch("SELECT beatmap_id FROM beatmaps WHERE beatmap_md5 = %s LIMIT 1", [md5])
-				if not response:
+				data = cheesegull.getBeatmapSetMD5(md5)
+				if not data:
 					raise exceptions.invalidArgumentsException(MODULE_NAME)
-					
-				data = cheesegull.getBeatmap(response['beatmap_id'])
-				_id = response['beatmap_id']
+	
+				_id = data['ChildrenBeatmaps'][0]['BeatmapID']
 			else:
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
