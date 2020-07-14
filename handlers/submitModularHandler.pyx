@@ -179,7 +179,7 @@ class handler(requestsManager.asyncRequestHandler):
 				s.pp = 0
 
 			# Restrict obvious cheaters
-			if (s.pp >= 850 and s.gameMode == gameModes.STD) and restricted == False:
+			if ((not userUtils.isInPrivilegeGroup(userID, "Verified Legit Player")) and s.pp >= 850 and s.gameMode == gameModes.STD) and restricted == False:
 				userUtils.restrict(userID)
 				userUtils.appendNotes(userID, "Restricted due to too high pp gain ({}pp)".format(s.pp))
 				log.warning("**{}** ({}) has been restricted due to too high pp gain **({}pp)**".format(username, userID, s.pp), "cm")
