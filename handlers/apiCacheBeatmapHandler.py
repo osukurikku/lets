@@ -55,6 +55,9 @@ class handler(requestsManager.asyncRequestHandler):
 					"status": bmap.rankedStatus,
 					"frozen": bmap.rankedStatusFrozen,
 					"pp": pp,
+					"submit_date": i["submit_date"],
+					"approved_date": i["approved_date"],
+					"last_update": i["last_update"]
 				})
 
 			# Set status code and message
