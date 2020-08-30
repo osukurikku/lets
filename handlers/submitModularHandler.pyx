@@ -376,7 +376,7 @@ class handler(requestsManager.asyncRequestHandler):
 					('onlineScoreId', s.scoreID)
 				])
 				# Build final string
-				msg = "\n".join(kotrikhelper.zingonify(x) for x in [output, outputBeatmap])
+				msg = "\n".join(kotrikhelper.zingonify(x) for x in [outputBeatmap, output])
 
 				# Some debug messages
 				log.debug("Generated output for online ranking screen!")
