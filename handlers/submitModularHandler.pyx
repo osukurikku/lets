@@ -329,13 +329,16 @@ class handler(requestsManager.asyncRequestHandler):
 				# Get rank info (current rank, pp/score to next rank, user who is 1 rank above us)
 				rankInfo = leaderboardHelper.getRankInfo(userID, s.gameMode)
 
-				# Output dictionary
-				output = collections.OrderedDict([
+				beatmapStat = collections.OrderedDict([
 					('beatmapId', beatmapInfo.beatmapID),
 					('beatmapSetId', beatmapInfo.beatmapSetID),
 					('beatmapPlaycount', beatmapInfo.playcount),
 					('beatmapPasscount', beatmapInfo.passcount),
-					('approvedDate', f"{beatmapInfo.approvedDate}\n" if beatmapInfo.approvedDate else "\n"),
+					('approvedDate', f"{beatmapInfo.approvedDate}" if beatmapInfo.approvedDate else "")
+				])
+
+				# Output dictionary
+				output = collections.OrderedDict([
 					('chartId', 'overall'),
 					('chartName', 'Overall Ranking'),
 					('chartEndDate', ""),
@@ -376,7 +379,7 @@ class handler(requestsManager.asyncRequestHandler):
 					('onlineScoreId', s.scoreID)
 				])
 				# Build final string
-				msg = "\n".join(kotrikhelper.zingonify(x) for x in [outputBeatmap, output])
+				msg = "\n".join(kotrikhelper.zingonify(x) for x in [beatmapStat, outputBeatmap, output])
 
 				# Some debug messages
 				log.debug("Generated output for online ranking screen!")
