@@ -13,47 +13,46 @@ CTB = 2
 MANIA = 3
 '''
 
-
 def ReadableMods(m):
-	"""
-	Return a string with readable std mods.
-	Used to convert a mods number for oppai
+    """
+    Return a string with readable std mods.
+    Used to convert a mods number for oppai
 
-	:param m: mods bitwise number
-	:return: readable mods string, eg HDDT
-	"""
-	r = []
-	if m & PlayMods.NOFAIL > 0:
-		r.append("NF")
-	if m & PlayMods.EASY > 0:
-		r.append("EZ")
-	if m & PlayMods.HIDDEN > 0:
-		r.append("HD")
+    :param m: mods bitwise number
+    :return: readable mods string, eg HDDT
+    """
+    r = []
+    if m & PlayMods.NOFAIL > 0:
+        r.append("NF")
+    if m & PlayMods.EASY > 0:
+        r.append("EZ")
+    if m & PlayMods.HIDDEN > 0:
+        r.append("HD")
     if m & PlayMods.FADEIN > 0:
         r.append("FI")
-	if m & PlayMods.HARDROCK > 0:
-		r.append("HR")
+    if m & PlayMods.HARDROCK > 0:
+        r.append("HR")
     if m & PlayMods.NIGHTCORE:
         r.append("NC")
-	if m & PlayMods.DOUBLETIME > 0:
-		r.append("DT")
-	if m & PlayMods.HALFTIME > 0:
-		r.append("HT")
-	if m & PlayMods.FLASHLIGHT > 0:
-		r.append("FL")
-	if m & PlayMods.SPUNOUT > 0:
-		r.append("SO")
-	if m & PlayMods.TOUCHSCREEN > 0:
-		r.append("TD")
-	if m & PlayMods.RELAX > 0:
-		r.append("RX")
-	if m & PlayMods.RELAX2 > 0:
-		r.append("AP")
+    if m & PlayMods.DOUBLETIME > 0:
+        r.append("DT")
+    if m & PlayMods.HALFTIME > 0:
+        r.append("HT")
+    if m & PlayMods.FLASHLIGHT > 0:
+        r.append("FL")
+    if m & PlayMods.SPUNOUT > 0:
+        r.append("SO")
+    if m & PlayMods.TOUCHSCREEN > 0:
+        r.append("TD")
+    if m & PlayMods.RELAX > 0:
+        r.append("RX")
+    if m & PlayMods.RELAX2 > 0:
+        r.append("AP")
     if m & PlayMods.PERFECT > 0:
         r.append("PF")
     if m & PlayMods.SUDDENDEATH > 0:
         r.append("SD")
-    if m & 1073741824 > 0: # Mirror
+    if m & 1073741824 > 0:  # Mirror
         r.append("MR")
     if m & PlayMods.KEY4 > 0:
         r.append("4K")
@@ -79,8 +78,7 @@ def ReadableMods(m):
         r.append("3K")
     if m & PlayMods.KEY2 > 0:
         r.append("2K")
-	return r
-
+    return r
 
 class OsuPerfomanceCalculationsError(Exception):
     pass
