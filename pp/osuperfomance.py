@@ -34,7 +34,7 @@ def ReadableMods(m):
         r.append("HR")
     if m & PlayMods.NIGHTCORE:
         r.append("NC")
-    if m & PlayMods.DOUBLETIME > 0:
+    if (not "NC" in r) and (m & PlayMods.DOUBLETIME > 0):
         r.append("DT")
     if m & PlayMods.HALFTIME > 0:
         r.append("HT")
@@ -50,7 +50,7 @@ def ReadableMods(m):
         r.append("AP")
     if m & PlayMods.PERFECT > 0:
         r.append("PF")
-    if m & PlayMods.SUDDENDEATH > 0:
+    if (not "PF" in r) and (m & PlayMods.SUDDENDEATH > 0):
         r.append("SD")
     if m & 1073741824 > 0:  # Mirror
         r.append("MR")
@@ -164,6 +164,8 @@ class OsuPerfomanceCalculation:
         try:
             # Reset pp
             self.pp = 0
+            if self.score.mods & PlayMods.SCOREV2 > 0:
+                return 0
 
             # Cache map
             mapsHelper.cacheMap(self.mapPath, self.beatmap)
