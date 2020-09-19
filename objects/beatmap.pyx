@@ -9,7 +9,7 @@ from common.web import cheesegull
 class beatmap:
 	__slots__ = ["songName", "fileMD5", "rankedStatus", "rankedStatusFrozen", "beatmapID", "beatmapSetID", "offset",
 	             "rating", "starsStd", "starsTaiko", "starsCtb", "starsMania", "AR", "OD", "maxCombo", "hitLength",
-	             "bpm", "playcount" ,"passcount", "refresh", "approvedDate"]
+	             "bpm", "playcount" ,"passcount", "refresh", "approvedDate", "totalLength"]
 
 	def __init__(self, md5 = None, beatmapSetID = None, gameMode = 0, refresh=False):
 		"""
@@ -35,6 +35,7 @@ class beatmap:
 		self.OD = 0.0
 		self.maxCombo = 0
 		self.hitLength = 0
+		self.totalLength = 0
 		self.bpm = 0
 		self.approvedDate = None
 
@@ -120,15 +121,24 @@ class beatmap:
 
 		# Data in DB, set beatmap data
 		log.debug("Got beatmap data from db")
-		self.setDataFromDict(data)
+		self.setDataFromDict(data)			
+		return True
 
-		#And finally we need approvedDate, cheesegull plz help
+	def setAdditionalInfo(self):
+		#And finally we need approvedDate, totalLength, cheesegull plz help
 		cg_request = cheesegull.getBeatmapSet(self.beatmapSetID)
-		if cg_request and 'ApprovedDate' in cg_request:
+		if cg_request:
 			# I consider it quite possible
 			# I'll be safe just in case
-			self.approvedDate = cg_request['ApprovedDate']
-			
+			if self.approvedDate == "":
+				self.approvedDate = cg_request.get('ApprovedDate', '')
+
+			if self.totalLength == 0: # just it can be > 0 when it get info from osu!API 
+				for bm in cg_request.get('ChildrenBeatmaps', []):
+					if bm['BeatmapID'] == self.beatmapID:
+						self.totalLength = bm['TotalLength']
+						break
+		
 		return True
 
 	def setDataFromDict(self, data):
@@ -156,6 +166,8 @@ class beatmap:
 		# Ranking panel statistics
 		self.playcount = int(data["playcount"]) if "playcount" in data else 0
 		self.passcount = int(data["passcount"]) if "passcount" in data else 0
+
+		self.setAdditionalInfo()
 
 	def setDataFromOsuApi(self, md5, beatmapSetID):
 		"""
@@ -243,10 +255,13 @@ class beatmap:
 
 		self.maxCombo = int(mainData["max_combo"]) if mainData["max_combo"] is not None else 0
 		self.hitLength = int(mainData["hit_length"])
+		self.totalLength = int(mainData["total_length"])
 		if mainData["bpm"] is not None:
 			self.bpm = int(float(mainData["bpm"]))
 		else:
 			self.bpm = -1
+
+		self.setAdditionalInfo()
 		return True
 
 	def setData(self, md5, beatmapSetID):

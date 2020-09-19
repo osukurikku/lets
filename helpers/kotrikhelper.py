@@ -14,6 +14,16 @@ def writeSomeDebugStuff(log):
     fileDebug.close()
     return True
 
+def similitary(num1: int, num2: int) -> float:
+    '''
+    compares the difference between two integers
+
+    :param num1 int: number1 to compare
+    :param num2 int: number2 to compare
+    :return float: returns the difference in probability
+    '''
+    return (min(num1, num2) / max(num1, num2))
+
 
 def zingonify(d):
     """
