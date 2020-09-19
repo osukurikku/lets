@@ -146,8 +146,9 @@ class handler(requestsManager.asyncRequestHandler):
 				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"obv cheater: st flag is not present (cherry hqOsu)")
 			
 			if beatmapInfo.hitLength != 0 and not userQuit and int(_ft) == 0:
-				if (int(_st)//1000) < int(beatmapInfo.hitLength):
-					raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"prob timewarped: player was on map {int(_st)//1000} seconds when map length is {beatmapInfo.totalLength}")
+				hitLength = beatmapInfo.hitLength // 1.5 if (s.mods & mods.DOUBLETIME) > 0 else beatmapInfo.hitLength // 0.75 if (s.mods & mods.HALFTIME) > 0 else beatmapInfo.hitLength
+				if (int(_st)//1000) < int(hitLength):
+					raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"prob timewarped: player was on map {int(_st)//1000} seconds when map length is {hitLength}")
 
 			# Make sure the beatmap is submitted and updated
 			if beatmapInfo.rankedStatus == rankedStatuses.NOT_SUBMITTED or beatmapInfo.rankedStatus == rankedStatuses.NEED_UPDATE or beatmapInfo.rankedStatus == rankedStatuses.UNKNOWN:

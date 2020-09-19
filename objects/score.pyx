@@ -118,7 +118,7 @@ class score:
 		
 	def calculatePlayTime(self, normalPlayTime = None, failTime = None):
 		def __adjustSeconds(x):
-			return x // 1.25 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
+			return x // 1.5 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
 
 		normalPlayTime = __adjustSeconds(normalPlayTime)
 		if not failTime:
