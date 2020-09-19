@@ -136,25 +136,28 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Calculating play time data!
 			userQuit = self.get_argument("x") == "1"
+			failTime = None
 			_ft = self.get_argument("ft", "0")
 			if not _ft.isdigit(): # bye abusers
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 			
 			_st = self.get_argument("st", None)
 			if not _st or not _st.isdigit():
-				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"prob timewarped: st flag is not present (cherry hqOsu)")
+				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"obv cheater: st flag is not present (cherry hqOsu)")
 			
-			if beatmapInfo.totalLength != 0 and not userQuit and int(_ft) == 0:
-				_is_timewarped, _itsim = s.is_timewarped(int(_st), beatmapInfo.totalLength)
-				if _is_timewarped:
-					raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"prob timewarped: player was on map {int(_st)//1000} when map length is {beatmapInfo.totalLength} (sim: {int(_itsim*100)}%)")
+			if beatmapInfo.hitLength != 0 and not userQuit and int(_ft) == 0:
+				if (int(_st)//1000) < int(beatmapInfo.hitLength):
+					raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"prob timewarped: player was on map {int(_st)//1000} seconds when map length is {beatmapInfo.totalLength}")
 
 			# Make sure the beatmap is submitted and updated
 			if beatmapInfo.rankedStatus == rankedStatuses.NOT_SUBMITTED or beatmapInfo.rankedStatus == rankedStatuses.NEED_UPDATE or beatmapInfo.rankedStatus == rankedStatuses.UNKNOWN:
 				log.debug("Beatmap is not submitted/outdated/unknown. Score submission aborted.")
 				return
 
-			s.playTime = int(_st)//1000
+			failTime = int(_ft)
+			failed = not userQuit and failTime
+
+			s.calculatePlayTime(beatmapInfo.hitLength, failTime // 1000 if failed else False)
 			kotrikhelper.updateUserPlayTime(userID, s.gameMode, s.playTime)
 
 			# Calculate PP

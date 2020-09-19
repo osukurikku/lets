@@ -115,36 +115,25 @@ class score:
 		rank -- new score rank
 		"""
 		self.rank = rank
-
-	def is_timewarped(self, player_play_time: int = None, normal_play_time: int = None):
+		
+	def calculatePlayTime(self, normalPlayTime = None, failTime = None):
 		def __adjustSeconds(x):
-			return x // 1.5 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
+			return x // 1.25 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
 
-		sim = kotrikhelper.similitary(player_play_time//1000, __adjustSeconds(normal_play_time))
-		if sim < 0.8:
-			return True, sim
+		normalPlayTime = __adjustSeconds(normalPlayTime)
+		if not failTime:
+			# its a normal using of this
+			self.playTime = normalPlayTime
+			return
 		
-		return False, sim
+		# if failtime presented
+		failedPlayTime = __adjustSeconds(failTime)
+		if normalPlayTime and failedPlayTime > normalPlayTime * 1.33:
+			self.playTime = 0
+			return
 		
-	# deprecated bcs st argument!
-	# def calculatePlayTime(self, normalPlayTime = None, failTime = None):
-	# 	def __adjustSeconds(x):
-	# 		return x // 1.5 if (self.mods & PlayMods.DOUBLETIME) > 0 else x // 0.75 if (self.mods & PlayMods.HALFTIME) > 0 else x
-
-	# 	normalPlayTime = __adjustSeconds(normalPlayTime)
-	# 	if not failTime:
-	# 		# its a normal using of this
-	# 		self.playTime = normalPlayTime
-	# 		return
-		
-	# 	# if failtime presented
-	# 	failedPlayTime = __adjustSeconds(failTime)
-	# 	if normalPlayTime and failedPlayTime > normalPlayTime * 1.33:
-	# 		self.playTime = 0
-	# 		return
-		
-	# 	self.playTime = failedPlayTime
-	# 	return
+		self.playTime = failedPlayTime
+		return
 
 	def setDataFromDB(self, scoreID, rank = None):
 		"""
