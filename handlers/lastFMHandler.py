@@ -44,12 +44,12 @@ class handler(requestsManager.asyncRequestHandler):
 
         arguments_cheat = int(arguments_cheat)
         # Let's try found something
-        cheat_id = kotrikhelper.getHackByFlag(arguments_cheat)
+        cheat_flags = kotrikhelper.getHackByFlag(arguments_cheat)
         webhook.set_title(title=f"Catched some cheater {username} ({userID})")
-        if type(cheat_id) == str:
+        if type(cheat_flags) in [list, tuple]:
             # OUGH OUGH CALL THE POLICE! WE CATCHED SOME SHIT
             # LET'S SEND THIS TO POLICE
-            webhook.set_desc(f'This body catched with flag {arguments_cheat}\nIn enuming: {cheat_id}')
+            webhook.set_desc(f'This body catched with flag {arguments_cheat}\nIn enuming: {",".join(cheat_flags)}')
         else:
             webhook.set_desc(f'This body catched with undefined flag {arguments_cheat}')
 

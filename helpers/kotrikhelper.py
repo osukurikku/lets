@@ -174,7 +174,9 @@ cheat_ids = {
 }
 
 def getHackByFlag(flag):
-    if cheat_ids.get(flag, False):
-        return cheat_ids[flag]
-    else:
-        return flag
+    flags = []
+    for (k, v) in cheat_ids.items():
+        if (flag & k) > 0:
+            flags.append(v)
+    
+    return flags if len(flags) > 0 else False
