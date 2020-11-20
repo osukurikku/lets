@@ -196,9 +196,6 @@ class beatmap:
 		if mainData is not None and self.rankedStatusFrozen == 1:
 			return True
 
-		if type(mainData) is not dict:
-			return False
-
 		# Can't fint beatmap by MD5. The beatmap has been updated. Check with beatmap set ID
 		if mainData is None:
 			log.debug("osu!api data is None")
@@ -223,6 +220,8 @@ class beatmap:
 				self.rankedStatus = rankedStatuses.NEED_UPDATE
 				return True
 
+		if type(mainData) is not dict:
+			return False
 
 		# We have data from osu!api, set beatmap data
 		log.debug("Got beatmap data from osu!api")
@@ -345,7 +344,6 @@ def convertRankedStatus(approvedStatus):
 	approvedStatus -- approved status, from osu!api
 	return -- rankedStatus for getscores
 	"""
-
 	approvedStatus = int(approvedStatus)
 	if approvedStatus <= 0:
 		return rankedStatuses.PENDING

@@ -53,6 +53,10 @@ class handler(requestsManager.asyncRequestHandler):
 			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x", "s", "osuver"]):
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
+			print(self.request.headers)
+			print(self.request.headers.get('token'))
+			if not 'token' in self.request.headers:
+				raise exceptions.invalidArgumentsException(MODULE_NAME) # UwU
 			# TODO: Maintenance check
 
 			# Get parameters and IP
@@ -124,7 +128,7 @@ class handler(requestsManager.asyncRequestHandler):
 			# Create score object and set its data
 			log.info("{} has submitted a score on {}...".format(username, scoreData[0]))
 			s = score.score()
-			s.setDataFromScoreData(scoreData)
+			s.setDataFromScoreData(scoreData, self.request.headers.get('token', ''))
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 
 			# Set score stuff missing in score data
@@ -253,10 +257,9 @@ class handler(requestsManager.asyncRequestHandler):
 				glob.redis.publish("api:score_submission", s.scoreID)
 
 				if s.gameMode == 0 and s.completed == 3:
-					beat = beatmap.beatmap(s.fileMd5, 0)
 					glob.redis.publish("kr:calc1", json.dumps({
 						"score_id": s.scoreID,
-						"map_id": beat.beatmapID,
+						"map_id": beatmapInfo.beatmapID,
 						"user_id": s.playerUserID,
 						"mods": s.mods
 					}))
@@ -268,6 +271,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# If there was no exception, update stats and build score submitted panel
 			# We don't have to do that since stats are recalculated with the cron
+			
 			# Update beatmap playcount (and passcount)
 			beatmap.incrementPlaycount(s.fileMd5, s.passed)
 
