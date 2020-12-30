@@ -16,7 +16,7 @@ from helpers import kotrikhelper
 class score:
 	__slots__ = ["scoreID", "playerName", "score", "maxCombo", "c50", "c100", "c300", "cMiss", "cKatu", "cGeki",
 	             "fullCombo", "mods", "playerUserID","rank","date", "hasReplay", "fileMd5", "passed", "playDateTime",
-	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime"]
+	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime", "scoreHash"]
 	def __init__(self, scoreID = None, rank = None, setData = True):
 		"""
 		Initialize a (empty) score object.
@@ -25,6 +25,7 @@ class score:
 		setData -- if True, set score data from db using scoreID. Optional.
 		"""
 		self.scoreID = 0
+		self.scoreHash = ''
 		self.playerName = "nospe"
 		self.score = 0
 		self.maxCombo = 0
@@ -228,7 +229,7 @@ class score:
 		self.pp = int((self.pp+new_data['pp'])/2)
 		self.calculateAccuracy()
 
-	def setDataFromScoreData(self, scoreData):
+	def setDataFromScoreData(self, scoreData, scoreHash: str = ''):
 		"""
 		Set this object's score data from scoreData list (submit modular)
 		scoreData -- scoreData list
@@ -253,6 +254,7 @@ class score:
 			#self.playDateTime = int(scoreData[16])
 			self.playDateTime = int(time.time())
 			self.calculateAccuracy()
+			self.scoreHash = scoreHash
 			#osuVersion = scoreData[17]
 
 			# Set completed status
@@ -353,6 +355,11 @@ class score:
 		if self.completed >= 2:
 			query = "INSERT INTO scores (id, beatmap_md5, userid, score, max_combo, full_combo, mods, 300_count, 100_count, 50_count, katus_count, gekis_count, misses_count, time, play_mode, completed, accuracy, pp, playtime) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 			self.scoreID = int(glob.db.execute(query, [self.fileMd5, userUtils.getID(self.playerName), self.score, self.maxCombo, int(self.fullCombo), self.mods, self.c300, self.c100, self.c50, self.cKatu, self.cGeki, self.cMiss, self.playDateTime, self.gameMode, self.completed, self.accuracy * 100, self.pp, self.playTime]))
+
+			glob.db.execute("INSERT INTO scores_hashes (score_id, hash) VALUES (%s, %s)", [
+				self.scoreID,
+				self.scoreHash
+			])
 
 			# Redis stats
 			glob.redis.incr("ripple:submitted_scores")
