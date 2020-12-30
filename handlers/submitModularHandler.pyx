@@ -53,6 +53,10 @@ class handler(requestsManager.asyncRequestHandler):
 			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x", "s", "osuver"]):
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
+			print(self.request.headers)
+			print(self.request.headers.get('token'))
+			if not 'token' in self.request.headers:
+				raise exceptions.invalidArgumentsException(MODULE_NAME) # UwU
 			# TODO: Maintenance check
 
 			# Get parameters and IP
@@ -118,13 +122,22 @@ class handler(requestsManager.asyncRequestHandler):
 			if not isScoreVerfied:
 				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], "checksum doesn't match")
 
+			# bad flags check
+			#
+			# After reversing osu!client from 2020, i have found notice about these flags
+			#
+			badFlags = (len(scoreData[17])-len(scoreData[17].strip())) & ~4
+			resolveFlags = kotrikhelper.getSubmitHackByFlag(badFlags)
+			if resolveFlags:
+				raise exceptions.checkSumNotPassed(username, badFlags, resolveFlags, "Pee-pee-poo-poo check found. Client anticheat flags detected.")
+
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
 
 			# Create score object and set its data
 			log.info("{} has submitted a score on {}...".format(username, scoreData[0]))
 			s = score.score()
-			s.setDataFromScoreData(scoreData)
+			s.setDataFromScoreData(scoreData, self.request.headers.get('token', ''))
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 
 			# Set score stuff missing in score data
@@ -253,10 +266,9 @@ class handler(requestsManager.asyncRequestHandler):
 				glob.redis.publish("api:score_submission", s.scoreID)
 
 				if s.gameMode == 0 and s.completed == 3:
-					beat = beatmap.beatmap(s.fileMd5, 0)
 					glob.redis.publish("kr:calc1", json.dumps({
 						"score_id": s.scoreID,
-						"map_id": beat.beatmapID,
+						"map_id": beatmapInfo.beatmapID,
 						"user_id": s.playerUserID,
 						"mods": s.mods
 					}))
@@ -268,6 +280,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# If there was no exception, update stats and build score submitted panel
 			# We don't have to do that since stats are recalculated with the cron
+			
 			# Update beatmap playcount (and passcount)
 			beatmap.incrementPlaycount(s.fileMd5, s.passed)
 
@@ -483,12 +496,14 @@ class handler(requestsManager.asyncRequestHandler):
 			self.set_status(408)
 			self.write("error: pass")
 		except exceptions.haxException as e:
+			self.set_status(408)
 			self.write("error: oldver")
 			glob.redis.publish("peppy:notification", json.dumps({
 				'userID': e.userID,
 				"message": "Sorry, you use outdated/bad osu!version. Please update game to submit scores!"
 			}))
 		except exceptions.checkSumNotPassed as e:
+			self.set_status(200)
 			webhook = Webhook(glob.conf.config["discord"]["ahook"],
                   color=0xc32c74,
                   footer="stupid anticheat")				
@@ -497,7 +512,7 @@ class handler(requestsManager.asyncRequestHandler):
 			webhook.set_desc(f'{e.additional_notification}')
 			webhook.set_footer(text="sended by submit-moodular-cuckold-checker")
 			webhook.post()
-			self.write("error: checksum")
+			self.write("ok") # confuse cheaters
 		except:
 			# Try except block to avoid more errors
 			try:

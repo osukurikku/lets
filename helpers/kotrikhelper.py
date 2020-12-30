@@ -173,9 +173,34 @@ cheat_ids = {
     128: 'AqnLibeay32Loaded (lib for SSL)'
 }
 
+submit_flags = {
+    0: 'Clean',
+    1 << 1: 'SpeedHackDetected',
+    1 << 2: 'IncorrectModValue',
+    1 << 3: 'MultipleOsuClients',
+    1 << 4: 'ChecksumFailure',
+    1 << 5: 'FlashlightChecksumIncorrect',
+    1 << 6: 'OsuExecutableChecksum',
+    1 << 7: 'MissingProcessesInList',
+    1 << 8: 'FlashLightImageHack',
+    1 << 9: 'SpinnerHack',
+    1 << 10: 'TransparentWindow',
+    1 << 11: 'FastPress',
+    1 << 12: 'RawMouseDiscrepancy',
+    1 << 13: 'RawKeyboardDiscrepancy'
+}
+
 def getHackByFlag(flag):
     flags = []
     for (k, v) in cheat_ids.items():
+        if (flag & k) > 0:
+            flags.append(v)
+    
+    return flags if len(flags) > 0 else False
+
+def getSubmitHackByFlag(flag: int) -> list:
+    flags = []
+    for (k, v) in submit_flags.items():
         if (flag & k) > 0:
             flags.append(v)
     
