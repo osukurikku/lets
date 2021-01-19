@@ -1,12 +1,6 @@
 [submodule "secret"]
 	path = secret
 	url = https://github.com/osukurikku/secret.git
-[submodule "pp/oppai-ng"]
-	path = pp/oppai-ng
-	url = https://github.com/osukurikku/oppai-ng.git
-[submodule "pp/oppai-relax"]
-	path = pp/oppai-relax
-	url = https://git.kotworks.wtf/KotRik/oppai-relax.git
 [submodule "common"]
 	path = common
 	url = https://github.com/osukurikku/python-common
