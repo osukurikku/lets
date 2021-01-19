@@ -13,7 +13,7 @@ from common.web import requestsManager
 from constants import exceptions
 from helpers import osuapiHelper
 from objects import glob
-from pp import rippoppai, relaxoppai
+from pp import ez
 from common.sentry import sentry
 
 MODULE_NAME = "api/pp"
@@ -118,10 +118,8 @@ class handler(requestsManager.asyncRequestHandler):
 					else:
 						log.debug("Cached pp not found. Calculating pp with oppai...")
 						# Cached pp not found, calculate them
-						if gameMode == gameModes.STD and (modsEnum&mods.RELAX or modsEnum&mods.RELAX2):
-							oppai = relaxoppai.oppai(bmap, mods=modsEnum, tillerino=True)
-						else:
-							oppai = rippoppai.oppai(bmap, mods=modsEnum, tillerino=True)
+						if gameMode == gameModes.STD:
+							oppai = ez.Ez(bmap, mods_=modsEnum, tillerino=True)
 
 						returnPP = oppai.pp
 						bmap.starsStd = oppai.stars
@@ -135,10 +133,8 @@ class handler(requestsManager.asyncRequestHandler):
 					# Specific accuracy, calculate
 					# Create oppai instance
 					log.debug("Specific request ({}%/{}). Calculating pp with oppai...".format(accuracy, modsEnum))
-					if gameMode == gameModes.STD and (modsEnum&mods.RELAX or modsEnum&mods.RELAX2):
-						oppai = relaxoppai.oppai(bmap, mods=modsEnum, tillerino=True)
-					else:
-						oppai = rippoppai.oppai(bmap, mods=modsEnum, tillerino=True)
+					if gameMode == gameModes.STD:
+						oppai = ez.Ez(bmap, mods_=modsEnum, tillerino=True)
 					bmap.starsStd = oppai.stars
 					if accuracy > 0:
 						returnPP.append(calculatePPFromAcc(oppai, accuracy))
