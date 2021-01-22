@@ -53,10 +53,6 @@ class handler(requestsManager.asyncRequestHandler):
 			if not requestsManager.checkArguments(self.request.arguments, ["score", "iv", "pass", "x", "s", "osuver"]):
 				raise exceptions.invalidArgumentsException(MODULE_NAME)
 
-			print(self.request.headers)
-			print(self.request.headers.get('token'))
-			if not 'token' in self.request.headers:
-				raise exceptions.invalidArgumentsException(MODULE_NAME) # UwU
 			# TODO: Maintenance check
 
 			# Get parameters and IP
@@ -125,11 +121,13 @@ class handler(requestsManager.asyncRequestHandler):
 			# bad flags check
 			#
 			# After reversing osu!client from 2020, i have found notice about these flags
+			# My notes: it shows up too often
 			#
-			badFlags = (len(scoreData[17])-len(scoreData[17].strip())) & ~4
-			resolveFlags = kotrikhelper.getSubmitHackByFlag(badFlags)
-			if resolveFlags:
-				raise exceptions.checkSumNotPassed(username, badFlags, resolveFlags, "Pee-pee-poo-poo check found. Client anticheat flags detected.")
+			#badFlags = scoreData[17].count(' ') & ~12
+			#badFlags = (len(scoreData[17])-len(scoreData[17].strip())) & ~12
+			#resolveFlags = kotrikhelper.getSubmitHackByFlag(badFlags)
+			#if resolveFlags and resolveFlags[0] != 'Clean':
+			#	raise exceptions.checkSumNotPassed(username, badFlags, "", f"Pee-pee-poo-poo check found. Client anticheat flags detected. {resolveFlags}")
 
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
