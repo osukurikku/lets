@@ -85,6 +85,18 @@ class handler(requestsManager.asyncRequestHandler):
 			# User exists check
 			if userID == 0:
 				raise exceptions.loginFailedException(MODULE_NAME, userID)
+
+			# Score submission lock check
+			lock_key = "lets:score_submission_lock:{}:{}:{}".format(userID, scoreData[0], int(scoreData[9]))
+			if glob.redis.get(lock_key) is not None:
+				# The same score score is being submitted and it's taking a lot
+				log.warning("Score submission blocked because there's a submission lock in place ({})".format(lock_key))
+				return
+
+			# Set score submission lock
+			log.debug("Setting score submission lock {}".format(lock_key))
+			glob.redis.set(lock_key, "1", 120)
+
 			# Bancho session/username-pass combo check
 			if not userUtils.checkLogin(userID, password, ip):
 				raise exceptions.loginFailedException(MODULE_NAME, username)
@@ -109,6 +121,10 @@ class handler(requestsManager.asyncRequestHandler):
 				self.write("error: version mismatch")
 				return
 
+			_st = self.get_argument("st", None)
+			if not _st or not _st.isdigit():
+				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"obv cheater: st flag is not present (cherry hqOsu)")
+
 			# checksum check
 			#
 			# NOT ITS WORKING, ALL FUCKING FLEX!
@@ -132,10 +148,20 @@ class handler(requestsManager.asyncRequestHandler):
 			# Get restricted
 			restricted = userUtils.isRestricted(userID)
 
+			# Calculating play time data!
+			userQuit = self.get_argument("x") == "1"
+			failTime = None
+			_ft = self.get_argument("ft", "0")
+			if not _ft.isdigit(): # bye abusers
+				raise exceptions.invalidArgumentsException(MODULE_NAME)
+
+			failTime = int(_ft)
+			failed = not userQuit and failTime
+
 			# Create score object and set its data
 			log.info("{} has submitted a score on {}...".format(username, scoreData[0]))
 			s = score.score()
-			s.setDataFromScoreData(scoreData, self.request.headers.get('token', ''))
+			s.setDataFromScoreData(scoreData, self.request.headers.get('token', ''), leaved=userQuit, failed=failed)
 			oldStats = userUtils.getUserStats(userID, s.gameMode)
 
 			# Set score stuff missing in score data
@@ -144,30 +170,19 @@ class handler(requestsManager.asyncRequestHandler):
 			# Get beatmap info
 			beatmapInfo = beatmap.beatmap()
 			beatmapInfo.setDataFromDB(s.fileMd5)
-
-			# Calculating play time data!
-			userQuit = self.get_argument("x") == "1"
-			failTime = None
-			_ft = self.get_argument("ft", "0")
-			if not _ft.isdigit(): # bye abusers
-				raise exceptions.invalidArgumentsException(MODULE_NAME)
-			
-			_st = self.get_argument("st", None)
-			if not _st or not _st.isdigit():
-				raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"obv cheater: st flag is not present (cherry hqOsu)")
+			# Make sure the beatmap is submitted and updated
+			if beatmapInfo.rankedStatus in (
+				rankedStatuses.NOT_SUBMITTED,
+				rankedStatuses.NEED_UPDATE,	# Who at ripple finally got a job? For the first time pattern that I want to praise :)
+				rankedStatuses.UNKNOWN
+			):
+				log.debug("Beatmap is not submitted/outdated/unknown. Score submission aborted.")
+				return
 			
 			if beatmapInfo.hitLength != 0 and not userQuit and int(_ft) == 0:
 				hitLength = beatmapInfo.hitLength // 1.5 if (s.mods & mods.DOUBLETIME) > 0 else beatmapInfo.hitLength // 0.75 if (s.mods & mods.HALFTIME) > 0 else beatmapInfo.hitLength
 				if (int(_st)//1000) < int(hitLength):
 					raise exceptions.checkSumNotPassed(username, scoreData[0], scoreData[2], f"prob timewarped: player was on map {int(_st)//1000} seconds when map length is {hitLength}")
-
-			# Make sure the beatmap is submitted and updated
-			if beatmapInfo.rankedStatus == rankedStatuses.NOT_SUBMITTED or beatmapInfo.rankedStatus == rankedStatuses.NEED_UPDATE or beatmapInfo.rankedStatus == rankedStatuses.UNKNOWN:
-				log.debug("Beatmap is not submitted/outdated/unknown. Score submission aborted.")
-				return
-
-			failTime = int(_ft)
-			failed = not userQuit and failTime
 
 			s.calculatePlayTime(beatmapInfo.hitLength, failTime // 1000 if failed else False)
 			kotrikhelper.updateUserPlayTime(userID, s.gameMode, s.playTime)
@@ -204,11 +219,7 @@ class handler(requestsManager.asyncRequestHandler):
 				log.warning("**{}** ({}) has been restricted due to too high pp gain **({}pp)**".format(username, userID, s.pp), "cm")
 
 			# Check notepad hack
-			if not bmk and not bml:
-				# No bmk and bml params passed, edited or super old client
-				#log.warning("{} ({}) most likely submitted a score from an edited client or a super old client".format(username, userID), "cm")
-				pass
-			elif bmk != bml and restricted == False:
+			if bmk and bml and bmk != bml and restricted == False:
 				# bmk and bml passed and they are different, restrict the user
 				userUtils.restrict(userID)
 				userUtils.appendNotes(userID, "Restricted due to notepad hack")
@@ -257,7 +268,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Make sure the replay has been saved (debug)
 			if not os.path.isfile(".data/replays/replay_{}.osr".format(s.scoreID)) and s.completed == 3:
-				log.error("Replay for score {} not saved!!".format(s.scoreID), "bunker")
+				log.error("Replay for score {} not saved!!".format(s.scoreID))
 
 			# Let the api know of this score
 			if s.scoreID:
@@ -425,7 +436,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 				if s.completed == 3 and restricted == False and beatmapInfo.rankedStatus >= rankedStatuses.RANKED and newScoreboard.personalBestRank > oldPersonalBestRank:
 					if newScoreboard.personalBestRank == 1 and len(newScoreboard.scores) > 2:
-						#woohoo we achieved #1, now we should say to #2 that he sniped!						
+						# woohoo we achieved #1, now we should say to #2 that he sniped!						
 						userUtils.logUserLog(messages[2].format(newScoreboard.scores[2].playerName), s.fileMd5, newScoreboard.scores[2].playerUserID, s.gameMode, s.scoreID)
 
 					userLogMsg = messages[0]

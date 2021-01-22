@@ -48,7 +48,10 @@ from common import generalUtils
 from helpers import leaderboardHelper
 from objects import glob
 from pubSubHandlers import beatmapUpdateHandler
+
+# this part can be removed if you use public github version
 import secret.achievements.utils
+from very_secret.handlers import osuCoinHandler
 
 
 def make_app():
@@ -90,6 +93,8 @@ def make_app():
 		(r"/letsapi/v1/status", apiStatusHandler.handler),
 		(r"/letsapi/v1/pp", apiPPHandler.handler),
 		(r"/letsapi/v1/cacheBeatmap", apiCacheBeatmapHandler.handler),
+
+		(r"/web/coins.php", osuCoinHandler.handler),
 		
 		# Not done yet
 		(r"/web/osu-checktweets.php", emptyHandler.handler),

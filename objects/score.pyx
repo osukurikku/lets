@@ -14,9 +14,10 @@ from helpers import kotrikhelper
 
 
 class score:
-	__slots__ = ["scoreID", "playerName", "score", "maxCombo", "c50", "c100", "c300", "cMiss", "cKatu", "cGeki",
+	__slots__ = ("scoreID", "playerName", "score", "maxCombo", "c50", "c100", "c300", "cMiss", "cKatu", "cGeki",
 	             "fullCombo", "mods", "playerUserID","rank","date", "hasReplay", "fileMd5", "passed", "playDateTime",
-	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime", "scoreHash"]
+	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime", "scoreHash",
+				 "quit", "failed")
 	def __init__(self, scoreID = None, rank = None, setData = True):
 		"""
 		Initialize a (empty) score object.
@@ -229,7 +230,7 @@ class score:
 		self.pp = int((self.pp+new_data['pp'])/2)
 		self.calculateAccuracy()
 
-	def setDataFromScoreData(self, scoreData, scoreHash: str = ''):
+	def setDataFromScoreData(self, scoreData, scoreHash: str = '', leaved: bool = False, failed: bool = False):
 		"""
 		Set this object's score data from scoreData list (submit modular)
 		scoreData -- scoreData list
@@ -255,6 +256,8 @@ class score:
 			self.playDateTime = int(time.time())
 			self.calculateAccuracy()
 			self.scoreHash = scoreHash
+			self.quit = leaved
+			self.failed = failed
 			#osuVersion = scoreData[17]
 
 			# Set completed status
@@ -285,19 +288,14 @@ class score:
 		Set this score completed status and rankedScoreIncrease
 		"""
 		b = beatmap.beatmap(self.fileMd5, 0)
+		if not scoreUtils.isRankable(self.mods):
+			log.debug("Unrankable mods")
+			return
 
 		self.completed = 0
-		if self.passed and scoreUtils.isRankable(self.mods):
+		if self.passed:
 			# Get userID
 			userID = userUtils.getID(self.playerName)
-
-			# Make sure we don't have another score identical to this one
-			# TODO: time check
-			duplicate = glob.db.fetch("SELECT id FROM scores WHERE userid = %s AND beatmap_md5 = %s AND play_mode = %s AND score = %s LIMIT 1", [userID, self.fileMd5, self.gameMode, self.score])
-			if duplicate is not None:
-				# Found same score in db. Don't save this score.
-				self.completed = -1
-				return
 
 			# No duplicates found.
 			# Get right "completed" value
@@ -344,6 +342,12 @@ class score:
 						self.completed = 2
 						self.rankedScoreIncrease = 0
 						self.oldPersonalBest = 0
+		elif self.quit:
+			log.debug("QUIT")
+			self.completed = 0
+		elif self.failed:
+			log.debug("FAILED")
+			self.completed = 1
 
 		log.debug("Completed status: {}".format(self.completed))
 
@@ -352,7 +356,7 @@ class score:
 		Save this score in DB (if passed and mods are valid)
 		"""
 		# Add this score
-		if self.completed >= 2:
+		if self.completed >= 0:
 			query = "INSERT INTO scores (id, beatmap_md5, userid, score, max_combo, full_combo, mods, 300_count, 100_count, 50_count, katus_count, gekis_count, misses_count, time, play_mode, completed, accuracy, pp, playtime) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 			self.scoreID = int(glob.db.execute(query, [self.fileMd5, userUtils.getID(self.playerName), self.score, self.maxCombo, int(self.fullCombo), self.mods, self.c300, self.c100, self.c50, self.cKatu, self.cGeki, self.cMiss, self.playDateTime, self.gameMode, self.completed, self.accuracy * 100, self.pp, self.playTime]))
 
