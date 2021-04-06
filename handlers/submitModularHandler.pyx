@@ -338,7 +338,8 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# At the end, check achievements
 			if s.passed:
-				secret.achievements.utils.unlock_achievements(s, beatmapInfo, newUserData)
+				# secret.achievements.utils.unlock_achievements(s, beatmapInfo, newUserData)
+				pass
 
 			# Output ranking panel only if we passed the song
 			# and we got valid beatmap info from db

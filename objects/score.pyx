@@ -16,7 +16,7 @@ from helpers import kotrikhelper
 class score:
 	__slots__ = ("scoreID", "playerName", "score", "maxCombo", "c50", "c100", "c300", "cMiss", "cKatu", "cGeki",
 	             "fullCombo", "mods", "playerUserID","rank","date", "hasReplay", "fileMd5", "passed", "playDateTime",
-	             "gameMode", "completed", "accuracy", "pp", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime", "scoreHash",
+	             "gameMode", "completed", "accuracy", "pp", "sr", "oldPersonalBest", "rankedScoreIncrease", "clan", "personalOldBestScore", "playTime", "scoreHash",
 				 "quit", "failed")
 	def __init__(self, scoreID = None, rank = None, setData = True):
 		"""
@@ -54,6 +54,7 @@ class score:
 		self.clan = 0
 
 		self.pp = 0.00
+		self.sr = 0
 
 		self.oldPersonalBest = 0
 		self.rankedScoreIncrease = 0
@@ -61,18 +62,6 @@ class score:
 
 		if scoreID is not None and setData:
 			self.setDataFromDB(scoreID, rank)
-
-	def getClan(self, username):
-		"""
-		Get userID's clan
-		:param userID: user id
-		:return: username or None
-		"""
-		userID = userUtils.getID(username)
-		clanInfo = glob.db.fetch("SELECT clans.tag, clans.id, user_clans.clan, user_clans.user FROM user_clans LEFT JOIN clans ON clans.id = user_clans.clan WHERE user_clans.user = %s LIMIT 1", [userID])
-		if clanInfo is None:
-			return username
-		return "[" + clanInfo["tag"] + "] " + username
 
 	def calculateAccuracy(self):
 		"""
@@ -157,10 +146,7 @@ class score:
 		"""
 		#print(str(data))
 		self.scoreID = data["id"]
-		if "username" in data:
-			self.playerName = self.getClan(data["username"])
-		else:
-			self.playerName = userUtils.getUsername(data["userid"])
+		self.playerName = userUtils.getUsername(data["userid"])
 		self.playerUserID = data["userid"]
 		self.score = data["score"]
 		self.maxCombo = data["max_combo"]
@@ -360,10 +346,10 @@ class score:
 			query = "INSERT INTO scores (id, beatmap_md5, userid, score, max_combo, full_combo, mods, 300_count, 100_count, 50_count, katus_count, gekis_count, misses_count, time, play_mode, completed, accuracy, pp, playtime) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 			self.scoreID = int(glob.db.execute(query, [self.fileMd5, userUtils.getID(self.playerName), self.score, self.maxCombo, int(self.fullCombo), self.mods, self.c300, self.c100, self.c50, self.cKatu, self.cGeki, self.cMiss, self.playDateTime, self.gameMode, self.completed, self.accuracy * 100, self.pp, self.playTime]))
 
-			glob.db.execute("INSERT INTO scores_hashes (score_id, hash) VALUES (%s, %s)", [
-				self.scoreID,
-				self.scoreHash
-			])
+			#glob.db.execute("INSERT INTO scores_hashes (score_id, hash) VALUES (%s, %s)", [
+			#	self.scoreID,
+			#	self.scoreHash
+			#])
 
 			# Redis stats
 			glob.redis.incr("ripple:submitted_scores")
@@ -386,6 +372,7 @@ class score:
 				if self.gameMode in pp.PP_RELAX_CALCULATORS:
 					calculator = pp.PP_RELAX_CALCULATORS[self.gameMode](b, self)
 					self.pp = calculator.pp
+					self.sr = calculator.stars
 					return
 				else:
 					self.pp = 0
@@ -395,6 +382,7 @@ class score:
 			if self.gameMode in pp.PP_CALCULATORS:
 				calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
 				self.pp = calculator.pp
+				self.sr = calculator.stars
 				return
 		else:
 			self.pp = 0

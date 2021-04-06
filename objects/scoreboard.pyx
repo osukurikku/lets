@@ -142,6 +142,8 @@ class scoreboard:
         cdef dict topScore
         clanscores = {}
         cdef int sorted_c = 1
+
+        players_ids = []
         if topScores is not None:
             for topScore in topScores:
                 # Create score object
@@ -165,15 +167,36 @@ class scoreboard:
 
                 # Add this score to scores list and increment rank
                 self.scores.append(s)
+                players_ids.append(s.playerUserID)
                 c += 1
 
         if self.clan:
             self.scores.clear()
+            player_ids = []
             self.scores.append(-1)
             for x in (sorted(clanscores.values(), key=operator.attrgetter('score'))):
                 x.setRank(sorted_c)
                 self.scores.append(x)
+                players_ids.append(x.playerUserID)
                 sorted_c += 1
+
+        if players_ids:
+            clanInfo = glob.db.fetchAll(
+                "SELECT clans.tag, user_clans.user FROM user_clans LEFT JOIN clans ON clans.id = user_clans.clan WHERE user_clans.user IN ({seq})".format(
+                    seq=', '.join(['%s'] * len(players_ids))
+                ), 
+                players_ids
+            )
+
+            player_clans = {}
+            for user in clanInfo:
+                player_clans[user['user']] = user['tag']
+
+            for sc in self.scores:
+                if type(sc) == int: continue  # ripple rofl about -1
+
+                if sc.playerUserID in player_clans:
+                    sc.playerName = f'[{player_clans[sc.playerUserID]}] {sc.playerName}'
 
         '''# If we have more than 50 scores, run query to get scores count
         if c >= 50:
