@@ -100,7 +100,7 @@ class beatmap:
 		"""
 		# Get data from DB
 		if song_name:
-			data = glob.db.fetch("SELECT * FROM beatmaps WHERE song_name = %s", [
+			data = glob.db.fetch("SELECT * FROM beatmaps WHERE song_name LIKE %s", [
 				song_name
 			])
 		else:
@@ -276,11 +276,15 @@ class beatmap:
 					re = MAPFILE_REGEX.match(fileName)		
 					if not re:
 						self.rankedStatus = rankedStatuses.NOT_SUBMITTED
+						return
 
 					# Gives another try with setDataFromDB but now with song_name!
-					DBresult2 = self.setDataFromDB(None, f"{re['artist']} - {re['title']} [{re['version']}]")
+					DBresult2 = self.setDataFromDB(None, f"{re['artist']}%{re['title']}%[{re['version']}]")
 					if not DBresult2:
 						self.rankedStatus = rankedStatuses.NOT_SUBMITTED
+					else:
+						if self.fileMD5 != md5:
+							self.rankedStatus = rankedStatuses.NEED_UPDATE
 				else:
 					self.rankedStatus = rankedStatuses.NOT_SUBMITTED
 

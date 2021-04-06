@@ -63,7 +63,7 @@ class handler(requestsManager.asyncRequestHandler):
 				rating = 0.00
 				if beatmapSet['SetID'] in convert:
 					rating = float('{:.2f}'.format(convert[beatmapSet['SetID']]))
-					print(rating)
+
 				output += cheesegull.toDirect(beatmapSet, rating) + "\r\n"
 		except (exceptions.noAPIDataError, exceptions.invalidArgumentsException):
 			output = "0\n"
