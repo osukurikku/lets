@@ -49,7 +49,7 @@ class beatmap:
 		# Force refresh from osu api
 		self.refresh = refresh
 
-		if md5 and beatmapSetID:
+		if md5 is not None and beatmapSetID is not None:
 			self.setData(md5, beatmapSetID, file_name)
 
 	def addBeatmapToDB(self):

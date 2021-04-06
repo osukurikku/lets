@@ -191,7 +191,7 @@ class handler(requestsManager.asyncRequestHandler):
 			# NOTE: PP are std and mania only
 			ppCalcException = None
 			try:
-				s.calculatePP()
+				s.calculatePP(beatmapInfo)
 			except Exception as e:
 				# Intercept ALL exceptions and bypass them.
 				# We want to save scores even in case PP calc fails
