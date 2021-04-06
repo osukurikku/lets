@@ -100,7 +100,7 @@ class handler(requestsManager.asyncRequestHandler):
 			log.info("Requested beatmap {} ({})".format(fileNameShort, md5))
 
 			# Create beatmap object and set its data
-			bmap = beatmap.beatmap(md5, beatmapSetID, gameMode)
+			bmap = beatmap.beatmap(md5, beatmapSetID, gameMode, file_name=fileName)
 
 			# Create leaderboard object, link it to bmap and get all scores
 			sboard = scoreboard.scoreboard(username, gameMode, bmap, setScores=True, country=country, mods=modsFilter, friends=friends, clan=clan)

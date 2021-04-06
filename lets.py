@@ -194,17 +194,17 @@ if __name__ == "__main__":
 				consoleHelper.printColored("[!] IMPORTANT! Your beatmapcacheexpire in config.ini is > 0 and osu!api features are disabled.\nWe do not reccoment this, because too old beatmaps will be shown as unranked.\nSet beatmapcacheexpire to 0 to disable beatmap latest update check and fix that issue.", bcolors.YELLOW)
 
 		# Load achievements
-		consoleHelper.printNoNl("Loading achievements... ")
-		try:
-			secret.achievements.utils.load_achievements()
-		except Exception as e:
-			consoleHelper.printError()
-			consoleHelper.printColored(
-				"[!] Error while loading achievements! ({})".format(e),
-				bcolors.RED,
-			)
-			sys.exit()
-		consoleHelper.printDone()
+		# consoleHelper.printNoNl("Loading achievements... ")
+		# try:
+		# 	secret.achievements.utils.load_achievements()
+		# except Exception as e:
+		# 	consoleHelper.printError()
+		# 	consoleHelper.printColored(
+		# 		"[!] Error while loading achievements! ({})".format(e),
+		# 		bcolors.RED,
+		# 	)
+		# 	sys.exit()
+		# consoleHelper.printDone()
 
 		# Set achievements version
 		glob.redis.set("lets:achievements_version", glob.ACHIEVEMENTS_VERSION)

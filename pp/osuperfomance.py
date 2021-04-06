@@ -92,18 +92,23 @@ class OsuPerfomanceCalculation:
         self.beatmap = beatmap_
         self.score = score_
         self.pp = 0
+        self.stars = 0.00
 
         # we will use this for taiko, ctb, mania
         if self.score.gameMode == 1:
             # taiko
             self.OPC_DATA = self.OPC_DATA.format("oppai")
+            self.stars = beatmap_.starsTaiko
         elif self.score.gameMode == 2:
             # ctb
             self.OPC_DATA = self.OPC_DATA.format("catch_the_pp")
+            self.stars = beatmap_.starsCtb
         elif self.score.gameMode == 3:
             # mania
             self.OPC_DATA = self.OPC_DATA.format("omppc")
+            self.stars = beatmap_.starsMania
 
+        # TODO: Rewrite osu-perfomance output for stars support!
         self.getPP()
 
     def _runProcess(self):
