@@ -9,7 +9,6 @@ import requests
 import tornado.gen
 import tornado.web
 
-import secret.achievements.utils
 from common import generalUtils
 from common.constants import gameModes
 from common.constants import mods
@@ -26,8 +25,8 @@ from objects import glob
 from objects import score
 from objects import scoreboard
 
-from secret import achievements, butterCake
 from secret.discord_hooks import Webhook
+from very_secret.achievements import AchievementStorage
 
 MODULE_NAME = "submit_modular"
 class handler(requestsManager.asyncRequestHandler):
@@ -336,10 +335,12 @@ class handler(requestsManager.asyncRequestHandler):
 			# there are exceptions while building the ranking panel
 			keepSending = False
 
+			new_achievements = []
 			# At the end, check achievements
-			if s.passed:
-				# secret.achievements.utils.unlock_achievements(s, beatmapInfo, newUserData)
-				pass
+			if s.passed and not restricted and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
+				new_achievements.extend(
+					AchievementStorage.unlock_achievements(s, beatmapInfo)
+				)
 
 			# Output ranking panel only if we passed the song
 			# and we got valid beatmap info from db
@@ -387,11 +388,10 @@ class handler(requestsManager.asyncRequestHandler):
 					('rankAfter', rankInfo["currentRank"]),
 					('toNextRank', rankInfo["difference"]),
 					('toNextRankUser', rankInfo["nextUsername"]),
-					('achievements', ""),
-					('achievements-new', ""),
+					('achievements-new', "/".join(map(repr, new_achievements))),
 					('onlineScoreId', s.scoreID)
 				])
-				
+
 				outputBeatmap = collections.OrderedDict([
 					('chartId', "beatmap"),
 					('chartUrl', f"https://kurikku.pw/b/{beatmapInfo.beatmapID}"),
@@ -406,7 +406,6 @@ class handler(requestsManager.asyncRequestHandler):
 					('accuracyAfter', round(s.accuracy*100, 2)),
 					('ppBefore', oldBestScore.pp if oldBestScore else ""),
 					('ppAfter', s.pp),
-					('achievements-new', ""),
 					('onlineScoreId', s.scoreID)
 				])
 				# Build final string
