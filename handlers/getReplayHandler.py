@@ -61,6 +61,7 @@ class handler(requestsManager.asyncRequestHandler):
 				self.write(fileContent)
 			else:
 				log.warning("Replay {} doesn't exist".format(replayID))
+				glob.stats["replay_download_failures"].labels(type="replay_not_found").inc()
 				self.write("")
 		except exceptions.invalidArgumentsException:
 			pass

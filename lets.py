@@ -3,6 +3,8 @@ import os
 import sys
 from multiprocessing.pool import ThreadPool
 
+import prometheus_client
+
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
@@ -256,7 +258,6 @@ if __name__ == "__main__":
 		except:
 			consoleHelper.printColored("[!] Error while starting Datadog client! Please check your config.ini and run the server again", bcolors.RED)
 
-
 		# Server start message and console output
 		consoleHelper.printColored("> L.E.T.S. is listening for clients on 127.0.0.1:{}...".format(serverPort), bcolors.GREEN)
 		log.logMessage("Server started!", discord="bunker", of="info.txt", stdout=False)
@@ -265,6 +266,19 @@ if __name__ == "__main__":
 		pubSub.listener(glob.redis, {
 			"lets:beatmap_updates": beatmapUpdateHandler.handler(),
 		}).start()
+
+		# Prometheus port
+		statsPort = None
+		try:
+			if glob.conf.config["prometheus"]["port"]:
+				statsPort = int(glob.conf.config["prometheus"]["port"])
+		except:
+			consoleHelper.printColored("Invalid stats port! Please check your config.ini and run the server again", bcolors.YELLOW)
+			raise
+
+		if statsPort:
+			consoleHelper.printColored("Stats exporter listening on localhost:{}".format(statsPort), bcolors.GREEN)
+			prometheus_client.start_http_server(statsPort, addr="172.21.0.1")
 
 		# Start Tornado
 		glob.application.listen(serverPort)

@@ -68,6 +68,8 @@ class config:
 			self.config.get("datadog", "apikey")
 			self.config.get("datadog", "appkey")
 
+			self.config.get("prometheus", "port")
+
 			self.config.get("osuapi","enable")
 			self.config.get("osuapi","apiurl")
 			self.config.get("osuapi","apikey")
@@ -122,6 +124,9 @@ class config:
 		self.config.set("datadog", "enable", "False")
 		self.config.set("datadog", "apikey", "")
 		self.config.set("datadog", "appkey", "")
+
+		self.config.add_section("prometheus")
+		self.config.get("prometheus", "port", "8080")
 
 		self.config.add_section("osuapi")
 		self.config.set("osuapi", "enable", "True")

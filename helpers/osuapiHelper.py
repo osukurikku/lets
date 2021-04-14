@@ -24,22 +24,25 @@ def osuApiRequest(request, params, getFirst=True):
 
 	# Api request
 	resp = None
-	try:
-		finalURL = "{}/api/{}?k={}&{}".format(glob.conf.config["osuapi"]["apiurl"], request, glob.conf.config["osuapi"]["apikey"], params)
-		log.debug(finalURL)
-		resp = requests.get(finalURL, timeout=5).text
-		data = json.loads(resp)
-		if getFirst:
-			if len(data) >= 1:
-				resp = data[0]
+	with glob.stats["osu_api_failures"].labels(method=request).count_exceptions():
+		try:
+			finalURL = "{}/api/{}?k={}&{}".format(glob.conf.config["osuapi"]["apiurl"], request, glob.conf.config["osuapi"]["apikey"], params)
+			log.debug(finalURL)
+			
+			resp = requests.get(finalURL, timeout=5).text
+			data = json.loads(resp)
+			if getFirst:
+				if len(data) >= 1:
+					resp = data[0]
+				else:
+					resp = None
 			else:
-				resp = None
-		else:
-			resp = data
-	finally:
-		glob.dog.increment(glob.DATADOG_PREFIX+".osu_api.requests")
-		log.debug(str(resp).encode("utf-8"))
-		return resp
+				resp = data
+		finally:
+			glob.dog.increment(glob.DATADOG_PREFIX+".osu_api.requests")
+			glob.stats["osu_api_requests"].labels(method=request).inc()
+			log.debug(str(resp).encode("utf-8"))
+			return resp
 
 def getOsuFileFromName(fileName):
 	"""

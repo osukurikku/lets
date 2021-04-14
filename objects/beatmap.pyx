@@ -337,7 +337,7 @@ class beatmap:
 
 	@property
 	def is_rankable(self):
-		return self.rankedStatus >= rankedStatuses.RANKED and self.rankedStatus != rankedStatuses.UNKNOWN
+		return self.rankedStatus in [rankedStatuses.RANKED, rankedStatuses.APPROVED, rankedStatuses.QUALIFIED] and self.rankedStatus != rankedStatuses.UNKNOWN
 
 def convertRankedStatus(approvedStatus):
 	"""

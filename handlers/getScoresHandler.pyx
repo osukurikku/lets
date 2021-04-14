@@ -4,7 +4,7 @@ import tornado.web
 
 from objects import beatmap
 from objects import scoreboard
-from common.constants import privileges
+from common.constants import gameModes, privileges
 from common.log import logUtils as log
 from common.ripple import userUtils
 from common.web import requestsManager
@@ -122,6 +122,9 @@ class handler(requestsManager.asyncRequestHandler):
 					}))
 
 
+			glob.stats["served_leaderboards"].labels(
+				game_mode=gameModes.getGameModeForDB(gameMode)
+			).inc()
 			# Datadog stats
 			glob.dog.increment(glob.DATADOG_PREFIX+".served_leaderboards")
 		except exceptions.need2FAException:

@@ -4,7 +4,9 @@ import re
 from common.log import logUtils as log
 from helpers import mapsHelper
 from common.constants import mods as PlayMods
-from common import generalUtils
+from common.constants import gameModes
+from objects import glob
+import contextlib
 
 '''
 STD = 0
@@ -82,6 +84,22 @@ def ReadableMods(m):
 
 class OsuPerfomanceCalculationsError(Exception):
     pass
+
+stats = {
+	"latency": {
+		gameModes.TAIKO: glob.stats["pp_calc_latency_seconds"].labels(game_mode="taiko"),
+		gameModes.CTB: glob.stats["pp_calc_latency_seconds"].labels(game_mode="ctb"),
+        gameModes.MANIA: glob.stats["pp_calc_latency_seconds"].labels(game_mode="mania")
+	},
+	"failures": {
+		gameModes.TAIKO: glob.stats["pp_calc_failures"].labels(game_mode="std"),
+		gameModes.CTB: glob.stats["pp_calc_failures"].labels(game_mode="taiko"),
+        gameModes.MANIA: glob.stats["pp_calc_failures"].labels(game_mode="mania")
+	}
+}
+
+latency = None
+excC = None
 
 class OsuPerfomanceCalculation:
 
@@ -165,7 +183,7 @@ class OsuPerfomanceCalculation:
         log.debug("opc ~> returned pp: {}".format(pp))
         return pp
 
-    def getPP(self):
+    def _getPP(self):
         try:
             # Reset pp
             self.pp = 0
@@ -185,6 +203,19 @@ class OsuPerfomanceCalculation:
             print(e1)
         finally:
             return self.pp
+
+    def getPP(self):
+        latencyCtx = contextlib.suppress()
+        excC = None
+        if self.score.gameMode in (gameModes.TAIKO, gameModes.CTB, gameModes.MANIA):
+            latencyCtx = stats["latency"][self.score.gameMode].time()
+            excC = stats["failures"][self.score.gameMode]
+        with latencyCtx:
+            try:
+                return self._getPP()
+            finally:
+                if self.pp <= 0 and excC is not None:
+                    excC.inc()
 
     @property
     def mapPath(self):

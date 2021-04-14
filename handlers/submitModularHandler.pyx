@@ -338,9 +338,7 @@ class handler(requestsManager.asyncRequestHandler):
 			new_achievements = []
 			# At the end, check achievements
 			if s.passed and not restricted and beatmapInfo.rankedStatus >= rankedStatuses.RANKED:
-				new_achievements.extend(
-					AchievementStorage.unlock_achievements(s, beatmapInfo)
-				)
+				new_achievements = AchievementStorage.unlock_achievements(s, beatmapInfo, newUserData)
 
 			# Output ranking panel only if we passed the song
 			# and we got valid beatmap info from db
@@ -480,6 +478,11 @@ class handler(requestsManager.asyncRequestHandler):
 					"userID": userID,
 					"newUsername": newUsername.decode("utf-8")
 				}))
+
+			glob.stats["submitted_scores"].labels(
+				game_mode=gameModes.getGameModeForDB(s.gameMode),
+				completed=str(s.completed),
+			).inc()
 
 			# Datadog stats
 			glob.dog.increment(glob.DATADOG_PREFIX+".submitted_scores")

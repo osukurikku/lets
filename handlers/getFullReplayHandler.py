@@ -73,4 +73,5 @@ class handler(requestsManager.asyncRequestHandler):
 			self.set_header("Content-Description", "File Transfer")
 			self.set_header ("Content-Disposition", "attachment; filename=\"{}.osr\"".format(scoreData["id"]))
 		except exceptions.fileNotFoundException:
+			glob.stats["replay_download_failures"].labels(type="replay_not_found").inc()
 			self.write("Replay not found")
