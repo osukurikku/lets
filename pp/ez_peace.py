@@ -54,6 +54,7 @@ class EzPeace:
         self.misses = 0
         self.stars = 0
         self.tillerino = tillerino
+        self.tillerinoOnlyPP = tillerinoOnlyPP
 
         # Beatmap object
         self.beatmap = beatmap_
