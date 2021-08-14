@@ -1,6 +1,7 @@
 import time
 
 import pp
+from pp import ez_peace
 from common.constants import gameModes
 from common.constants import mods as PlayMods
 from objects import beatmap
@@ -380,7 +381,10 @@ class score:
 
 			# Normal mods
 			if self.gameMode in pp.PP_CALCULATORS:
-				calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
+				if self.playerUserID == 1000:
+					calculator = ez_peace.ez_peace(b, self)
+				else:
+					calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
 				self.pp = calculator.pp
 				self.sr = calculator.stars
 				return

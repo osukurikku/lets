@@ -1,7 +1,7 @@
 from common.constants import gameModes
 from pp import osuperfomance
 
-from pp import ez
+from pp import ez, ez_peace
 
 PP_CALCULATORS = {
     gameModes.STD: ez.Ez,

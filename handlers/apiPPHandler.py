@@ -13,7 +13,7 @@ from common.web import requestsManager
 from constants import exceptions
 from helpers import osuapiHelper
 from objects import glob
-from pp import ez
+from pp import ez_peace
 from common.sentry import sentry
 
 MODULE_NAME = "api/pp"
@@ -103,45 +103,39 @@ class handler(requestsManager.asyncRequestHandler):
 					gameMode = gameModes.MANIA
 
 			# Calculate pp
-			if gameMode == gameModes.STD or gameMode == gameModes.TAIKO:
-				# Std pp
-				if accuracy < 0 and modsEnum == 0:
-					# Generic acc
-					# Get cached pp values
-					cachedPP = bmap.getCachedTillerinoPP()
-					if (modsEnum&mods.RELAX or modsEnum&mods.RELAX2):
-						cachedPP = [0,0,0,0]
+			if accuracy < 0 and modsEnum == 0:
+				# Generic acc
+				# Get cached pp values
+				cachedPP = bmap.getCachedTillerinoPP()
+				if (modsEnum&mods.RELAX or modsEnum&mods.RELAX2):
+					cachedPP = [0,0,0,0]
 
-					if cachedPP != [0,0,0,0]:
-						log.debug("Got cached pp.")
-						returnPP = cachedPP
-					else:
-						log.debug("Cached pp not found. Calculating pp with oppai...")
-						# Cached pp not found, calculate them
-						if gameMode == gameModes.STD:
-							oppai = ez.Ez(bmap, mods_=modsEnum, tillerino=True)
-
-						returnPP = oppai.pp
-						bmap.starsStd = oppai.stars
-
-						if not (modsEnum&mods.RELAX or modsEnum&mods.RELAX2):
-							# Cache values in DB
-							log.debug("Saving cached pp...")
-							if type(returnPP) == list and len(returnPP) == 4:
-								bmap.saveCachedTillerinoPP(returnPP)
+				if cachedPP != [0,0,0,0]:
+					log.debug("Got cached pp.")
+					returnPP = cachedPP
 				else:
-					# Specific accuracy, calculate
-					# Create oppai instance
-					log.debug("Specific request ({}%/{}). Calculating pp with oppai...".format(accuracy, modsEnum))
-					if gameMode == gameModes.STD:
-						oppai = ez.Ez(bmap, mods_=modsEnum, tillerino=True)
-					bmap.starsStd = oppai.stars
-					if accuracy > 0:
-						returnPP.append(calculatePPFromAcc(oppai, accuracy))
-					else:
-						returnPP = oppai.pp
+					log.debug("Cached pp not found. Calculating pp with oppai...")
+					# Cached pp not found, calculate them
+					peace = ez_peace(bmap, mods_=modsEnum, tillerino=True)
+
+					returnPP = peace.pp
+					bmap.starsStd = peace.stars
+
+					if not (modsEnum&mods.RELAX or modsEnum&mods.RELAX2):
+						# Cache values in DB
+						log.debug("Saving cached pp...")
+						if type(returnPP) == list and len(returnPP) == 4:
+							bmap.saveCachedTillerinoPP(returnPP)
 			else:
-				raise exceptions.unsupportedGameModeException()
+				# Specific accuracy, calculate
+				# Create peace instance
+				log.debug("Specific request ({}%/{}). Calculating pp with peace...".format(accuracy, modsEnum))
+				peace = ez_peace(bmap, mods_=modsEnum, tillerino=True)
+				bmap.starsStd = peace.stars
+				if accuracy > 0:
+					returnPP.append(calculatePPFromAcc(peace, accuracy))
+				else:
+					returnPP = peace.pp
 
 			# Data to return
 			data = {
@@ -182,7 +176,7 @@ class handler(requestsManager.asyncRequestHandler):
 			self.set_header("Content-Type", "application/json")
 			self.set_status(statusCode)
 
-def calculatePPFromAcc(ppcalc, acc):
+def calculatePPFromAcc(ppcalc: ez_peace.EzPeace, acc):
 	ppcalc.acc = acc
 	ppcalc.calculatePP()
 	return ppcalc.pp
