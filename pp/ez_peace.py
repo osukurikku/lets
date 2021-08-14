@@ -137,7 +137,6 @@ class EzPeace:
                 pp_list = []
                 peace_calculations = peace.calculate(beatmap)
                 self.stars = peace_calculations.attrs_dict['stars']
-                peace.reset()
 
                 if self.tillerinoOnlyPP:
                     peace.set_acc(self.acc)
@@ -155,7 +154,6 @@ class EzPeace:
                             break
 
                         pp_list.append(pp)
-                        peace.reset()
 
                     self.pp = pp_list
 
@@ -172,7 +170,6 @@ class EzPeace:
             self.pp = 0
             raise
         finally:
-            peace.reset()
             log.debug("peace ~> Shutting down, pp = {}".format(self.pp))
 
     def calculatePP(self):
