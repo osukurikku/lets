@@ -7,3 +7,6 @@
 [submodule "pp/osu-tools"]
 	path = pp/osu-tools
 	url = https://github.com/osukurikku/osu-tools.git
+[submodule "very_secret"]
+	path = very_secret
+	url = https://git.kotworks.cyou/osukurikku/lets_very_secret.git

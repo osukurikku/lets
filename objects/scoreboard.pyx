@@ -62,7 +62,7 @@ class scoreboard:
                 mods = " AND (mods & 128 > 0 AND mods & 8192 = 0 AND mods&%(mods)s) "
             elif (self.mods & modsEnum.RELAX2) > 0:
                 mods = " AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s) "
-            elif (self.mods & modsEnum.AUTOPLAY) >= 0:
+            elif (self.mods & modsEnum.AUTOPLAY) > 0:
                 mods = " AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s) "
         else:
             mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
@@ -118,7 +118,7 @@ class scoreboard:
             friends = ""
 
         # Sort and limit at the end
-        if self.mods <= -1 or (self.mods & modsEnum.AUTOPLAY) == 0:
+        if self.mods <= -1 or (self.mods & modsEnum.AUTOPLAY) != modsEnum.AUTOPLAY:
             # Order by score if we aren't filtering by mods or autoplay mod is disabled
             order = "ORDER BY score DESC"
         elif self.mods & modsEnum.AUTOPLAY > 0 or self.mods & modsEnum.RELAX > 0 or self.mods & modsEnum.RELAX2 > 0:
@@ -133,7 +133,7 @@ class scoreboard:
         # Build query, get params and run query
         query = buildQuery(locals())
         params = {"beatmap_md5": self.beatmap.fileMD5, "play_mode": self.gameMode, "userid": self.userID,
-                  "mods": self.mods}
+                  "mods": self.mods & ~modsEnum.AUTOPLAY}
         topScores = glob.db.fetchAll(query, params)
 
         # Set data for all scores

@@ -92,8 +92,8 @@ stats = {
         gameModes.MANIA: glob.stats["pp_calc_latency_seconds"].labels(game_mode="mania")
 	},
 	"failures": {
-		gameModes.TAIKO: glob.stats["pp_calc_failures"].labels(game_mode="std"),
-		gameModes.CTB: glob.stats["pp_calc_failures"].labels(game_mode="taiko"),
+		gameModes.TAIKO: glob.stats["pp_calc_failures"].labels(game_mode="taiko"),
+		gameModes.CTB: glob.stats["pp_calc_failures"].labels(game_mode="ctb"),
         gameModes.MANIA: glob.stats["pp_calc_failures"].labels(game_mode="mania")
 	}
 }

@@ -87,9 +87,15 @@ class handler(requestsManager.asyncRequestHandler):
 				# Disable automod (pp sort) if we are not donors
 				# if not isDonor:
 				# 	modsFilter = modsFilter & ~mods.AUTOPLAY
-			elif scoreboardType == 3 and isDonor:
-				# Friends leaderboard
-				friends = True
+			elif scoreboardType == 3:
+				if not isDonor:
+					glob.redis.publish("peppy:notification", json.dumps({
+						"userID": userID,
+						"message": "Hi! This function available only for donor users. You can check it here: https://kurikku.pw/donate"
+					}))
+				else:
+					# Friends leaderboard
+					friends = True
 
 			if (modsFilter > -1 and scoreboardType != 2) and \
 			   (not (modsFilter&mods.RELAX) and not (modsFilter&mods.RELAX2)):
