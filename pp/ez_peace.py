@@ -35,7 +35,7 @@ class EzPeace:
         gameModes.MANIA: ".data/omppc"
     }
 
-    def __init__(self, beatmap_, score_=None, acc=None, mods_=None, tillerino=False, gameMode=gameModes.STD):
+    def __init__(self, beatmap_, score_=None, acc=None, mods_=None, tillerino=False, gameMode=gameModes.STD, tillerinoOnlyPP=False):
         """
             Set peace params.
 
@@ -109,6 +109,8 @@ class EzPeace:
 
             beatmap = Beatmap(mapFile)
             peace = Calculator()
+            
+            # Not so readeable part starts here...
             peace.set_mode(self.gameMode)
             if self.misses > 0:
                 peace.set_miss(self.misses)
@@ -119,6 +121,7 @@ class EzPeace:
                     peace.set_acc(self.acc)
             if self.mods > mods.NOMOD:
                 peace.set_mods(self.mods)
+            
             if not self.tillerino:
                 peace_calculations = peace.calculate(beatmap)
                 temp_pp = round(peace_calculations.pp, 5)
@@ -131,22 +134,30 @@ class EzPeace:
                     self.pp = temp_pp
             else:
                 pp_list = []
-                peace.calculate(beatmap)
-                self.stars = peace.attrs_dict['stars']
+                peace_calculations = peace.calculate(beatmap)
+                self.stars = peace_calculations.attrs_dict['stars']
                 peace.reset()
-                for acc in (100, 99, 98, 95):
-                    peace.set_acc(acc)
+
+                if self.tillerinoOnlyPP:
+                    peace.set_acc(self.acc)
                     peace_calculations = peace.calculate(beatmap)
-                    pp = round(peace_calculations.pp, 5)
-                    # If this is a broken converted, set all pp to 0 and break the loop
-                    if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800:
-                        pp_list = [0, 0, 0, 0]
-                        break
 
-                    pp_list.append(pp)
-                    peace.reset()
+                    self.pp = peace_calculations.pp
+                else:
+                    for acc in (100, 99, 98, 95):
+                        peace.set_acc(acc)
+                        peace_calculations = peace.calculate(beatmap)
+                        pp = round(peace_calculations.pp, 5)
+                        # If this is a broken converted, set all pp to 0 and break the loop
+                        if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800:
+                            pp_list = [0, 0, 0, 0]
+                            break
 
-                self.pp = pp_list
+                        pp_list.append(pp)
+                        peace.reset()
+
+                    self.pp = pp_list
+
             log.debug("peace ~> Calculated PP: {}, stars: {}".format(
                 self.pp, self.stars))
         except exceptions.osuApiFailException:
