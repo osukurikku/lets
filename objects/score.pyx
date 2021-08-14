@@ -1,6 +1,7 @@
 import time
 
 import pp
+from pp import ez_peace
 from common.constants import gameModes
 from common.constants import mods as PlayMods
 from objects import beatmap
