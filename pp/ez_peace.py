@@ -122,7 +122,7 @@ class EzPeace:
             if not self.tillerino:
                 peace_calculations = peace.calculate(beatmap)
                 temp_pp = round(peace_calculations.pp, 5)
-                self.stars = peace_calculations.attrs_dict.stars
+                self.stars = peace_calculations.attrs_dict['stars']
                 if (self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and temp_pp > 800) or \
                         self.stars > 50:
                     # Invalidate pp for bugged taiko converteds and bugged inf pp std maps
@@ -132,7 +132,7 @@ class EzPeace:
             else:
                 pp_list = []
                 peace.calculate(beatmap)
-                self.stars = peace.attrs_dict.stars
+                self.stars = peace.attrs_dict['stars']
                 peace.reset()
                 for acc in (100, 99, 98, 95):
                     peace.set_acc(acc)
