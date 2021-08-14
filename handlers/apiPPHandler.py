@@ -116,7 +116,7 @@ class handler(requestsManager.asyncRequestHandler):
 				else:
 					log.debug("Cached pp not found. Calculating pp with oppai...")
 					# Cached pp not found, calculate them
-					peace = ez_peace(bmap, mods_=modsEnum, tillerino=True)
+					peace = ez_peace.EzPeace(bmap, mods_=modsEnum, tillerino=True)
 
 					returnPP = peace.pp
 					bmap.starsStd = peace.stars
@@ -130,7 +130,7 @@ class handler(requestsManager.asyncRequestHandler):
 				# Specific accuracy, calculate
 				# Create peace instance
 				log.debug("Specific request ({}%/{}). Calculating pp with peace...".format(accuracy, modsEnum))
-				peace = ez_peace(bmap, mods_=modsEnum, tillerino=True)
+				peace = ez_peace.EzPeace(bmap, mods_=modsEnum, tillerino=True)
 				bmap.starsStd = peace.stars
 				if accuracy > 0:
 					returnPP.append(calculatePPFromAcc(peace, accuracy))

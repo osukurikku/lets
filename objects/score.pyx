@@ -382,7 +382,7 @@ class score:
 			# Normal mods
 			if self.gameMode in pp.PP_CALCULATORS:
 				if self.playerUserID == 1000:
-					calculator = ez_peace.ez_peace(b, self)
+					calculator = ez_peace.EzPeace(b, self)
 				else:
 					calculator = pp.PP_CALCULATORS[self.gameMode](b, self)
 				self.pp = calculator.pp
