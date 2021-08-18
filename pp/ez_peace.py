@@ -120,6 +120,9 @@ class EzPeace:
             if not self.tillerino:
                 if self.acc > 0:
                     peace.set_acc(self.acc)
+            if self.score and self.gameMode == gameModes.MANIA:
+                peace.set_score(self.score.score)
+
             if self.mods > mods.NOMOD:
                 peace.set_mods(self.mods)
             
