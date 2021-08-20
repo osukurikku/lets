@@ -130,7 +130,7 @@ class handler(requestsManager.asyncRequestHandler):
 				# Specific accuracy, calculate
 				# Create peace instance
 				log.debug("Specific request ({}%/{}). Calculating pp with peace...".format(accuracy, modsEnum))
-				peace = ez_peace.EzPeace(bmap, mods_=modsEnum, tillerino=True, tillerinoOnlyPP=True)
+				peace = ez_peace.EzPeace(bmap, mods_=modsEnum, tillerino=True)
 				bmap.starsStd = peace.stars
 				if accuracy > 0:
 					returnPP.append(calculatePPFromAcc(peace, accuracy))
@@ -140,7 +140,7 @@ class handler(requestsManager.asyncRequestHandler):
 			# Data to return
 			data = {
 				"song_name": bmap.songName,
-				"pp": [round(x, 2) for x in returnPP] if type(returnPP) == list else returnPP,
+				"pp": [round(x, 2) for x in returnPP] if type(returnPP) == list else round(returnPP, 2),
 				"length": bmap.hitLength,
 				"stars": bmap.starsStd,
 				"ar": bmap.AR,

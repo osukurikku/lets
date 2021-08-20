@@ -141,7 +141,7 @@ class EzPeace:
                 peace_calculations = peace.calculate(beatmap)
                 self.stars = peace_calculations.attrs_dict['stars']
 
-                if self.tillerinoOnlyPP:
+                if self.acc and self.acc > 0:
                     peace.set_acc(self.acc)
                     peace_calculations = peace.calculate(beatmap)
 

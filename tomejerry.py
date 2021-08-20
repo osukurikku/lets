@@ -308,9 +308,6 @@ class Worker:
                     if recalculated_score is not None:
                         # New score returned, store new pp in memory
                         self.scores[i].pp = recalculated_score.pp
-                        if recalculated_score.pp == 0:
-                            # PP calculator error
-                            self.log_failed_score(score_, "0 pp")
 
                     # Mark for garbage collection
                     del score_
@@ -589,7 +586,7 @@ def main():
     # Get recalculator
     recalculators_gen = {
         "zero": lambda: SimpleRecalculator(("scores.completed = 3", "pp = 0")),
-        "recalc": lambda: SimpleRecalculator(("scores.completed = 3",)),
+        "recalc": lambda: SimpleRecalculator(("scores.completed IN (2, 3)",)),
         "mods": lambda: SimpleRecalculator(("scores.completed = 3", "mods & %s > 0"), (args.mods,)),
         "id": lambda: SimpleRecalculator(("scores.id = %s",), (args.id,)),
         "gamemode": lambda: SimpleRecalculator(("scores.completed = 3", "scores.play_mode = %s",), (args.gamemode,)),
