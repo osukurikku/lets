@@ -292,12 +292,12 @@ class handler(requestsManager.asyncRequestHandler):
 			# Update beatmap playcount (and passcount)
 			beatmap.incrementPlaycount(s.fileMd5, s.passed)
 
+			# Get stats and rank
+			oldUserData = glob.userStatsCache.get(userID, s.gameMode)
+			oldRank = userUtils.getGameRank(userID, s.gameMode)
+
 			# Get "before" stats for ranking panel (only if passed)
 			if s.passed:
-				# Get stats and rank
-				oldUserData = glob.userStatsCache.get(userID, s.gameMode)
-				oldRank = userUtils.getGameRank(userID, s.gameMode)
-
 				# Try to get oldPersonalBestRank from cache
 				oldPersonalBestRank = glob.personalBestCache.get(userID, s.fileMd5)
 				if not oldPersonalBestRank:
