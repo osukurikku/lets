@@ -31,4 +31,4 @@ class handler(requestsManager.asyncRequestHandler):
         if friends_list[0] == 0:
             return self.write('')
         
-        return self.write('\n'.join(friends_list))
+        return self.write('\n'.join(str(x) for x in friends_list))
