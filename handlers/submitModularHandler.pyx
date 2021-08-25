@@ -86,7 +86,7 @@ class handler(requestsManager.asyncRequestHandler):
 				raise exceptions.loginFailedException(MODULE_NAME, userID)
 
 			# Score submission lock check
-			lock_key = "lets:score_submission_lock:{}:{}:{}".format(userID, scoreData[0], scoreData[2])
+			lock_key = "lets:score_submission_lock:{}:{}:{}".format(userID, scoreData[0], int(scoreData[2])
 			if glob.redis.get(lock_key) is not None:
 				# The same score score is being submitted and it's taking a lot
 				log.warning("Score submission blocked because there's a submission lock in place ({})".format(lock_key))
@@ -371,7 +371,7 @@ class handler(requestsManager.asyncRequestHandler):
 				output = collections.OrderedDict([
 					('chartId', 'overall'),
 					('chartName', 'Overall Ranking'),
-					('chartUrl', f'https://kurikku.pw/u/{s.playerUserID}')
+					('chartUrl', f'https://kurikku.pw/u/{s.playerUserID}'),
 					('rankedScoreBefore', oldUserData["rankedScore"]),
 					('rankedScoreAfter', newUserData["rankedScore"]),
 					('totalScoreBefore', oldUserData["totalScore"]),
@@ -466,57 +466,60 @@ class handler(requestsManager.asyncRequestHandler):
 				# Write message to client
 				self.write(msg)
 			else:
-				# Trigger bancho stats cache update
-				glob.redis.publish("peppy:update_cached_stats", userID)
+				if not beatmapInfo or beatmapInfo and beatmapInfo == False:
+					self.write("error: no")
+				else:
+					# Trigger bancho stats cache update
+					glob.redis.publish("peppy:update_cached_stats", userID)
 
-				beatmapStat = collections.OrderedDict([
-					('beatmapId', beatmapInfo.beatmapID),
-					('beatmapSetId', beatmapInfo.beatmapSetID),
-					('beatmapPlaycount', beatmapInfo.playcount),
-					('beatmapPasscount', beatmapInfo.passcount),
-					('approvedDate', f"{beatmapInfo.approvedDate}" if beatmapInfo.approvedDate else "")
-				])
+					beatmapStat = collections.OrderedDict([
+						('beatmapId', beatmapInfo.beatmapID),
+						('beatmapSetId', beatmapInfo.beatmapSetID),
+						('beatmapPlaycount', beatmapInfo.playcount),
+						('beatmapPasscount', beatmapInfo.passcount),
+						('approvedDate', f"{beatmapInfo.approvedDate}" if beatmapInfo.approvedDate else "")
+					])
 
-				# Output dictionary
-				output = collections.OrderedDict([
-					('chartId', 'overall'),
-					('chartUrl', f'https://kurikku.pw/u/{s.playerUserID}'),
-					('chartName', 'Overall Ranking'),
-					('rankedScoreBefore', oldUserData["rankedScore"]),
-					('rankedScoreAfter', oldUserData["rankedScore"]),
-					('totalScoreBefore', oldUserData["totalScore"]),
-					('totalScoreAfter', oldUserData["totalScore"]),
-					('maxComboBefore', oldBestScore.maxCombo if oldBestScore else ""),
-					('maxComboAfter', oldBestScore.maxCombo if oldBestScore else ""),
-					('accuracyBefore', round(float(oldUserData["accuracy"]), 2)),
-					('accuracyAfter', round(float(oldUserData["accuracy"]), 2)),
-					('ppBefore', oldStats["pp"]),
-					('ppAfter', oldStats["pp"]),
-					('rankBefore', oldRank),
-					('rankAfter', oldRank),
-					('achievements-new', "/".join(map(repr, new_achievements))),
-					('onlineScoreId', s.scoreID)
-				])
+					# Output dictionary
+					output = collections.OrderedDict([
+						('chartId', 'overall'),
+						('chartUrl', f'https://kurikku.pw/u/{s.playerUserID}'),
+						('chartName', 'Overall Ranking'),
+						('rankedScoreBefore', oldUserData["rankedScore"]),
+						('rankedScoreAfter', oldUserData["rankedScore"]),
+						('totalScoreBefore', oldUserData["totalScore"]),
+						('totalScoreAfter', oldUserData["totalScore"]),
+						('maxComboBefore', oldBestScore.maxCombo if oldBestScore else ""),
+						('maxComboAfter', oldBestScore.maxCombo if oldBestScore else ""),
+						('accuracyBefore', round(float(oldUserData["accuracy"]), 2)),
+						('accuracyAfter', round(float(oldUserData["accuracy"]), 2)),
+						('ppBefore', oldStats["pp"]),
+						('ppAfter', oldStats["pp"]),
+						('rankBefore', oldRank),
+						('rankAfter', oldRank),
+						('achievements-new', "/".join(map(repr, new_achievements))),
+						('onlineScoreId', s.scoreID)
+					])
 
-				outputBeatmap = collections.OrderedDict([
-					('chartId', "beatmap"),
-					('chartUrl', f"https://kurikku.pw/b/{beatmapInfo.beatmapID}"),
-					('chartName', "Beatmap Ranking"),
-					('rankBefore', 0),
-					('rankAfter', 0),
-					('maxComboBefore', ""),
-					('maxComboAfter', s.maxCombo),
-					('rankedScoreBefore', ""),
-					('rankedScoreAfter', oldBestScore.score if oldBestScore else ""),
-					('accuracyBefore', ""),
-					('accuracyAfter', ""),
-					('ppBefore', ""),
-					('ppAfter', ""),
-					('onlineScoreId', s.scoreID)
-				])
-				# Build final string
-				msg = "\n".join(kotrikhelper.zingonify(x) for x in [beatmapStat, outputBeatmap, output])
-				self.write(msg)
+					outputBeatmap = collections.OrderedDict([
+						('chartId', "beatmap"),
+						('chartUrl', f"https://kurikku.pw/b/{beatmapInfo.beatmapID}"),
+						('chartName', "Beatmap Ranking"),
+						('rankBefore', 0),
+						('rankAfter', 0),
+						('maxComboBefore', ""),
+						('maxComboAfter', s.maxCombo),
+						('rankedScoreBefore', ""),
+						('rankedScoreAfter', oldBestScore.score if oldBestScore else ""),
+						('accuracyBefore', ""),
+						('accuracyAfter', ""),
+						('ppBefore', ""),
+						('ppAfter', ""),
+						('onlineScoreId', s.scoreID)
+					])
+					# Build final string
+					msg = "\n".join(kotrikhelper.zingonify(x) for x in [beatmapStat, outputBeatmap, output])
+					self.write(msg)
 
 			# Send username change request to bancho if needed
 			# (key is deleted bancho-side)
