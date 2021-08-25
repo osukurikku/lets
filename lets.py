@@ -41,6 +41,8 @@ from handlers import osuSessionHandler
 from handlers import redirectHandler
 from handlers import submitModularHandler
 from handlers import uploadScreenshotHandler
+from handlers import osuGetFriends
+from handlers import osuMarkAsRead
 from handlers import lastFMHandler
 from handlers import rateHandler
 from handlers import commentHandler
@@ -97,11 +99,12 @@ def make_app():
 		(r"/letsapi/v1/cacheBeatmap", apiCacheBeatmapHandler.handler),
 
 		(r"/web/coins.php", osuCoinHandler.handler),
+		(r"/web/osu-getfriends.php", osuGetFriends.handler),
+		(r"/web/osu-markasread.php", osuMarkAsRead.handler),
 		
 		# Not done yet
 		(r"/web/osu-checktweets.php", emptyHandler.handler),
-		(r"/web/osu-addfavourite.php", emptyHandler.handler),
-		(r"/web/osu-markasread.php", emptyHandler.handler)
+		(r"/web/osu-addfavourite.php", emptyHandler.handler)
 	], default_handler_class=defaultHandler.handler)
 
 if __name__ == "__main__":
