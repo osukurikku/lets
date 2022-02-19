@@ -43,9 +43,15 @@ class LwScore:
     """
     A lightweight score object, that can hold score id and pp only
     """
+
     __slots__ = ("score_id", "pp")
 
-    def __init__(self, score_id: Optional[int]=None, pp: Optional[int]=None, score_: Optional[score.score]=None):
+    def __init__(
+        self,
+        score_id: Optional[int] = None,
+        pp: Optional[int] = None,
+        score_: Optional[score.score] = None,
+    ):
         """
         Initializes a new LwScore. Either score_id and pp OR just score must be provided.
 
@@ -67,6 +73,7 @@ class Recalculator(ABC):
     """
     Base PP Recalculator
     """
+
     def __init__(self, ids_query: RecalculatorQuery, count_query: RecalculatorQuery):
         """
         Instantiates a new recalculator
@@ -95,10 +102,11 @@ class SimpleRecalculator(Recalculator):
     """
     A simple recalculator that can use a set of simple conditions, joined with logic ANDs
     """
+
     def __init__(
         self,
         conditions: Union[Iterable[str], str],
-        parameters: Optional[Union[Iterable[str], Dict[str, Any]]]=None
+        parameters: Optional[Union[Iterable[str], Dict[str, Any]]] = None,
     ):
         """
         Initializes a new SimpleRecalculator
@@ -118,8 +126,12 @@ class SimpleRecalculator(Recalculator):
             raise TypeError("`conditions` must be either a `str`, `tuple` or `list`")
         q = "SELECT {} FROM scores JOIN beatmaps USING(beatmap_md5) WHERE {} ORDER BY scores.id DESC"
         super(SimpleRecalculator, self).__init__(
-            ids_query=RecalculatorQuery(q.format("scores.id AS id", conditions_str), parameters),
-            count_query=RecalculatorQuery(q.format("COUNT(*) AS c", conditions_str), parameters)
+            ids_query=RecalculatorQuery(
+                q.format("scores.id AS id", conditions_str), parameters
+            ),
+            count_query=RecalculatorQuery(
+                q.format("COUNT(*) AS c", conditions_str), parameters
+            ),
         )
 
     def offset_ids_query(self, limit: int, offset: int) -> str:
@@ -130,6 +142,7 @@ class ScoreIdsPool:
     """
     Pool of score ids that needs to be recalculated.
     """
+
     logger = logging.getLogger("score_ids_pool")
 
     def __init__(self):
@@ -147,7 +160,9 @@ class ScoreIdsPool:
         :return:
         """
         with self._lock:
-            query_result = glob.db.fetchAll(recalculator.ids_query.query, recalculator.ids_query.parameters)
+            query_result = glob.db.fetchAll(
+                recalculator.ids_query.query, recalculator.ids_query.parameters
+            )
             self.scores += [LwScore(x["id"], 0) for x in query_result]
         self.logger.debug("Loaded {} scores".format(len(self.scores)))
 
@@ -161,7 +176,9 @@ class ScoreIdsPool:
         with self._lock:
             chunked_scores = self.scores[:chunk_size]
             self.scores = self.scores[chunk_size:]
-        self.logger.debug("Chunked {} scores. Current scores in pool: {}".format(chunk_size, len(self.scores)))
+        self.logger.debug(
+            "Chunked {} scores. Current scores in pool: {}".format(chunk_size, len(self.scores))
+        )
         return chunked_scores
 
     @property
@@ -178,9 +195,10 @@ class Worker:
     """
     A tomejerry worker. Recalculates pp for a set of scores.
     """
+
     score_ids_pool = ScoreIdsPool()
 
-    def __init__(self, chunk_size: int, worker_id: int=-1, start: bool=True):
+    def __init__(self, chunk_size: int, worker_id: int = -1, start: bool = True):
         """
         Initializes a new worker.
 
@@ -201,7 +219,7 @@ class Worker:
         if start:
             self.threaded_work()
 
-    def recycle(self, start: bool=True):
+    def recycle(self, start: bool = True):
         """
         Recycles this worker with a new chunk of scores
 
@@ -298,7 +316,7 @@ class Worker:
                 # Fetch score and beatmap data for this id
                 cursor.execute(
                     "SELECT * FROM scores JOIN beatmaps USING(beatmap_md5) WHERE scores.id = %s LIMIT 1",
-                    (lw_score.score_id,)
+                    (lw_score.score_id,),
                 )
                 score_ = cursor.fetchone()
                 try:
@@ -343,7 +361,10 @@ class Worker:
         for i, lw_score in enumerate(self.scores):
             if i % self.log_every == 0:
                 self.logger.debug("Updated {}/{} scores".format(i, self.chunk_size))
-            glob.db.execute("UPDATE scores SET pp = %s WHERE id = %s LIMIT 1", (lw_score.pp, lw_score.score_id))
+            glob.db.execute(
+                "UPDATE scores SET pp = %s WHERE id = %s LIMIT 1",
+                (lw_score.pp, lw_score.score_id),
+            )
             self.saved_scores_count += 1
 
         self.logger.debug("Scores updated")
@@ -366,7 +387,12 @@ class Worker:
         self.thread = threading.Thread(target=self._work)
         self.thread.start()
 
-    def log_failed_score(self, score_: Dict[str, Any], additional_information: str="", traceback_: bool=False):
+    def log_failed_score(
+        self,
+        score_: Dict[str, Any],
+        additional_information: str = "",
+        traceback_: bool = False,
+    ):
         """
         Logs a failed score.
 
@@ -378,13 +404,19 @@ class Worker:
         """
         msg = ""
         if traceback_:
-            msg = "\n\n\nUnhandled exception: {}\n{}".format(sys.exc_info(), traceback.format_exc())
+            msg = "\n\n\nUnhandled exception: {}\n{}".format(
+                sys.exc_info(), traceback.format_exc()
+            )
         msg += "score_id:{} ({})".format(score_["id"], additional_information).strip()
         FAILED_SCORES_LOGGER.error(msg)
         self.failed_scores += 1
 
 
-def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chunk_size: Optional[int]=None):
+def mass_recalc(
+    recalculator: Recalculator,
+    workers_number: int = MAX_WORKERS,
+    chunk_size: Optional[int] = None,
+):
     """
     Recalculate performance points for a set of scores, using multiple workers
 
@@ -396,10 +428,14 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
     global FAILED_SCORES_LOGGER
     workers = []
 
-    logging.info("Query: {} ({})".format(recalculator.ids_query.query, recalculator.ids_query.parameters))
+    logging.info(
+        "Query: {} ({})".format(recalculator.ids_query.query, recalculator.ids_query.parameters)
+    )
 
     # Fetch the total number of scores
-    total_scores = glob.db.fetch(recalculator.count_query.query, recalculator.count_query.parameters)
+    total_scores = glob.db.fetch(
+        recalculator.count_query.query, recalculator.count_query.parameters
+    )
     if total_scores is None:
         logging.warning("No scores to recalc.")
         return
@@ -407,7 +443,9 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
     # Set up failed scores logger (creates file too)
     FAILED_SCORES_LOGGER = logging.getLogger("failed_scores")
     FAILED_SCORES_LOGGER.addHandler(
-        logging.FileHandler("tomejerry_failed_scores_{}.log".format(time.strftime("%d-%m-%Y--%H-%M-%S")))
+        logging.FileHandler(
+            "tomejerry_failed_scores_{}.log".format(time.strftime("%d-%m-%Y--%H-%M-%S"))
+        )
     )
 
     # Get the number of total scores from the result dict
@@ -418,7 +456,9 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
 
     # for some reason `typing` believes that `math.ceil` returns a `float`, so we need an extra cast here...
     scores_per_worker = int(math.ceil(total_scores / workers_number))
-    logging.info("Using {} workers and {} scores per worker".format(workers_number, scores_per_worker))
+    logging.info(
+        "Using {} workers and {} scores per worker".format(workers_number, scores_per_worker)
+    )
 
     # Load score ids in the pool
     logging.info("Filling score ids pool")
@@ -432,7 +472,7 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
                 if chunk_size is not None
                 else len(Worker.score_ids_pool.scores) // workers_number // 3,
                 worker_id=i,
-                start=True
+                start=True,
             )
         )
 
@@ -440,22 +480,29 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
     steps_text = {
         WorkerStatus.NOT_STARTED: "Starting workers",
         WorkerStatus.RECALCULATING: "Recalculating pp",
-        WorkerStatus.SAVING: "Updating db"
+        WorkerStatus.SAVING: "Updating db",
     }
     recycles = 0
     widgets = [
-        "[ ", "Starting", " ]",
-        "w_pp:<>", "w_db:<>", "w_done:<>", "rec:0",
+        "[ ",
+        "Starting",
+        " ]",
+        "w_pp:<>",
+        "w_db:<>",
+        "w_done:<>",
+        "rec:0",
         progressbar.FormatLabel(" %(value)s/%(max)s "),
         progressbar.Bar(marker="#", left="[", right="]", fill="."),
         progressbar.Percentage(),
-        " (", progressbar.ETA(), ") "
+        " (",
+        progressbar.ETA(),
+        ") ",
     ]
     with progressbar.ProgressBar(
         widgets=widgets,
         max_value=total_scores,
         redirect_stdout=True,
-        redirect_stderr=True
+        redirect_stderr=True,
     ) as bar:
         while True:
             lowest_status = min([x.status for x in workers])
@@ -463,7 +510,9 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
             # Loop through all workers to get progress value
             total_progress_value = sum(
                 [
-                    x.recalculated_scores_count if lowest_status != WorkerStatus.SAVING else x.saved_scores_count
+                    x.recalculated_scores_count
+                    if lowest_status != WorkerStatus.SAVING
+                    else x.saved_scores_count
                     for x in workers
                 ]
             )
@@ -479,10 +528,12 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
             # Output total status information
             widgets[1] = steps_text.get(lowest_status, "...")
             widgets[3] = " w_pp:<{}/{}>".format(
-                len([x for x in workers if x.status == WorkerStatus.RECALCULATING]), len(workers)
+                len([x for x in workers if x.status == WorkerStatus.RECALCULATING]),
+                len(workers),
             )
             widgets[4] = " w_db:<{}/{}>".format(
-                len([x for x in workers if x.status == WorkerStatus.SAVING]), len(workers)
+                len([x for x in workers if x.status == WorkerStatus.SAVING]),
+                len(workers),
             )
             widgets[5] = " w_done:<{}/{}>".format(len(workers_done), len(workers))
             widgets[6] = " rec:{}".format(recycles)
@@ -507,7 +558,7 @@ def mass_recalc(recalculator: Recalculator, workers_number: int=MAX_WORKERS, chu
             total_scores - failed_scores,
             failed_scores,
             total_scores,
-            end_time - start_time
+            end_time - start_time,
         )
     )
 
@@ -517,34 +568,70 @@ def main():
     parser = argparse.ArgumentParser(description="pp recalc tool for ripple, new version.")
     recalc_group = parser.add_mutually_exclusive_group(required=False)
     recalc_group.add_argument(
-        "-r", "--recalc", help="calculates pp for all high scores", required=False, action="store_true"
+        "-r",
+        "--recalc",
+        help="calculates pp for all high scores",
+        required=False,
+        action="store_true",
     )
     recalc_group.add_argument(
-        "-z", "--zero", help="calculates pp for 0 pp high scores", required=False, action="store_true"
-    )
-    recalc_group.add_argument("-i", "--id", help="calculates pp for the score with this score_id", required=False)
-    recalc_group.add_argument(
-        "-m", "--mods", help="calculates pp for high scores with these mods (flags)", required=False
-    )
-    recalc_group.add_argument(
-        "-g", "--gamemode", help="calculates pp for scores played on this game mode (std:0, taiko:1, ctb:2, mania:3)",
-        required=False
+        "-z",
+        "--zero",
+        help="calculates pp for 0 pp high scores",
+        required=False,
+        action="store_true",
     )
     recalc_group.add_argument(
-        "-u", "--userid", help="calculates pp for high scores set by a specific user (user_id)", required=False
+        "-i",
+        "--id",
+        help="calculates pp for the score with this score_id",
+        required=False,
     )
     recalc_group.add_argument(
-        "-b", "--beatmapid", help="calculates pp for high scores played on a specific beatmap (beatmap_id)", required=False
+        "-m",
+        "--mods",
+        help="calculates pp for high scores with these mods (flags)",
+        required=False,
     )
     recalc_group.add_argument(
-        "-fhd", "--fixstdhd", help="calculates pp for std hd high scores (14/05/2018 pp algorithm changes)",
-        required=False, action="store_true"
+        "-g",
+        "--gamemode",
+        help="calculates pp for scores played on this game mode (std:0, taiko:1, ctb:2, mania:3)",
+        required=False,
     )
-    parser.add_argument("-w", "--workers", help="number of workers. {} by default. Max {}".format(
-        MAX_WORKERS // 2, MAX_WORKERS
-    ), required=False)
+    recalc_group.add_argument(
+        "-u",
+        "--userid",
+        help="calculates pp for high scores set by a specific user (user_id)",
+        required=False,
+    )
+    recalc_group.add_argument(
+        "-b",
+        "--beatmapid",
+        help="calculates pp for high scores played on a specific beatmap (beatmap_id)",
+        required=False,
+    )
+    recalc_group.add_argument(
+        "-fhd",
+        "--fixstdhd",
+        help="calculates pp for std hd high scores (14/05/2018 pp algorithm changes)",
+        required=False,
+        action="store_true",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        help="number of workers. {} by default. Max {}".format(MAX_WORKERS // 2, MAX_WORKERS),
+        required=False,
+    )
     parser.add_argument("-cs", "--chunksize", help="score chunks size", required=False)
-    parser.add_argument("-v", "--verbose", help="verbose/debug mode", required=False, action="store_true")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="verbose/debug mode",
+        required=False,
+        action="store_true",
+    )
     args = parser.parse_args()
 
     # Logging
@@ -577,7 +664,7 @@ def main():
         glob.conf.config["db"]["username"],
         glob.conf.config["db"]["password"],
         glob.conf.config["db"]["database"],
-        max(workers_number, MAX_WORKERS)
+        max(workers_number, MAX_WORKERS),
     )
 
     # Set verbose
@@ -587,12 +674,34 @@ def main():
     recalculators_gen = {
         "zero": lambda: SimpleRecalculator(("scores.completed = 3", "pp = 0")),
         "recalc": lambda: SimpleRecalculator(("scores.completed IN (2, 3)",)),
-        "mods": lambda: SimpleRecalculator(("scores.completed = 3", "mods & %s > 0"), (args.mods,)),
+        "mods": lambda: SimpleRecalculator(
+            ("scores.completed = 3", "mods & %s > 0"), (args.mods,)
+        ),
         "id": lambda: SimpleRecalculator(("scores.id = %s",), (args.id,)),
-        "gamemode": lambda: SimpleRecalculator(("scores.completed = 3", "scores.play_mode = %s",), (args.gamemode,)),
-        "userid": lambda: SimpleRecalculator(("scores.completed = 3", "scores.userid = %s",), (args.userid,)),
-        "beatmapid": lambda: SimpleRecalculator(("scores.completed = 3", "beatmaps.beatmap_id = %s",), (args.beatmapid,)),
-        "fixstdhd": lambda: SimpleRecalculator(("scores.completed = 3", "scores.play_mode = 0", "scores.mods & 8 > 0"))
+        "gamemode": lambda: SimpleRecalculator(
+            (
+                "scores.completed = 3",
+                "scores.play_mode = %s",
+            ),
+            (args.gamemode,),
+        ),
+        "userid": lambda: SimpleRecalculator(
+            (
+                "scores.completed = 3",
+                "scores.userid = %s",
+            ),
+            (args.userid,),
+        ),
+        "beatmapid": lambda: SimpleRecalculator(
+            (
+                "scores.completed = 3",
+                "beatmaps.beatmap_id = %s",
+            ),
+            (args.beatmapid,),
+        ),
+        "fixstdhd": lambda: SimpleRecalculator(
+            ("scores.completed = 3", "scores.play_mode = 0", "scores.mods & 8 > 0")
+        ),
     }
     recalculator = None
     for k, v in vars(args).items():

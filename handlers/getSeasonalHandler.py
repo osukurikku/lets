@@ -14,29 +14,29 @@ from common.web import requestsManager
 
 
 class handler(requestsManager.asyncRequestHandler):
-	@tornado.web.asynchronous
-	@tornado.gen.engine
-	def asyncGet(self):
-		try:
-			# Get user IP
-			requestIP = self.getRequestIP()
-			self.flush()
+    @tornado.web.asynchronous
+    @tornado.gen.engine
+    def asyncGet(self):
+        try:
+            # Get user IP
+            requestIP = self.getRequestIP()
+            self.flush()
 
-			time.sleep(2)
-			
-			ppybg = requests.get("https://osu.ppy.sh/web/osu-getseasonal.php")
-			user = kotrikhelper.getUserIdByIP(requestIP)
-			if user == 0:
-				self.write(ppybg.text)
-				return
-			
-			bgs = kotrikhelper.getUserBGs(user)
-			if bgs[0] == "":
-				self.write(ppybg.text)
-				return
+            time.sleep(2)
 
-			self.write(json.dumps(bgs))
-			self.finish()
-		except Exception as e:
-			log.error("check-seasonal failed: {}".format(e))
-			self.write("")
+            ppybg = requests.get("https://osu.ppy.sh/web/osu-getseasonal.php")
+            user = kotrikhelper.getUserIdByIP(requestIP)
+            if user == 0:
+                self.write(ppybg.text)
+                return
+
+            bgs = kotrikhelper.getUserBGs(user)
+            if bgs[0] == "":
+                self.write(ppybg.text)
+                return
+
+            self.write(json.dumps(bgs))
+            self.finish()
+        except Exception as e:
+            log.error("check-seasonal failed: {}".format(e))
+            self.write("")

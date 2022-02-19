@@ -14,58 +14,66 @@ from objects import glob
 from common.sentry import sentry
 
 MODULE_NAME = "get_replay"
+
+
 class handler(requestsManager.asyncRequestHandler):
-	"""
-	Handler for osu-getreplay.php
-	"""
-	@tornado.web.asynchronous
-	@tornado.gen.engine
-	@sentry.captureTornado
-	def asyncGet(self):
-		try:
-			# Get request ip
-			ip = self.getRequestIP()
+    """
+    Handler for osu-getreplay.php
+    """
 
-			# Check arguments
-			if not requestsManager.checkArguments(self.request.arguments, ["c", "u", "h"]):
-				raise exceptions.invalidArgumentsException(MODULE_NAME)
+    @tornado.web.asynchronous
+    @tornado.gen.engine
+    @sentry.captureTornado
+    def asyncGet(self):
+        try:
+            # Get request ip
+            ip = self.getRequestIP()
 
-			# Get arguments
-			username = self.get_argument("u")
-			password = self.get_argument("h")
-			replayID = self.get_argument("c")
+            # Check arguments
+            if not requestsManager.checkArguments(self.request.arguments, ["c", "u", "h"]):
+                raise exceptions.invalidArgumentsException(MODULE_NAME)
 
-			# Login check
-			userID = userUtils.getID(username)
-			if userID == 0:
-				raise exceptions.loginFailedException(MODULE_NAME, userID)
-			if not userUtils.checkLogin(userID, password, ip):
-				raise exceptions.loginFailedException(MODULE_NAME, username)
-			if userUtils.check2FA(userID, ip):
-				raise exceptions.need2FAException(MODULE_NAME, username, ip)
+            # Get arguments
+            username = self.get_argument("u")
+            password = self.get_argument("h")
+            replayID = self.get_argument("c")
 
-			# Get user ID
-			replayData = glob.db.fetch("SELECT scores.*, users.username AS uname FROM scores LEFT JOIN users ON scores.userid = users.id WHERE scores.id = %s", [replayID])
+            # Login check
+            userID = userUtils.getID(username)
+            if userID == 0:
+                raise exceptions.loginFailedException(MODULE_NAME, userID)
+            if not userUtils.checkLogin(userID, password, ip):
+                raise exceptions.loginFailedException(MODULE_NAME, username)
+            if userUtils.check2FA(userID, ip):
+                raise exceptions.need2FAException(MODULE_NAME, username, ip)
 
-			# Increment 'replays watched by others' if needed
-			if replayData is not None:
-				if username != replayData["uname"]:
-					userUtils.incrementReplaysWatched(replayData["userid"], replayData["play_mode"])
+            # Get user ID
+            replayData = glob.db.fetch(
+                "SELECT scores.*, users.username AS uname FROM scores LEFT JOIN users ON scores.userid = users.id WHERE scores.id = %s",
+                [replayID],
+            )
 
-			# Serve replay
-			log.info("Serving replay_{}.osr".format(replayID))
-			fileName = ".data/replays/replay_{}.osr".format(replayID)
-			if os.path.isfile(fileName):
-				with open(fileName, "rb") as f:
-					fileContent = f.read()
-				self.write(fileContent)
-			else:
-				log.warning("Replay {} doesn't exist".format(replayID))
-				glob.stats["replay_download_failures"].labels(type="replay_not_found").inc()
-				self.write("")
-		except exceptions.invalidArgumentsException:
-			pass
-		except exceptions.need2FAException:
-			pass
-		except exceptions.loginFailedException:
-			pass
+            # Increment 'replays watched by others' if needed
+            if replayData is not None:
+                if username != replayData["uname"]:
+                    userUtils.incrementReplaysWatched(
+                        replayData["userid"], replayData["play_mode"]
+                    )
+
+            # Serve replay
+            log.info("Serving replay_{}.osr".format(replayID))
+            fileName = ".data/replays/replay_{}.osr".format(replayID)
+            if os.path.isfile(fileName):
+                with open(fileName, "rb") as f:
+                    fileContent = f.read()
+                self.write(fileContent)
+            else:
+                log.warning("Replay {} doesn't exist".format(replayID))
+                glob.stats["replay_download_failures"].labels(type="replay_not_found").inc()
+                self.write("")
+        except exceptions.invalidArgumentsException:
+            pass
+        except exceptions.need2FAException:
+            pass
+        except exceptions.loginFailedException:
+            pass

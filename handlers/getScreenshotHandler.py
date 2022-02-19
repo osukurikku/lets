@@ -13,29 +13,35 @@ from objects import glob
 from common.sentry import sentry
 
 MODULE_NAME = "get_screenshot"
+
+
 class handler(requestsManager.asyncRequestHandler):
-	"""
-	Handler for /ss/
-	"""
-	@tornado.web.asynchronous
-	@tornado.gen.engine
-	@sentry.captureTornado
-	def asyncGet(self, screenshotID = None):
-		try:
-			# Make sure the screenshot exists
-			if screenshotID is None or os.path.isfile(".data/screenshots/{}".format(screenshotID)) == False:
-				raise exceptions.fileNotFoundException(MODULE_NAME, screenshotID)
+    """
+    Handler for /ss/
+    """
 
-			# Read screenshot
-			with open(".data/screenshots/{}".format(screenshotID), "rb") as f:
-				data = f.read()
+    @tornado.web.asynchronous
+    @tornado.gen.engine
+    @sentry.captureTornado
+    def asyncGet(self, screenshotID=None):
+        try:
+            # Make sure the screenshot exists
+            if (
+                screenshotID is None
+                or os.path.isfile(".data/screenshots/{}".format(screenshotID)) == False
+            ):
+                raise exceptions.fileNotFoundException(MODULE_NAME, screenshotID)
 
-			# Output
-			log.info("Served screenshot {}".format(screenshotID))
+            # Read screenshot
+            with open(".data/screenshots/{}".format(screenshotID), "rb") as f:
+                data = f.read()
 
-			# Display screenshot
-			self.write(data)
-			self.set_header("Content-type", "image/jpg")
-			self.set_header("Content-length", len(data))
-		except exceptions.fileNotFoundException:
-			self.set_status(404)
+            # Output
+            log.info("Served screenshot {}".format(screenshotID))
+
+            # Display screenshot
+            self.write(data)
+            self.set_header("Content-type", "image/jpg")
+            self.set_header("Content-length", len(data))
+        except exceptions.fileNotFoundException:
+            self.set_status(404)

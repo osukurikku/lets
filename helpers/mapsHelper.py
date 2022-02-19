@@ -5,6 +5,7 @@ from common.log import logUtils as log
 from constants import exceptions
 from helpers import osuapiHelper
 
+
 def isBeatmap(fileName=None, content=None):
     if fileName is not None:
         with open(fileName, "rb") as f:
@@ -17,6 +18,7 @@ def isBeatmap(fileName=None, content=None):
     else:
         raise ValueError("Either `fileName` or `content` must be provided.")
     return firstLine.lower().startswith("osu file format v")
+
 
 def cacheMap(mapFile, _beatmap):
     # Check if we have to download the .osu file

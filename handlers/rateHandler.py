@@ -36,7 +36,7 @@ class handler(requestsManager.asyncRequestHandler):
 
             ranked = glob.db.fetch(
                 "SELECT ranked FROM beatmaps WHERE beatmap_md5 = %s LIMIT 1",
-                (checksum,)
+                (checksum,),
             )
             if ranked is None:
                 output = "no exist"
@@ -46,10 +46,12 @@ class handler(requestsManager.asyncRequestHandler):
                 return
 
             rating = glob.db.fetch(
-                "SELECT rating FROM beatmaps WHERE beatmap_md5 = %s LIMIT 1", (checksum,))
+                "SELECT rating FROM beatmaps WHERE beatmap_md5 = %s LIMIT 1",
+                (checksum,),
+            )
             has_voted = glob.db.fetch(
                 "SELECT id FROM beatmaps_rating WHERE user_id = %s AND beatmap_md5 = %s LIMIT 1",
-                (user_id, checksum)
+                (user_id, checksum),
             )
             if has_voted is not None:
                 output = f"alreadyvoted\n{rating['rating']:.2f}"
@@ -67,15 +69,17 @@ class handler(requestsManager.asyncRequestHandler):
                 return
             glob.db.execute(
                 "REPLACE INTO beatmaps_rating (beatmap_md5, user_id, rating) VALUES (%s, %s, %s)",
-                (checksum, user_id, vote)
+                (checksum, user_id, vote),
             )
             glob.db.execute(
                 "UPDATE beatmaps SET rating = (SELECT SUM(rating)/COUNT(rating) FROM beatmaps_rating "
                 "WHERE beatmap_md5 = %(md5)s) WHERE beatmap_md5 = %(md5)s LIMIT 1",
-                {"md5": checksum}
+                {"md5": checksum},
             )
             rating = glob.db.fetch(
-                "SELECT rating FROM beatmaps WHERE beatmap_md5 = %s LIMIT 1", (checksum,))
+                "SELECT rating FROM beatmaps WHERE beatmap_md5 = %s LIMIT 1",
+                (checksum,),
+            )
             output = f"{rating['rating']:.2f}"
         except exceptions.loginFailedException:
             output = "auth failed"

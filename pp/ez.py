@@ -10,21 +10,27 @@ import contextlib
 MODULE_NAME = "ez"
 
 stats = {
-	"latency": {
-		gameModes.STD: glob.stats["pp_calc_latency_seconds"].labels(game_mode="std")
-	},
-	"failures": {
-		gameModes.STD: glob.stats["pp_calc_failures"].labels(game_mode="std")
-	}
+    "latency": {gameModes.STD: glob.stats["pp_calc_latency_seconds"].labels(game_mode="std")},
+    "failures": {gameModes.STD: glob.stats["pp_calc_failures"].labels(game_mode="std")},
 }
+
 
 class Ez:
     """
     Std pp cacalculator, based on oppai-ng
     """
+
     OPPAI_FOLDER = ".data/oppai"
 
-    def __init__(self, beatmap_, score_=None, acc=None, mods_=None, tillerino=False, gameMode=gameModes.STD):
+    def __init__(
+        self,
+        beatmap_,
+        score_=None,
+        acc=None,
+        mods_=None,
+        tillerino=False,
+        gameMode=gameModes.STD,
+    ):
         """
         Set oppai params.
 
@@ -39,7 +45,7 @@ class Ez:
         self.score = None
         self.acc = 0
         self.mods = mods.NOMOD
-        self.combo = -1		# FC
+        self.combo = -1  # FC
         self.misses = 0
         self.stars = 0
         self.tillerino = tillerino
@@ -48,7 +54,7 @@ class Ez:
         self.beatmap = beatmap_
         self.map = "{}.osu".format(self.beatmap.beatmapID)
 
-         # If passed, set everything from score object
+        # If passed, set everything from score object
         if score_ is not None:
             self.score = score_
             self.acc = self.score.accuracy * 100
@@ -84,8 +90,7 @@ class Ez:
         ez = None
         try:
             # Build .osu map file path
-            mapFile = "{path}/maps/{map}".format(
-                path=self.OPPAI_FOLDER, map=self.map)
+            mapFile = "{path}/maps/{map}".format(path=self.OPPAI_FOLDER, map=self.map)
             mapsHelper.cacheMap(mapFile, self.beatmap)
 
             # Check gamemode
@@ -110,8 +115,11 @@ class Ez:
                 oppai.ezpp_dup(ez, mapFile)
                 temp_pp = round(oppai.ezpp_pp(ez), 5)
                 self.stars = oppai.ezpp_stars(ez)
-                if (self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and temp_pp > 800) or \
-                        self.stars > 50:
+                if (
+                    self.gameMode == gameModes.TAIKO
+                    and self.beatmap.starsStd > 0
+                    and temp_pp > 800
+                ) or self.stars > 50:
                     # Invalidate pp for bugged taiko converteds and bugged inf pp std maps
                     self.pp = 0
                 else:
@@ -127,13 +135,16 @@ class Ez:
                     oppai.ezpp_set_accuracy_percent(ez, acc)
                     pp = round(oppai.ezpp_pp(ez), 5)
                     # If this is a broken converted, set all pp to 0 and break the loop
-                    if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800:
+                    if (
+                        self.gameMode == gameModes.TAIKO
+                        and self.beatmap.starsStd > 0
+                        and pp > 800
+                    ):
                         pp_list = [0, 0, 0, 0]
                         break
                     pp_list.append(pp)
                 self.pp = pp_list
-            log.debug("oppai ~> Calculated PP: {}, stars: {}".format(
-                self.pp, self.stars))
+            log.debug("oppai ~> Calculated PP: {}, stars: {}".format(self.pp, self.stars))
         except exceptions.osuApiFailException:
             log.error("oppai ~> osu!api error!")
             self.pp = 0

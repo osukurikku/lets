@@ -8,12 +8,13 @@ from common.constants import gameModes
 from objects import glob
 import contextlib
 
-'''
+"""
 STD = 0
 TAIKO = 1
 CTB = 2
 MANIA = 3
-'''
+"""
+
 
 def ReadableMods(m):
     """
@@ -82,24 +83,27 @@ def ReadableMods(m):
         r.append("2K")
     return r
 
+
 class OsuPerfomanceCalculationsError(Exception):
     pass
 
+
 stats = {
-	"latency": {
-		gameModes.TAIKO: glob.stats["pp_calc_latency_seconds"].labels(game_mode="taiko"),
-		gameModes.CTB: glob.stats["pp_calc_latency_seconds"].labels(game_mode="ctb"),
-        gameModes.MANIA: glob.stats["pp_calc_latency_seconds"].labels(game_mode="mania")
-	},
-	"failures": {
-		gameModes.TAIKO: glob.stats["pp_calc_failures"].labels(game_mode="taiko"),
-		gameModes.CTB: glob.stats["pp_calc_failures"].labels(game_mode="ctb"),
-        gameModes.MANIA: glob.stats["pp_calc_failures"].labels(game_mode="mania")
-	}
+    "latency": {
+        gameModes.TAIKO: glob.stats["pp_calc_latency_seconds"].labels(game_mode="taiko"),
+        gameModes.CTB: glob.stats["pp_calc_latency_seconds"].labels(game_mode="ctb"),
+        gameModes.MANIA: glob.stats["pp_calc_latency_seconds"].labels(game_mode="mania"),
+    },
+    "failures": {
+        gameModes.TAIKO: glob.stats["pp_calc_failures"].labels(game_mode="taiko"),
+        gameModes.CTB: glob.stats["pp_calc_failures"].labels(game_mode="ctb"),
+        gameModes.MANIA: glob.stats["pp_calc_failures"].labels(game_mode="mania"),
+    },
 }
 
 latency = None
 excC = None
+
 
 class OsuPerfomanceCalculation:
 
@@ -135,17 +139,21 @@ class OsuPerfomanceCalculation:
         command = "dotnet ./pp/osu-tools/PerformanceCalculator/bin/Release/netcoreapp3.1/PerformanceCalculator.dll simulate"
         if self.score.gameMode == 1:
             # taiko
-            command += f" taiko {self.mapPath} -a {int(self.score.accuracy)} " \
-                f"-c {int(self.score.maxCombo)} " \
-                f"-X {int(self.score.cMiss)} " \
+            command += (
+                f" taiko {self.mapPath} -a {int(self.score.accuracy)} "
+                f"-c {int(self.score.maxCombo)} "
+                f"-X {int(self.score.cMiss)} "
                 f"-G {int(self.score.c100)} "
+            )
         elif self.score.gameMode == 2:
-            # ctb        
-            command += f" catch {self.mapPath} -a {int(self.score.accuracy)} " \
-                f"-c {int(self.score.maxCombo)} " \
-                f"-X {int(self.score.cMiss)} " \
-                f"-T {int(self.score.c50)} " \
-                f"-D {int(self.score.c100)} " 
+            # ctb
+            command += (
+                f" catch {self.mapPath} -a {int(self.score.accuracy)} "
+                f"-c {int(self.score.maxCombo)} "
+                f"-X {int(self.score.cMiss)} "
+                f"-T {int(self.score.c50)} "
+                f"-D {int(self.score.c100)} "
+            )
         elif self.score.gameMode == 3:
             # mania
             command += f" mania {self.mapPath} -s {int(self.score.score)} "
@@ -155,13 +163,12 @@ class OsuPerfomanceCalculation:
                 command += f"-m {mod} "
 
         log.debug("opc ~> running {}".format(command))
-        process = subprocess.run(
-            command, shell=True, stdout=subprocess.PIPE)
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
 
         # Get pp from output
         output = process.stdout.decode("utf-8", errors="ignore")
         pp = 0
-        
+
         # pattern, string
         op_selector = re.findall(self.OPC_REGEX, output)
         output = {}
@@ -171,14 +178,14 @@ class OsuPerfomanceCalculation:
         log.debug("opc ~> output: {}".format(output))
 
         if len(output.items()) < 4:
-            raise OsuPerfomanceCalculationsError(
-                "Wrong output present")
+            raise OsuPerfomanceCalculationsError("Wrong output present")
 
         try:
             pp = float(output["pp"])
         except ValueError:
             raise OsuPerfomanceCalculationsError(
-                "Invalid 'pp' value (got '{}', expected a float)".format(output))
+                "Invalid 'pp' value (got '{}', expected a float)".format(output)
+            )
 
         log.debug("opc ~> returned pp: {}".format(pp))
         return pp
@@ -196,8 +203,7 @@ class OsuPerfomanceCalculation:
             # Calculate pp
             self.pp = self._runProcess()
         except OsuPerfomanceCalculationsError:
-            log.warning("Invalid beatmap {}".format(
-                self.beatmap.beatmapID))
+            log.warning("Invalid beatmap {}".format(self.beatmap.beatmapID))
             self.pp = 0
         except Exception as e1:
             print(e1)

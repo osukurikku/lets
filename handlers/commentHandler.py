@@ -12,8 +12,13 @@ MODULE_NAME = "comments"
 
 
 class handler(requestsManager.asyncRequestHandler):
-    CLIENT_WHO = {"normal": "", "player": "player",
-        "admin": "creator", "donor": "subscriber", "bat": "bat"}
+    CLIENT_WHO = {
+        "normal": "",
+        "player": "player",
+        "admin": "creator",
+        "donor": "subscriber",
+        "bat": "bat",
+    }
 
     @tornado.web.asynchronous
     @tornado.gen.engine
@@ -48,14 +53,17 @@ class handler(requestsManager.asyncRequestHandler):
                 self.write(self._getComments())
             elif action == "post":
                 self._addComment()
-        except (exceptions.loginFailedException, exceptions.need2FAException, exceptions.userBannedException):
+        except (
+            exceptions.loginFailedException,
+            exceptions.need2FAException,
+            exceptions.userBannedException,
+        ):
             self.write("error: no")
 
     @staticmethod
     def clientWho(y):
         return handler.CLIENT_WHO[y["who"]] + (
-            ("|{}".format(y["special_format"])
-             ) if y["special_format"] is not None else ""
+            ("|{}".format(y["special_format"])) if y["special_format"] is not None else ""
         )
 
     def _getComments(self):
@@ -85,19 +93,24 @@ class handler(requestsManager.asyncRequestHandler):
 
             # Fetch these comments
             comments = glob.db.fetchAll(
-                "SELECT * FROM comments WHERE {} = %s ORDER BY `time`".format(
-                    x["db_type"]),
-                    (x["value"],)
+                "SELECT * FROM comments WHERE {} = %s ORDER BY `time`".format(x["db_type"]),
+                (x["value"],),
             )
 
             # Output comments
-            output += "\n".join([
-                "{y[time]}\t{client_name}\t{client_who}\t{y[comment]}".format(
-                        y=y,
-                        client_name=x["client_type"],
-                        client_who=self.clientWho(y)
-                    ) for y in comments
-            ]) + "\n"
+            output += (
+                "\n".join(
+                    [
+                        "{y[time]}\t{client_name}\t{client_who}\t{y[comment]}".format(
+                            y=y,
+                            client_name=x["client_type"],
+                            client_who=self.clientWho(y),
+                        )
+                        for y in comments
+                    ]
+                )
+                + "\n"
+            )
         return output
 
     def _addComment(self):
@@ -119,8 +132,12 @@ class handler(requestsManager.asyncRequestHandler):
             raise exceptions.invalidArgumentsException(MODULE_NAME)
 
         # Add a comment, removing all illegal characters and trimming after 128 characters
-        comment = self.get_argument("comment").replace(
-            "\r", "").replace("\t", "").replace("\n", "")[:128]
+        comment = (
+            self.get_argument("comment")
+            .replace("\r", "")
+            .replace("\t", "")
+            .replace("\n", "")[:128]
+        )
         try:
             time_ = int(self.get_argument("starttime"))
         except ValueError:
@@ -128,16 +145,24 @@ class handler(requestsManager.asyncRequestHandler):
 
         # Type of comment
         who = "normal"
-        if target == "replay" and glob.db.fetch(
-            "SELECT COUNT(*) AS c FROM scores WHERE id = %s AND userid = %s AND completed = 3",
-                        (scoreID, userID)
-        )["c"] > 0:
+        if (
+            target == "replay"
+            and glob.db.fetch(
+                "SELECT COUNT(*) AS c FROM scores WHERE id = %s AND userid = %s AND completed = 3",
+                (scoreID, userID),
+            )["c"]
+            > 0
+        ):
             # From player, on their score
             who = "player"
-        elif userUtils.isInAnyPrivilegeGroup(userID, ("Developer", "Community Manager", "Owner")):
+        elif userUtils.isInAnyPrivilegeGroup(
+            userID, ("Developer", "Community Manager", "Owner")
+        ):
             # From BAT/Admin
             who = "admin"
-        elif userUtils.isInAnyPrivilegeGroup(userID, ("BAT", "Chat Moderators", "Replay moderator")):
+        elif userUtils.isInAnyPrivilegeGroup(
+            userID, ("BAT", "Chat Moderators", "Replay moderator")
+        ):
             who = "bat"
         elif userUtils.isInPrivilegeGroup(userID, "Donor"):
             # Supporter
@@ -166,18 +191,23 @@ class handler(requestsManager.asyncRequestHandler):
             return
 
         # Make sure the user hasn't submitted another comment on the same map/set/song in a 5 seconds range
-        if glob.db.fetch(
+        if (
+            glob.db.fetch(
                 "SELECT COUNT(*) AS c FROM comments WHERE user_id = %s AND {} = %s AND `time` BETWEEN %s AND %s".format(
                     column
-                ), (userID, value, time_ - 5000, time_ + 5000)
-        )["c"] > 0:
+                ),
+                (userID, value, time_ - 5000, time_ + 5000),
+            )["c"]
+            > 0
+        ):
             return
 
         # Store the comment
         glob.db.execute(
             "INSERT INTO comments ({}, user_id, comment, `time`, who, special_format) "
-                "VALUES (%s, %s, %s, %s, %s, %s)".format(column),
-                (value, userID, comment, time_, who, specialFormat)
+            "VALUES (%s, %s, %s, %s, %s, %s)".format(column),
+            (value, userID, comment, time_, who, specialFormat),
         )
-        log.info("Submitted {} ({}) comment, user {}: '{}'".format(
-            column, value, userID, comment))
+        log.info(
+            "Submitted {} ({}) comment, user {}: '{}'".format(column, value, userID, comment)
+        )

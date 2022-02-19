@@ -15,10 +15,12 @@ from helpers import kotrikhelper
 
 MODULE_NAME = "osu-session"
 
+
 class handler(requestsManager.asyncRequestHandler):
     """
     Handler for /web/osu-session.php
     """
+
     @tornado.web.asynchronous
     @tornado.gen.engine
     @sentry.captureTornado

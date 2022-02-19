@@ -1,148 +1,147 @@
 import os
 import configparser
 
+
 class config:
-	"""
-	config.ini object
+    """
+    config.ini object
 
-	config -- list with ini data
-	default -- if true, we have generated a default config.ini
-	"""
+    config -- list with ini data
+    default -- if true, we have generated a default config.ini
+    """
 
-	config = configparser.ConfigParser()
-	fileName = ""		# config filename
-	default = True
+    config = configparser.ConfigParser()
+    fileName = ""  # config filename
+    default = True
 
-	# Check if config.ini exists and load/generate it
-	def __init__(self, __file):
-		"""
-		Initialize a config object
+    # Check if config.ini exists and load/generate it
+    def __init__(self, __file):
+        """
+        Initialize a config object
 
-		__file -- filename
-		"""
+        __file -- filename
+        """
 
-		self.fileName = __file
-		if os.path.isfile(self.fileName):
-			# config.ini found, load it
-			self.config.read(self.fileName)
-			self.default = False
-		else:
-			# config.ini not found, generate a default one
-			self.generateDefaultConfig()
-			self.default = True
+        self.fileName = __file
+        if os.path.isfile(self.fileName):
+            # config.ini found, load it
+            self.config.read(self.fileName)
+            self.default = False
+        else:
+            # config.ini not found, generate a default one
+            self.generateDefaultConfig()
+            self.default = True
 
+    # Check if config.ini has all needed the keys
+    def checkConfig(self):
+        """
+        Check if this config has the required keys
 
-	# Check if config.ini has all needed the keys
-	def checkConfig(self):
-		"""
-		Check if this config has the required keys
+        return -- True if valid, False if not
+        """
 
-		return -- True if valid, False if not
-		"""
+        try:
+            # Try to get all the required keys
+            self.config.get("db", "host")
+            self.config.get("db", "username")
+            self.config.get("db", "password")
+            self.config.get("db", "database")
+            self.config.get("db", "workers")
 
-		try:
-			# Try to get all the required keys
-			self.config.get("db","host")
-			self.config.get("db","username")
-			self.config.get("db","password")
-			self.config.get("db","database")
-			self.config.get("db","workers")
+            self.config.get("redis", "host")
+            self.config.get("redis", "port")
+            self.config.get("redis", "database")
+            self.config.get("redis", "password")
 
-			self.config.get("redis","host")
-			self.config.get("redis","port")
-			self.config.get("redis","database")
-			self.config.get("redis","password")
+            self.config.get("server", "port")
+            self.config.get("server", "debug")
+            self.config.get("server", "beatmapcacheexpire")
+            self.config.get("server", "serverurl")
+            self.config.get("server", "banchourl")
+            self.config.get("server", "threads")
+            self.config.get("server", "apikey")
 
-			self.config.get("server","port")
-			self.config.get("server", "debug")
-			self.config.get("server", "beatmapcacheexpire")
-			self.config.get("server", "serverurl")
-			self.config.get("server", "banchourl")
-			self.config.get("server", "threads")
-			self.config.get("server", "apikey")
+            self.config.get("sentry", "enable")
+            self.config.get("sentry", "dns")
 
-			self.config.get("sentry","enable")
-			self.config.get("sentry","dns")
+            self.config.get("datadog", "enable")
+            self.config.get("datadog", "apikey")
+            self.config.get("datadog", "appkey")
 
-			self.config.get("datadog", "enable")
-			self.config.get("datadog", "apikey")
-			self.config.get("datadog", "appkey")
+            self.config.get("prometheus", "port")
 
-			self.config.get("prometheus", "port")
+            self.config.get("osuapi", "enable")
+            self.config.get("osuapi", "apiurl")
+            self.config.get("osuapi", "apikey")
 
-			self.config.get("osuapi","enable")
-			self.config.get("osuapi","apiurl")
-			self.config.get("osuapi","apikey")
+            self.config.get("cheesegull", "apiurl")
 
-			self.config.get("cheesegull", "apiurl")
+            self.config.get("discord", "enable")
+            self.config.get("discord", "boturl")
+            self.config.get("discord", "devgroup")
+            self.config.get("discord", "webhook")
+            self.config.get("discord", "ahook")
+            return True
+        except:
+            return False
 
-			self.config.get("discord","enable")
-			self.config.get("discord","boturl")
-			self.config.get("discord", "devgroup")
-			self.config.get("discord", "webhook")
-			self.config.get("discord", "ahook")
-			return True
-		except:
-			return False
+    # Generate a default config.ini
+    def generateDefaultConfig(self):
+        """Open and set default keys for that config file"""
 
+        # Open config.ini in write mode
+        f = open(self.fileName, "w")
 
-	# Generate a default config.ini
-	def generateDefaultConfig(self):
-		"""Open and set default keys for that config file"""
+        # Set keys to config object
+        self.config.add_section("db")
+        self.config.set("db", "host", "localhost")
+        self.config.set("db", "username", "root")
+        self.config.set("db", "password", "")
+        self.config.set("db", "database", "ripple")
+        self.config.set("db", "workers", "16")
 
-		# Open config.ini in write mode
-		f = open(self.fileName, "w")
+        self.config.add_section("redis")
+        self.config.set("redis", "host", "localhost")
+        self.config.set("redis", "port", "6379")
+        self.config.set("redis", "database", "0")
+        self.config.set("redis", "password", "")
 
-		# Set keys to config object
-		self.config.add_section("db")
-		self.config.set("db", "host", "localhost")
-		self.config.set("db", "username", "root")
-		self.config.set("db", "password", "")
-		self.config.set("db", "database", "ripple")
-		self.config.set("db", "workers", "16")
+        self.config.add_section("server")
+        self.config.set("server", "port", "5002")
+        self.config.set("server", "debug", "False")
+        self.config.set("server", "beatmapcacheexpire", "86400")
+        self.config.set("server", "serverurl", "http://127.0.0.1:5002")
+        self.config.set("server", "banchourl", "http://127.0.0.1:5001")
+        self.config.set("server", "threads", "16")
+        self.config.set("server", "apikey", "changeme")
 
-		self.config.add_section("redis")
-		self.config.set("redis", "host", "localhost")
-		self.config.set("redis", "port", "6379")
-		self.config.set("redis", "database", "0")
-		self.config.set("redis", "password", "")
+        self.config.add_section("sentry")
+        self.config.set("sentry", "enable", "False")
+        self.config.set("sentry", "dns", "")
 
-		self.config.add_section("server")
-		self.config.set("server", "port", "5002")
-		self.config.set("server", "debug", "False")
-		self.config.set("server", "beatmapcacheexpire", "86400")
-		self.config.set("server", "serverurl", "http://127.0.0.1:5002")
-		self.config.set("server", "banchourl", "http://127.0.0.1:5001")
-		self.config.set("server", "threads", "16")
-		self.config.set("server", "apikey", "changeme")
+        self.config.add_section("datadog")
+        self.config.set("datadog", "enable", "False")
+        self.config.set("datadog", "apikey", "")
+        self.config.set("datadog", "appkey", "")
 
-		self.config.add_section("sentry")
-		self.config.set("sentry", "enable", "False")
-		self.config.set("sentry", "dns", "")
+        self.config.add_section("prometheus")
+        self.config.get("prometheus", "port", "8080")
 
-		self.config.add_section("datadog")
-		self.config.set("datadog", "enable", "False")
-		self.config.set("datadog", "apikey", "")
-		self.config.set("datadog", "appkey", "")
+        self.config.add_section("osuapi")
+        self.config.set("osuapi", "enable", "True")
+        self.config.set("osuapi", "apiurl", "https://osu.ppy.sh")
+        self.config.set("osuapi", "apikey", "YOUR_OSU_API_KEY_HERE")
 
-		self.config.add_section("prometheus")
-		self.config.get("prometheus", "port", "8080")
+        self.config.add_section("cheesegull")
+        self.config.set("cheesegull", "apiurl", "http://cheesegu.ll/api")
 
-		self.config.add_section("osuapi")
-		self.config.set("osuapi", "enable", "True")
-		self.config.set("osuapi", "apiurl", "https://osu.ppy.sh")
-		self.config.set("osuapi", "apikey", "YOUR_OSU_API_KEY_HERE")
+        self.config.add_section("discord")
+        self.config.set("discord", "enable", "False")
+        self.config.set("discord", "boturl", "")
+        self.config.set("discord", "devgroup", "")
+        self.config.set("discord", "webhook", "")
+        self.config.set("discord", "ahook", "")
 
-		self.config.add_section("cheesegull")
-		self.config.set("cheesegull", "apiurl", "http://cheesegu.ll/api")
-
-		self.config.add_section("discord")
-		self.config.set("discord", "enable", "False")
-		self.config.set("discord", "boturl", "")
-		self.config.set("discord", "devgroup", "")
-		self.config.set("discord", "webhook", "")
-		self.config.set("discord", "ahook", "")
-
-		# Write ini to file and close
-		self.config.write(f)
-		f.close()
+        # Write ini to file and close
+        self.config.write(f)
+        f.close()
