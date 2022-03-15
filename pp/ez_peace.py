@@ -90,6 +90,7 @@ class EzPeace:
         self.calculatePP()
 
     def _calculatePP(self):
+        log.debug(f"ezPeace ~> object dict: {self.__dict__}")
         """
         Calculate total pp value with peace and return it
 
@@ -131,7 +132,8 @@ class EzPeace:
                 temp_pp = round(peace_calculations.pp, 5)
                 self.stars = peace_calculations.attrs_dict['stars']
                 if (self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and temp_pp > 800) or \
-                        self.stars > 50:
+                        self.stars > 50 or \
+                            self.gameMode == gameModes.MANIA and self.mods & mods.SCOREV2 > 0:
                     # Invalidate pp for bugged taiko converteds and bugged inf pp std maps
                     self.pp = 0
                 else:
@@ -152,7 +154,8 @@ class EzPeace:
                         peace_calculations = peace.calculate(beatmap)
                         pp = round(peace_calculations.pp, 5)
                         # If this is a broken converted, set all pp to 0 and break the loop
-                        if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800:
+                        if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800 or \
+                            self.gameMode == gameModes.MANIA and self.mods & mods.SCOREV2 > 0:
                             pp_list = [0, 0, 0, 0]
                             break
 
