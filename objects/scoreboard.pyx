@@ -64,6 +64,8 @@ class scoreboard:
                 mods = " AND (mods & 128 = 0 AND mods & 8192 > 0 AND mods&%(mods)s) "
             elif (self.mods & modsEnum.AUTOPLAY) > 0:
                 mods = " AND (mods & 128 = 0 AND mods & 8192 = 0 AND mods = %(mods)s) "
+            else:
+                mods = " AND mods & %(mods)s = %(mods)s"
         else:
             mods = " AND (mods & 128 = 0 AND mods & 8192 = 0) "
 

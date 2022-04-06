@@ -72,11 +72,12 @@ class beatmap:
 
 		# Add new beatmap data
 		log.debug("Saving beatmap data in db...")
-		glob.db.execute("INSERT INTO `beatmaps` (`id`, `beatmap_id`, `beatmapset_id`, `beatmap_md5`, `song_name`, `ar`, `od`, `difficulty_std`, `difficulty_taiko`, `difficulty_ctb`, `difficulty_mania`, `max_combo`, `hit_length`, `bpm`, `ranked`, `latest_update`, `ranked_status_freezed`) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);", [
+		glob.db.execute("INSERT INTO `beatmaps` (`id`, `beatmap_id`, `beatmapset_id`, `beatmap_md5`, `song_name`, `filename`, `ar`, `od`, `difficulty_std`, `difficulty_taiko`, `difficulty_ctb`, `difficulty_mania`, `max_combo`, `hit_length`, `bpm`, `ranked`, `latest_update`, `ranked_status_freezed`) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);", [
 			self.beatmapID,
 			self.beatmapSetID,
 			self.fileMD5,
 			self.songName.encode("utf-8", "ignore").decode("utf-8"),
+			self.songName.encode("utf-8", "ignore").decode("utf-8") + ".osu",
 			self.AR,
 			self.OD,
 			self.starsStd,
@@ -100,7 +101,7 @@ class beatmap:
 		"""
 		# Get data from DB
 		if song_name:
-			data = glob.db.fetch("SELECT * FROM beatmaps WHERE song_name LIKE %s", [
+			data = glob.db.fetch("SELECT * FROM beatmaps WHERE filename = %s", [
 				song_name
 			])
 		else:
@@ -210,7 +211,7 @@ class beatmap:
 
 		# We have data from osu!api, set beatmap data
 		log.debug("Got beatmap data from osu!api")
-		self.songName = "{} - {} [{}]".format(mainData["artist"], mainData["title"], mainData["version"])
+		self.songName = "{} - {} ({}) [{}]".format(mainData["artist"], mainData["title"], mainData["creator"], mainData["version"])
 		self.fileMD5 = md5
 		self.rankedStatus = convertRankedStatus(int(mainData["approved"]))
 		self.beatmapID = int(mainData["beatmap_id"])
@@ -279,7 +280,7 @@ class beatmap:
 						return
 
 					# Gives another try with setDataFromDB but now with song_name!
-					DBresult2 = self.setDataFromDB(None, f"{re['artist']}%{re['title']}%[{re['version']}]")
+					DBresult2 = self.setDataFromDB(None, fileName)
 					if not DBresult2:
 						self.rankedStatus = rankedStatuses.NOT_SUBMITTED
 					else:
