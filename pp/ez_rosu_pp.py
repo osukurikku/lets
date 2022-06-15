@@ -125,42 +125,47 @@ class EzRosu:
             if self.mods > mods.NOMOD:
                 score_params.mods = self.mods
             
+            [rosu_calculations] = rosu.calculate(score_params)
             if not self.tillerino:
-                [rosu_calculations] = rosu.calculate(score_params)
-                temp_pp = round(rosu_calculations.pp, 5)
-                self.stars = rosu_calculations.stars
-                if (self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and temp_pp > 800) or \
-                        self.stars > 50 or \
-                            self.gameMode == gameModes.MANIA and self.mods & mods.SCOREV2 > 0:
-                    # Invalidate pp for bugged taiko converteds and bugged inf pp std maps
+                if rosu_calculations.mode != self.score.gameMode:
                     self.pp = 0
                 else:
-                    self.pp = temp_pp
+                    temp_pp = round(rosu_calculations.pp, 5)
+                    self.stars = rosu_calculations.stars
+                    if (self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and temp_pp > 800) or \
+                            self.stars > 50 or \
+                                self.gameMode == gameModes.MANIA and self.mods & mods.SCOREV2 > 0:
+                        # Invalidate pp for bugged taiko converteds and bugged inf pp std maps
+                        self.pp = 0
+                    else:
+                        self.pp = temp_pp
             else:
-                pp_list = []
-                [rosu_calculations] = rosu.calculate(score_params)
-                self.stars = rosu_calculations.stars
-
-                if self.acc and self.acc > 0:
-                    score_params.acc = self.acc
-                    [rosu_calculations] = rosu.calculate(score_params)
-
-                    self.pp = rosu_calculations.pp
+                if rosu_calculations.mode != self.score.gameMode:
+                    self.pp = [0, 0, 0, 0]
                 else:
-                    # ik that can be a better way, but i don't wanna do something "NICE" to this odd code
-                    for acc in (100, 99, 98, 95):
+                    pp_list = []
+                    self.stars = rosu_calculations.stars
+
+                    if self.acc and self.acc > 0:
                         score_params.acc = self.acc
                         [rosu_calculations] = rosu.calculate(score_params)
-                        pp = round(rosu_calculations.pp, 5)
-                        # If this is a broken converted, set all pp to 0 and break the loop
-                        if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800 or \
-                            self.gameMode == gameModes.MANIA and self.mods & mods.SCOREV2 > 0:
-                            pp_list = [0, 0, 0, 0]
-                            break
 
-                        pp_list.append(pp)
+                        self.pp = rosu_calculations.pp
+                    else:
+                        # ik that can be a better way, but i don't wanna do something "NICE" to this odd code
+                        for acc in (100, 99, 98, 95):
+                            score_params.acc = self.acc
+                            [rosu_calculations] = rosu.calculate(score_params)
+                            pp = round(rosu_calculations.pp, 5)
+                            # If this is a broken converted, set all pp to 0 and break the loop
+                            if self.gameMode == gameModes.TAIKO and self.beatmap.starsStd > 0 and pp > 800 or \
+                                self.gameMode == gameModes.MANIA and self.mods & mods.SCOREV2 > 0:
+                                pp_list = [0, 0, 0, 0]
+                                break
 
-                    self.pp = pp_list
+                            pp_list.append(pp)
+
+                        self.pp = pp_list
 
             log.debug("rosu ~> Calculated PP: {}, stars: {}".format(
                 self.pp, self.stars))
